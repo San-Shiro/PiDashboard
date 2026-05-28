@@ -60,15 +60,15 @@ function StatCard({ icon, label, value, hint, history, color }) {
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2 text-xs text-gray-500">
+        <div style={{ color: "var(--color-text-secondary)" }} className="flex items-center gap-2 text-xs">
           {icon}
           {label}
         </div>
         {hint && (
-          <span className="text-xs text-gray-400 font-mono">{hint}</span>
+          <span style={{ color: "var(--color-text-muted)" }} className="text-xs font-mono">{hint}</span>
         )}
       </div>
-      <div className="text-2xl font-semibold text-gray-900 tracking-tight tabular-nums">
+      <div style={{ color: "var(--color-text-primary)" }} className="text-2xl font-semibold tracking-tight tabular-nums">
         {value}
       </div>
       {history && (
@@ -248,7 +248,7 @@ export default function OverviewTab() {
             }
           />
           <Card>
-            <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500 bg-[#F9FAFB] rounded-t-xl">
+            <div style={{ borderBottom: "1px solid var(--color-border)", backgroundColor: "var(--color-surface-2)", color: "var(--color-text-secondary)" }} className="px-5 py-3 flex items-center justify-between text-xs rounded-t-xl">
               <span>Process</span>
               <div className="flex gap-6">
                 <span>RAM</span>
@@ -270,14 +270,15 @@ export default function OverviewTab() {
               .map((p, i, arr) => (
                 <div
                   key={p.name}
-                  className={`px-5 py-3 flex items-center justify-between ${i < arr.length - 1 ? "border-b border-gray-100" : ""}`}
+                  style={i < arr.length - 1 ? { borderBottom: "1px solid var(--color-border)" } : {}}
+                  className="px-5 py-3 flex items-center justify-between"
                 >
-                  <span className="text-sm text-gray-900 font-mono">
+                  <span style={{ color: "var(--color-text-primary)" }} className="text-sm font-mono">
                     {p.name}
                   </span>
                   <div className="flex gap-6 text-sm tabular-nums">
-                    <span className="text-gray-700">{p.ram_mb}MB</span>
-                    <span className="text-gray-500 w-12 text-right">
+                    <span style={{ color: "var(--color-text-secondary)" }}>{p.ram_mb}MB</span>
+                    <span style={{ color: "var(--color-text-muted)" }} className="w-12 text-right">
                       {p.cpu.toFixed(1)}%
                     </span>
                   </div>
@@ -297,13 +298,16 @@ export default function OverviewTab() {
           {(services?.services || []).map((svc, i, arr) => (
             <div
               key={svc.name}
-              className={`px-5 py-3 flex items-center justify-between ${i < arr.length - 1 ? "border-b border-gray-100" : ""} hover:bg-gray-50 transition-colors`}
+              style={{
+                borderBottom: i < arr.length - 1 ? "1px solid var(--color-border)" : "none"
+              }}
+              className="px-5 py-3 flex items-center justify-between hover-surface-2 transition-colors"
             >
               <div className="min-w-0">
-                <p className="text-sm font-mono text-gray-900">{svc.name}</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p style={{ color: "var(--color-text-primary)" }} className="text-sm font-mono">{svc.name}</p>
+                <p style={{ color: "var(--color-text-secondary)" }} className="text-xs mt-0.5">
                   {svc.core && (
-                    <span className="text-blue-600 font-medium mr-2">CORE</span>
+                    <span style={{ color: "var(--color-accent)" }} className="font-medium mr-2">CORE</span>
                   )}
                   {svc.desc}
                 </p>
@@ -318,7 +322,8 @@ export default function OverviewTab() {
                 <button
                   onClick={() => restartService.mutate(svc.name)}
                   disabled={restartService.isLoading}
-                  className="text-gray-400 hover:text-gray-700 transition-colors p-1.5 rounded-lg hover:bg-gray-100"
+                  style={{ color: "var(--color-text-muted)" }}
+                  className="hover:text-opacity-80 transition-colors p-1.5 rounded-lg hover-surface-2"
                   title="Restart service"
                 >
                   <RotateCcw size={12} />

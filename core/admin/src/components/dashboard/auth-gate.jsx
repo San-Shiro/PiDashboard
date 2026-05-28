@@ -68,7 +68,10 @@ export default function AuthGate({ children }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--color-bg)" }}
+      >
         <Spinner size={20} />
       </div>
     );
@@ -81,28 +84,40 @@ export default function AuthGate({ children }) {
   const needsSetup = !status?.isConfigured;
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center px-4 font-inter">
-      <div className="bg-white border border-gray-200 rounded-2xl p-8 w-full max-w-sm">
+    <div
+      className="min-h-screen flex items-center justify-center px-4 font-inter"
+      style={{ backgroundColor: "var(--color-bg)" }}
+    >
+      <div
+        className="border rounded-2xl p-8 w-full max-w-sm"
+        style={{
+          backgroundColor: "var(--color-surface)",
+          borderColor: "var(--color-border)"
+        }}
+      >
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
-            <Monitor size={18} className="text-white" />
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: "var(--color-text-primary)" }}
+          >
+            <Monitor size={18} style={{ color: "var(--color-bg)" }} />
           </div>
           <div>
-            <h1 className="text-base font-semibold text-gray-900">
+            <h1 style={{ color: "var(--color-text-primary)" }} className="text-base font-semibold">
               Pi Dashboard
             </h1>
-            <p className="text-xs text-gray-500">
+            <p style={{ color: "var(--color-text-secondary)" }} className="text-xs">
               {needsSetup ? "First-time setup" : "Admin login"}
             </p>
           </div>
         </div>
 
         <div className="mb-5">
-          <h2 className="text-sm font-semibold text-gray-900 mb-1 flex items-center gap-2">
+          <h2 style={{ color: "var(--color-text-primary)" }} className="text-sm font-semibold mb-1 flex items-center gap-2">
             <Lock size={13} />
             {needsSetup ? "Create admin password" : "Enter admin password"}
           </h2>
-          <p className="text-xs text-gray-500">
+          <p style={{ color: "var(--color-text-secondary)" }} className="text-xs">
             {needsSetup
               ? "This password protects the dashboard from anyone on your network."
               : "Sign in to manage your widgets and Pi system."}
@@ -121,7 +136,7 @@ export default function AuthGate({ children }) {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             autoFocus
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm mb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+            className="w-full border rounded-lg px-3 py-2.5 text-sm mb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
           />
           {needsSetup && (
             <input
@@ -129,7 +144,7 @@ export default function AuthGate({ children }) {
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="Confirm password"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm mb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+              className="w-full border rounded-lg px-3 py-2.5 text-sm mb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
             />
           )}
           {err && <p className="text-xs text-red-600 mb-3">{err}</p>}

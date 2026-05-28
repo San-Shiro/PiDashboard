@@ -46,16 +46,26 @@ export default function WidgetEditPanel({
       style={{ pointerEvents: "none" }}
     >
       <div
-        className="absolute inset-0 bg-black/20"
+        className="absolute inset-0 bg-black/30"
         style={{ pointerEvents: "auto" }}
         onClick={onClose}
       />
       <div
-        className="relative bg-white border-l border-gray-200 w-full max-w-md h-full overflow-y-auto"
-        style={{ pointerEvents: "auto" }}
+        className="relative w-full max-w-md h-full overflow-y-auto"
+        style={{
+          pointerEvents: "auto",
+          backgroundColor: "var(--color-surface)",
+          borderLeft: "1px solid var(--color-border)"
+        }}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-5 py-4 flex items-center justify-between z-10">
+        <div
+          className="sticky top-0 px-5 py-4 flex items-center justify-between z-10"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderBottom: "1px solid var(--color-border)"
+          }}
+        >
           <div className="flex items-center gap-3 min-w-0">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -68,35 +78,47 @@ export default function WidgetEditPanel({
               />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-gray-900 truncate">
+              <h3 style={{ color: "var(--color-text-primary)" }} className="text-sm font-semibold truncate">
                 {instance.label}
               </h3>
-              <p className="text-xs text-gray-500 capitalize">
+              <p style={{ color: "var(--color-text-secondary)" }} className="text-xs capitalize">
                 {manifest.name || instance.widget_id}{" "}
-                <span className="text-gray-300">·</span> {sched}
+                <span style={{ color: "var(--color-border)" }}>·</span> {sched}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100 shrink-0 ml-2"
+            style={{ color: "var(--color-text-muted)" }}
+            className="hover-surface-2 transition-colors p-1.5 rounded-lg shrink-0 ml-2"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Section tabs */}
-        <div className="px-5 border-b border-gray-200 sticky top-[57px] bg-white z-10">
+        <div
+          className="px-5 sticky top-[57px] z-10"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderBottom: "1px solid var(--color-border)"
+          }}
+        >
           <div className="flex gap-5">
             {SECTIONS.map((s) => (
               <button
                 key={s.id}
                 onClick={() => setSection(s.id)}
-                className={`pb-3 -mb-[1px] text-xs border-b-2 transition-colors focus-visible:outline-none ${
-                  section === s.id
-                    ? "text-gray-900 font-medium border-[#2563EB]"
-                    : "text-gray-500 font-normal border-transparent hover:text-gray-700"
-                }`}
+                className="pb-3 -mb-[1px] text-xs border-b-2 transition-colors focus-visible:outline-none"
+                style={{
+                  color:
+                    section === s.id
+                      ? "var(--color-text-primary)"
+                      : "var(--color-text-secondary)",
+                  fontWeight: section === s.id ? 500 : 400,
+                  borderColor:
+                    section === s.id ? "var(--color-accent)" : "transparent",
+                }}
               >
                 {s.label}
               </button>
@@ -119,39 +141,48 @@ export default function WidgetEditPanel({
                   Internal name shown in the admin panel only
                 </p>
               </div>
-              <div className="bg-[#F9FAFB] rounded-lg p-3 text-xs text-gray-500 space-y-1.5">
+              <div
+                style={{
+                  backgroundColor: "var(--color-surface-2)",
+                  color: "var(--color-text-secondary)"
+                }}
+                className="rounded-lg p-3 text-xs space-y-1.5"
+              >
                 <div className="flex justify-between">
                   <span>Widget</span>
-                  <span className="text-gray-900 font-medium">
+                  <span style={{ color: "var(--color-text-primary)" }} className="font-medium">
                     {manifest.name}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Version</span>
-                  <span className="font-mono text-gray-700">
+                  <span style={{ color: "var(--color-text-primary)" }} className="font-mono">
                     {manifest.version}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Author</span>
-                  <span className="text-gray-700">{manifest.author}</span>
+                  <span style={{ color: "var(--color-text-primary)" }}>{manifest.author}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Estimated RAM</span>
-                  <span className="font-mono text-gray-700">
+                  <span style={{ color: "var(--color-text-primary)" }} className="font-mono">
                     {manifest.estimatedRamMb || 0} MB
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tier</span>
-                  <span className="text-gray-700">
+                  <span style={{ color: "var(--color-text-primary)" }}>
                     {manifest.tier === 2
                       ? "Dedicated daemon"
                       : "Bun-native fetch"}
                   </span>
                 </div>
               </div>
-              <div className="pt-2 border-t border-gray-100">
+              <div
+                style={{ borderTop: "1px solid var(--color-border)" }}
+                className="pt-2"
+              >
                 <GhostButton
                   danger
                   onClick={() => {
@@ -174,7 +205,7 @@ export default function WidgetEditPanel({
           {section === "layout" && (
             <>
               <div>
-                <h4 className="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-3">
+                <h4 style={{ color: "var(--color-text-primary)" }} className="text-xs font-semibold uppercase tracking-wide mb-3">
                   Position
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
@@ -188,7 +219,7 @@ export default function WidgetEditPanel({
                       onChange={(e) =>
                         updateBase({ x: Number(e.target.value) })
                       }
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
                   <div>
@@ -201,14 +232,14 @@ export default function WidgetEditPanel({
                       onChange={(e) =>
                         updateBase({ y: Number(e.target.value) })
                       }
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <h4 className="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-3">
+                <h4 style={{ color: "var(--color-text-primary)" }} className="text-xs font-semibold uppercase tracking-wide mb-3">
                   Size
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
@@ -222,7 +253,7 @@ export default function WidgetEditPanel({
                       onChange={(e) =>
                         updateBase({ width: Number(e.target.value) })
                       }
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
                   <div>
@@ -235,14 +266,14 @@ export default function WidgetEditPanel({
                       onChange={(e) =>
                         updateBase({ height: Number(e.target.value) })
                       }
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <h4 className="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-3">
+                <h4 style={{ color: "var(--color-text-primary)" }} className="text-xs font-semibold uppercase tracking-wide mb-3">
                   Display
                 </h4>
                 <div className="space-y-3">
@@ -272,7 +303,7 @@ export default function WidgetEditPanel({
                       onChange={(e) =>
                         updateBase({ zIndex: Number(e.target.value) })
                       }
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
                 </div>
@@ -283,7 +314,7 @@ export default function WidgetEditPanel({
           {section === "config" && (
             <div className="space-y-4">
               {(manifest.configSchema || []).length === 0 ? (
-                <p className="text-sm text-gray-400">
+                <p style={{ color: "var(--color-text-muted)" }} className="text-sm">
                   This widget has no configurable options.
                 </p>
               ) : (
@@ -303,7 +334,7 @@ export default function WidgetEditPanel({
           {section === "schedule" && (
             <>
               <div>
-                <h4 className="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-3">
+                <h4 style={{ color: "var(--color-text-primary)" }} className="text-xs font-semibold uppercase tracking-wide mb-3">
                   Visibility window
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
@@ -315,7 +346,7 @@ export default function WidgetEditPanel({
                       onChange={(e) =>
                         updateBase({ activeFrom: e.target.value })
                       }
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
                   <div>
@@ -324,7 +355,7 @@ export default function WidgetEditPanel({
                       type="time"
                       value={base.activeTo || "23:59"}
                       onChange={(e) => updateBase({ activeTo: e.target.value })}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
                 </div>

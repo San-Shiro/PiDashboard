@@ -136,7 +136,27 @@ export default function ThemeProvider({ children }) {
           --color-header-bg: #FFFFFF;
           --color-header-border: #E5E7EB;
         }
-        body { background-color: var(--color-bg); }
+        body {
+          background-color: var(--color-bg);
+          color: var(--color-text-primary);
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="password"],
+        input[type="time"],
+        select,
+        textarea {
+          background-color: var(--color-surface) !important;
+          border-color: var(--color-border) !important;
+          color: var(--color-text-primary) !important;
+        }
+        input[type="text"]::placeholder,
+        input[type="password"]::placeholder {
+          color: var(--color-text-muted) !important;
+        }
+        .hover-surface-2:hover {
+          background-color: var(--color-surface-2) !important;
+        }
       `}</style>
       {children}
     </ThemeContext.Provider>

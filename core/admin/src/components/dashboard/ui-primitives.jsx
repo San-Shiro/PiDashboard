@@ -1,17 +1,41 @@
-// Shared visual primitives used throughout the admin panel.
-// Keeps the design tokens consistent across every tab.
+// Shared theme-aware visual primitives used throughout the admin panel.
+// Binds layout aesthetics directly with active CSS variables custom properties.
 
 export function Pill({ children, className = "", tone = "neutral" }) {
   const tones = {
-    neutral: "bg-white border-gray-200 text-gray-700",
-    green: "bg-white border-gray-200 text-gray-700",
-    blue: "bg-[#EFF6FF] border-blue-100 text-[#2563EB]",
-    amber: "bg-amber-50 border-amber-100 text-amber-700",
-    red: "bg-red-50 border-red-100 text-red-700",
+    neutral: {
+      backgroundColor: "var(--color-surface-2)",
+      borderColor: "var(--color-border)",
+      color: "var(--color-text-secondary)"
+    },
+    green: {
+      backgroundColor: "var(--color-success-bg)",
+      borderColor: "var(--color-border)",
+      color: "var(--color-success)"
+    },
+    blue: {
+      backgroundColor: "var(--color-accent-bg)",
+      borderColor: "var(--color-border)",
+      color: "var(--color-accent)"
+    },
+    amber: {
+      backgroundColor: "var(--color-warn-bg)",
+      borderColor: "var(--color-border)",
+      color: "var(--color-warn)"
+    },
+    red: {
+      backgroundColor: "var(--color-danger-bg)",
+      borderColor: "var(--color-border)",
+      color: "var(--color-danger)"
+    },
   };
+
+  const style = tones[tone] || tones.neutral;
+
   return (
     <span
-      className={`inline-flex items-center gap-1.5 border rounded-full px-3 py-1 text-xs ${tones[tone] || tones.neutral} ${className}`}
+      style={style}
+      className={`inline-flex items-center gap-1.5 border rounded-full px-3 py-1 text-xs ${className}`}
     >
       {children}
     </span>
@@ -21,7 +45,7 @@ export function Pill({ children, className = "", tone = "neutral" }) {
 export function StatusDot({ status = "active" }) {
   const colors = {
     active: "bg-green-500",
-    inactive: "bg-gray-300",
+    inactive: "bg-gray-400",
     warn: "bg-amber-500",
     error: "bg-red-500",
   };
@@ -34,7 +58,13 @@ export function StatusDot({ status = "active" }) {
 
 export function Card({ children, className = "" }) {
   return (
-    <div className={`bg-white border border-gray-200 rounded-xl ${className}`}>
+    <div
+      style={{
+        backgroundColor: "var(--color-surface)",
+        borderColor: "var(--color-border)",
+      }}
+      className={`border rounded-xl ${className}`}
+    >
       {children}
     </div>
   );
@@ -87,8 +117,8 @@ export function SectionHeader({ title, subtitle, action }) {
   return (
     <div className="mb-6 flex items-end justify-between gap-4">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-        {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+        <h2 style={{ color: "var(--color-text-primary)" }} className="text-lg font-semibold">{title}</h2>
+        {subtitle && <p style={{ color: "var(--color-text-secondary)" }} className="text-sm mt-1">{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -97,13 +127,19 @@ export function SectionHeader({ title, subtitle, action }) {
 
 export function EmptyState({ icon, title, description, action }) {
   return (
-    <div className="bg-white border border-dashed border-gray-200 rounded-xl py-16 px-6 text-center">
+    <div
+      style={{
+        backgroundColor: "var(--color-surface)",
+        borderColor: "var(--color-border)",
+      }}
+      className="border border-dashed rounded-xl py-16 px-6 text-center"
+    >
       {icon && (
-        <div className="flex justify-center mb-3 text-gray-300">{icon}</div>
+        <div className="flex justify-center mb-3" style={{ color: "var(--color-text-secondary)" }}>{icon}</div>
       )}
-      <p className="text-sm font-semibold text-gray-900 mb-1">{title}</p>
+      <p style={{ color: "var(--color-text-primary)" }} className="text-sm font-semibold mb-1">{title}</p>
       {description && (
-        <p className="text-xs text-gray-500 max-w-sm mx-auto">{description}</p>
+        <p style={{ color: "var(--color-text-secondary)" }} className="text-xs max-w-sm mx-auto">{description}</p>
       )}
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -113,10 +149,10 @@ export function EmptyState({ icon, title, description, action }) {
 export function FieldLabel({ children, hint }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-gray-500 mb-1.5">
+      <label style={{ color: "var(--color-text-secondary)" }} className="block text-xs font-medium mb-1.5">
         {children}
       </label>
-      {hint && <p className="text-xs text-gray-400 -mt-1 mb-1.5">{hint}</p>}
+      {hint && <p style={{ color: "var(--color-text-muted)" }} className="text-xs -mt-1 mb-1.5">{hint}</p>}
     </div>
   );
 }
