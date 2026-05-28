@@ -97,13 +97,17 @@ export function composeHTML(): string {
 
   // 2. Wrap widgets inside absolute positioning wrappers
   canvas.widgets.forEach((widget: any) => {
-    const fragment = fragmentCache.get(widget.widgetId) || `<div>Widget "${widget.widgetId}" Not Cached</div>`;
-    const position = widget.position || { x: 0, y: 0, w: 300, h: 200, z: 1, o: 1 };
-    const configString = JSON.stringify(widget.config || {}).replace(/'/g, "&apos;");
+    // Only render active, enabled widgets
+    if (widget.enabled === false) return;
+
+    const widgetId = widget.widget_id;
+    const fragment = fragmentCache.get(widgetId) || `<div>Widget "${widgetId}" Not Cached</div>`;
+    const base = widget.base_config || { x: 0, y: 0, width: 300, height: 200, zIndex: 1, opacity: 1 };
+    const configString = JSON.stringify(widget.widget_config || {}).replace(/'/g, "&apos;");
 
     chunks.push(`
-      <div data-widget="${widget.widgetId}" data-config='${configString}'
-           style="position: absolute; left: ${position.x}px; top: ${position.y}px; width: ${position.w}px; height: ${position.h}px; z-index: ${position.z || 1}; opacity: ${position.o ?? 1}; overflow: hidden;">
+      <div data-widget="${widgetId}" data-config='${configString}'
+           style="position: absolute; left: ${base.x}px; top: ${base.y}px; width: ${base.width}px; height: ${base.height}px; z-index: ${base.zIndex || 1}; opacity: ${base.opacity ?? 1}; overflow: hidden;">
         ${fragment}
       </div>
     `);
