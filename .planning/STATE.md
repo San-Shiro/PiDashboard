@@ -15,14 +15,14 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ---
 
 ## Active Phase: Phase B: Bun Backend Server & Compositor
-- **Status**: Not started
+- **Status**: Ready to execute
 - **Plans**: 3 plans (`B-01-PLAN.md`, `B-02-PLAN.md`, `B-03-PLAN.md`)
 
 ### Goals
 Deploy a functional Bun web server, static admin server, cookie auth gate, and vanilla HTML layout compositor.
 
 ### Active Plan
-- **None — Phase B has not been planned yet.** Run `/gsd-plan-phase B` to plan this phase.
+- **B-01: Build core Bun server with routes, static file server, and Argon2 cookie auth.**
 
 ### Checklist
 - [ ] B-01: Build core Bun server with routes, static file server, and Argon2 cookie auth.
