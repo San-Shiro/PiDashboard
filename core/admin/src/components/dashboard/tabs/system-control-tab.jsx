@@ -45,10 +45,16 @@ function WifiSection() {
 
   return (
     <Card>
-      <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between bg-[#F9FAFB] rounded-t-xl">
+      <div
+        style={{
+          backgroundColor: "var(--color-surface-2)",
+          borderBottom: "1px solid var(--color-border)"
+        }}
+        className="px-5 py-3 flex items-center justify-between rounded-t-xl"
+      >
         <div className="flex items-center gap-2">
-          <Wifi size={14} className="text-gray-500" />
-          <span className="text-sm font-medium text-gray-900">WiFi</span>
+          <Wifi size={14} style={{ color: "var(--color-text-secondary)" }} />
+          <span style={{ color: "var(--color-text-primary)" }} className="text-sm font-medium">WiFi</span>
         </div>
         {data.current && (
           <Pill tone="blue">
@@ -58,13 +64,19 @@ function WifiSection() {
         )}
       </div>
       {data.current && (
-        <div className="px-5 py-3 border-b border-gray-100 bg-blue-50/30">
+        <div
+          style={{
+            backgroundColor: "var(--color-accent-bg)",
+            borderBottom: "1px solid var(--color-border)"
+          }}
+          className="px-5 py-3"
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">
+              <p style={{ color: "var(--color-text-primary)" }} className="text-sm font-medium">
                 {data.current.ssid}
               </p>
-              <p className="text-xs text-gray-500 mt-0.5 font-mono">
+              <p style={{ color: "var(--color-text-secondary)" }} className="text-xs mt-0.5 font-mono">
                 {data.current.ip}
               </p>
             </div>
@@ -72,11 +84,14 @@ function WifiSection() {
               {[1, 2, 3, 4].map((b) => (
                 <span
                   key={b}
-                  className={`w-1 rounded-sm ${b <= signalBars(data.current.signal) ? "bg-blue-600" : "bg-gray-200"}`}
-                  style={{ height: 4 + b * 3 }}
+                  style={{
+                    height: 4 + b * 3,
+                    backgroundColor: b <= signalBars(data.current.signal) ? "var(--color-accent)" : "var(--color-border)"
+                  }}
+                  className="w-1 rounded-sm"
                 />
               ))}
-              <span className="ml-1.5 text-xs text-gray-500 font-mono">
+              <span style={{ color: "var(--color-text-secondary)" }} className="ml-1.5 text-xs font-mono">
                 {data.current.signal}%
               </span>
             </div>
@@ -88,11 +103,14 @@ function WifiSection() {
         .map((n, i, arr) => (
           <div
             key={n.ssid}
-            className={`px-5 py-3 flex items-center justify-between ${i < arr.length - 1 ? "border-b border-gray-100" : ""} hover:bg-gray-50 transition-colors`}
+            style={{
+              borderBottom: i < arr.length - 1 ? "1px solid var(--color-border)" : "none"
+            }}
+            className="px-5 py-3 flex items-center justify-between hover-surface-2 transition-colors"
           >
             <div className="min-w-0">
-              <p className="text-sm text-gray-900">{n.ssid}</p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p style={{ color: "var(--color-text-primary)" }} className="text-sm">{n.ssid}</p>
+              <p style={{ color: "var(--color-text-muted)" }} className="text-xs mt-0.5">
                 {n.secured ? "Secured" : "Open"}
               </p>
             </div>
@@ -101,12 +119,18 @@ function WifiSection() {
                 {[1, 2, 3, 4].map((b) => (
                   <span
                     key={b}
-                    className={`w-1 rounded-sm ${b <= signalBars(n.signal) ? "bg-gray-400" : "bg-gray-200"}`}
-                    style={{ height: 4 + b * 3 }}
+                    style={{
+                      height: 4 + b * 3,
+                      backgroundColor: b <= signalBars(n.signal) ? "var(--color-text-secondary)" : "var(--color-border)"
+                    }}
+                    className="w-1 rounded-sm"
                   />
                 ))}
               </div>
-              <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+              <button
+                style={{ color: "var(--color-accent)" }}
+                className="text-xs hover:opacity-80 font-medium"
+              >
                 Connect
               </button>
             </div>
@@ -136,10 +160,16 @@ function BluetoothSection() {
 
   return (
     <Card>
-      <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between bg-[#F9FAFB] rounded-t-xl">
+      <div
+        style={{
+          backgroundColor: "var(--color-surface-2)",
+          borderBottom: "1px solid var(--color-border)"
+        }}
+        className="px-5 py-3 flex items-center justify-between rounded-t-xl"
+      >
         <div className="flex items-center gap-2">
-          <Bluetooth size={14} className="text-gray-500" />
-          <span className="text-sm font-medium text-gray-900">Bluetooth</span>
+          <Bluetooth size={14} style={{ color: "var(--color-text-secondary)" }} />
+          <span style={{ color: "var(--color-text-primary)" }} className="text-sm font-medium">Bluetooth</span>
         </div>
         <Pill>
           <StatusDot status={data.enabled ? "active" : "inactive"} />
@@ -149,11 +179,14 @@ function BluetoothSection() {
       {data.devices.map((d, i, arr) => (
         <div
           key={d.mac}
-          className={`px-5 py-3 flex items-center justify-between ${i < arr.length - 1 ? "border-b border-gray-100" : ""}`}
+          style={{
+            borderBottom: i < arr.length - 1 ? "1px solid var(--color-border)" : "none"
+          }}
+          className="px-5 py-3 flex items-center justify-between hover-surface-2 transition-colors"
         >
           <div className="min-w-0">
-            <p className="text-sm text-gray-900">{d.name}</p>
-            <p className="text-xs text-gray-400 font-mono mt-0.5">{d.mac}</p>
+            <p style={{ color: "var(--color-text-primary)" }} className="text-sm">{d.name}</p>
+            <p style={{ color: "var(--color-text-muted)" }} className="text-xs font-mono mt-0.5">{d.mac}</p>
           </div>
           <div className="flex items-center gap-2">
             {d.connected && (
@@ -164,7 +197,10 @@ function BluetoothSection() {
             )}
             {!d.connected && d.paired && <Pill>Paired</Pill>}
             {!d.paired && (
-              <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+              <button
+                style={{ color: "var(--color-accent)" }}
+                className="text-xs hover:opacity-80 font-medium"
+              >
                 Pair
               </button>
             )}
@@ -206,19 +242,19 @@ function DisplayPowerSection() {
   return (
     <Card className="p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Monitor size={14} className="text-gray-500" />
-        <span className="text-sm font-medium text-gray-900">
+        <Monitor size={14} style={{ color: "var(--color-text-secondary)" }} />
+        <span style={{ color: "var(--color-text-primary)" }} className="text-sm font-medium">
           Display & power
         </span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <button
           onClick={() => toggle.mutate({ display_enabled: !displayOn })}
-          className={`flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-            displayOn
-              ? "bg-[#EFF6FF] text-[#2563EB] hover:bg-blue-100"
-              : "bg-gray-900 text-white hover:bg-gray-800"
-          }`}
+          style={{
+            backgroundColor: displayOn ? "var(--color-accent-bg)" : "var(--color-surface-2)",
+            color: displayOn ? "var(--color-accent)" : "var(--color-text-primary)"
+          }}
+          className="flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium hover:opacity-90 transition-opacity"
         >
           {displayOn ? <Moon size={14} /> : <Sun size={14} />}
           {toggleLabel}
@@ -228,7 +264,11 @@ function DisplayPowerSection() {
             window.confirm("Reboot the Pi now?") &&
             alert("Reboot command sent (mock)")
           }
-          className="flex items-center justify-center gap-2 bg-amber-50 text-amber-700 rounded-lg px-4 py-3 text-sm font-medium hover:bg-amber-100 transition-colors"
+          style={{
+            backgroundColor: "var(--color-warn-bg)",
+            color: "var(--color-warn)"
+          }}
+          className="flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <RotateCcw size={14} />
           Reboot Pi
@@ -239,7 +279,11 @@ function DisplayPowerSection() {
               "Shutdown the Pi? You'll need physical access to turn it back on.",
             ) && alert("Shutdown command sent (mock)")
           }
-          className="flex items-center justify-center gap-2 bg-red-50 text-red-700 rounded-lg px-4 py-3 text-sm font-medium hover:bg-red-100 transition-colors"
+          style={{
+            backgroundColor: "var(--color-danger-bg)",
+            color: "var(--color-danger)"
+          }}
+          className="flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Power size={14} />
           Shutdown
