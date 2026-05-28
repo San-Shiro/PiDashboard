@@ -5,3 +5,5 @@ admin/dist/
 state/logs/
 state/cache/
 .DS_Store
+secrets/
+config/
