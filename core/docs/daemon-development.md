@@ -67,7 +67,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -121,7 +120,7 @@ func main() {
 		}
 
 		// 1. Write atomically to temp file
-		err = ioutil.WriteFile(tempPath, payload, 0644)
+		err = os.WriteFile(tempPath, payload, 0644)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Write error: %v\n", err)
 			continue
@@ -158,7 +157,8 @@ RestartSec=2
 NoNewPrivileges=true
 
 # Security sandboxing
-PrivateTmp=true
+# Must be false so the daemon can access the system-wide /tmp/widgets IPC tmpfs directory
+PrivateTmp=false
 ProtectSystem=strict
 ReadWritePaths=/tmp/widgets
 

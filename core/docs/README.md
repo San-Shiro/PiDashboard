@@ -8,16 +8,18 @@ Welcome to the **PiDashboard** documentation. This suite provides comprehensive,
 
 To get started with specific aspects of the project, follow these modular guides:
 
-1. [**Pi Installation & Deployment Guide**](file:///f:/VSCodium/Github/PiDashboard/core/docs/pi-installation.md)
+1. [**Pi Installation & Deployment Guide**](./pi-installation.md)
    *Step-by-step setup for Pi hardware, tmpfs memory disk, autostart services, and kiosk web client.*
-2. [**User Guide & Operations**](file:///f:/VSCodium/Github/PiDashboard/core/docs/user-guide.md)
+2. [**User Guide & Operations**](./user-guide.md)
    *Learn how to operate the Web Admin Panel, drag-and-drop layout scaling, templates, and one-click Maintenance Mode.*
-3. [**Widget Development Guide**](file:///f:/VSCodium/Github/PiDashboard/core/docs/widget-development.md)
+3. [**Widget Development Guide**](./widget-development.md)
    *Learn how to package custom HTML snippet fragments and configure JSON manifests for automatic dynamic form generation.*
-4. [**Daemon Development Guide (Tier 2)**](file:///f:/VSCodium/Github/PiDashboard/core/docs/daemon-development.md)
+4. [**Daemon Development Guide (Tier 2)**](./daemon-development.md)
    *Develop low-level background systemd daemons that write structured JSON updates directly to RAM-disk pipelines.*
-5. [**Codebase Architecture & Decisions**](file:///f:/VSCodium/Github/PiDashboard/core/docs/codebase-explanation.md)
+5. [**Codebase Architecture & Decisions**](./codebase-explanation.md)
    *Deep-dive into core code layers (Bun, React, WebSocket) explaining design decisions and runtime memory advantages.*
+6. [**API Reference Guide**](./api-reference.md)
+   *Detailed documentation of all authentication, canvas, widgets, media, and system REST API endpoints.*
 
 ---
 

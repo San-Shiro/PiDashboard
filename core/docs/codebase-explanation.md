@@ -60,5 +60,5 @@ PiDashboard separates layout editing from kiosk display rendering. This division
 ### Decision: Categorized Rotation Logger
 - **Why:** The logging engine is a custom singleton (`core/server/utils/logger.ts`) dividing entries into 11 distinct category domains across 4 levels, with built-in log rotation capped at 5MB files.
 - **Advantages:**
-  - **Zero Disk Saturation Risk:** Sequential backups roll from `server.log` to `server.8.log`, enforcing a strict 45MB ceiling. The SD card can never be saturated by logs.
+  - **Zero Disk Saturation Risk:** Logs are written to `/core/state/cache/logs/server.log`. Sequential backups roll from `server.log` to `server.8.log`, enforcing a strict 45MB ceiling. The SD card can never be saturated by logs.
   - **No Thread Blocking:** Log writes are completed asynchronously using Bun's low-level file streams, preventing I/O thread bottlenecks.

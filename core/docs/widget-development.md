@@ -27,8 +27,8 @@ The manifest defines the widget's capabilities, default layout bounds, execution
 - **`version`**: Current widget version.
 - **`description`**: Brief explanation of widget functionality.
 - **`tier`**: Execution tier (`1a` for client-only, `1b` for server-fetched, `2` for daemon-driven).
-- **`defaults`**: Baseline dimensions (`width`, `height`) and z-index.
-- **`configSchema`**: Configuration variables. The Admin Panel automatically renders corresponding UI controls (inputs, checkboxes, select menus, range sliders) for each field.
+- **`entrypoints`**: Object specifying paths to component code files (e.g. `{"fragment": "fragment/index.html"}`).
+- **`configSchema`**: Configuration variables array. The Admin Panel automatically renders corresponding UI controls (inputs, checkboxes, select menus, range sliders) for each field.
 
 ### Manifest Example (`manifest.json`)
 ```json
@@ -38,20 +38,18 @@ The manifest defines the widget's capabilities, default layout bounds, execution
   "version": "1.0.0",
   "description": "Displays a countdown timer to a specific calendar target date.",
   "tier": "1a",
-  "defaults": {
-    "width": 300,
-    "height": 180,
-    "zIndex": 10
+  "entrypoints": {
+    "fragment": "fragment/index.html"
   },
   "configSchema": [
     {
-      "name": "targetDate",
+      "key": "targetDate",
       "label": "Target Date (YYYY-MM-DD)",
       "type": "text",
       "default": "2026-12-31"
     },
     {
-      "name": "themeColor",
+      "key": "themeColor",
       "label": "Progress Color",
       "type": "select",
       "options": [
@@ -62,7 +60,7 @@ The manifest defines the widget's capabilities, default layout bounds, execution
       "default": "#06b6d4"
     },
     {
-      "name": "showDaysOnly",
+      "key": "showDaysOnly",
       "label": "Show days counter only",
       "type": "checkbox",
       "default": false

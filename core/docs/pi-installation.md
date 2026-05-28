@@ -46,8 +46,12 @@ cp -r /path-to-source/core/* .
 ```
 
 ### Install NPM Workspace Packages
-Run installation within the new `/opt/pi-dashboard/` workspace:
+Run installation within the new `/opt/pi-dashboard/` workspace, ensuring required runtime directories exist:
 ```bash
+# Create runtime directory for admin password hashes
+mkdir -p secrets
+
+# Install packages & compile admin front-end
 npm install
 npm run build:admin
 ```
