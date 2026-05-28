@@ -4,6 +4,18 @@ This guide details how to build and register custom widget fragments in PiDashbo
 
 ---
 
+## 📡 Widget Execution Tiers
+
+To keep the system highly responsive while running on low-resource hardware like the Pi Zero 2W, widgets are categorized into three distinct execution tiers depending on their data and compute needs:
+
+| Tier | Type | Data Source | Update Mechanism | Impact on Pi CPU/RAM | Example |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`1a`** | Client-Only | None (local browser API) | Browser-bound JS interval triggers | **None (0% Backend Overhead)** | Monospace Clock, Timer |
+| **`1b`** | Server-Fetched | External Web APIs | Bun scheduler fetches & pushes to socket | **Low** (scheduled intervals) | Live Weather, RSS Ticker |
+| **`2`** | Daemon-Driven | Native OS hardware hooks | systemd compiled daemons write to tmpfs | **Ultra-low** (in-memory fs.watch) | System Stats, Music Lyrics |
+
+---
+
 ## 🏗️ 1. Widget Structure
 
 Every widget package resides inside its own subdirectory under `/core/widgets/<id>/` and contains two essential components:
@@ -177,3 +189,74 @@ window.__widgetUpdaters[root.dataset.widget] = function(data) {
 };
 ```
 This is fully automated. The scheduler periodically fetches, writes the data to the RAM-disk, and the WebSocket pushes it directly to this updater callback.
+
+---
+
+## 🔌 5. Creating Tier 2 (Daemon-Driven) Widgets
+
+Tier 2 widgets display native hardware metrics or OS service updates driven by background systemd services (e.g. Go, Rust compiled binaries) pushing data to the in-memory IPC directory `/tmp/widgets/`.
+
+### 1. Configure the `manifest.json`
+Specify `"tier": "2"` and define standard entrypoints. Do not specify `"polling"` as the background daemon pushes updates asynchronously:
+```json
+{
+  "id": "sysinfo",
+  "name": "System Monitor",
+  "version": "1.0.0",
+  "tier": "2",
+  "entrypoints": {
+    "fragment": "fragment/sysinfo.html"
+  },
+  "configSchema": []
+}
+```
+
+### 2. Implement the `fragment/sysinfo.html` Callback
+In your HTML fragment, register a listener under `window.__widgetUpdaters` keyed by your widget's ID. When the background daemon performs an atomic rename write inside `/tmp/widgets/sysinfo.json`, the Bun server watches this event and instantly forwards the updated JSON payload via WebSocket to this callback:
+
+```html
+<style>
+  [data-widget="sysinfo"] .stat-card {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 14px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+  }
+  [data-widget="sysinfo"] .value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #10b981;
+  }
+</style>
+
+<div class="stat-card">
+  <div style="font-size: 11px; opacity: 0.6; text-transform: uppercase;">Allocated Memory</div>
+  <div class="value"><span class="mem-val">--</span> MB</div>
+  <div style="font-size: 11px; opacity: 0.4; margin-top: 4px;">CPU Cores: <span class="cpu-cores">-</span></div>
+</div>
+
+<script>
+(function() {
+  const root = document.currentScript.closest('[data-widget]');
+  const memVal = root.querySelector('.mem-val');
+  const cpuCores = root.querySelector('.cpu-cores');
+
+  // Register window-level callback matching the widget manifest ID
+  window.__widgetUpdaters = window.__widgetUpdaters || {};
+  window.__widgetUpdaters["sysinfo"] = function(payload) {
+    // Standard DOM manipulation triggers immediately on WebSocket push (<1.5ms latency)
+    if (payload.memory_alloc_mb !== undefined) {
+      memVal.textContent = payload.memory_alloc_mb;
+    }
+    if (payload.num_cpu !== undefined) {
+      cpuCores.textContent = payload.num_cpu;
+    }
+  };
+})();
+</script>
+```
+
+When the Bun server starts up, it will automatically push the last-known cached memory statistics to this element immediately upon connection.
+

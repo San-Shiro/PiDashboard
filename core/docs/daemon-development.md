@@ -68,8 +68,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"runtime"
+	"syscall"
 	"time"
 )
 
@@ -97,39 +99,57 @@ func main() {
 	// Ensure directory exists
 	_ = os.MkdirAll(ipcDir, 0755)
 
+	// Configure OS signal channel for graceful cleanup
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
 	fmt.Printf("[daemon] Started sysmetrics monitoring to: %s\n", targetPath)
 
-	for range ticker.C {
-		var mem runtime.MemStats
-		runtime.ReadMemStats(&mem)
+	// Clean up temporary and metric files on shutdown
+	cleanup := func() {
+		fmt.Println("[daemon] Stopping and cleaning up...")
+		_ = os.Remove(tempPath)
+		// Optionally remove target metrics on exit so Bun server detects offline status
+		_ = os.Remove(targetPath)
+	}
 
-		metrics := SysMetrics{
-			Timestamp:   time.Now().Unix(),
-			Goroutines:  runtime.NumGoroutine(),
-			MemoryAlloc: mem.Alloc / 1024 / 1024,
-			NumCPU:      runtime.NumCPU(),
-		}
+	for {
+		select {
+		case <-sigChan:
+			cleanup()
+			os.Exit(0)
+		case <-ticker.C:
+			var mem runtime.MemStats
+			runtime.ReadMemStats(&mem)
 
-		payload, err := json.Marshal(metrics)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Serialization error: %v\n", err)
-			continue
-		}
+			metrics := SysMetrics{
+				Timestamp:   time.Now().Unix(),
+				Goroutines:  runtime.NumGoroutine(),
+				MemoryAlloc: mem.Alloc / 1024 / 1024,
+				NumCPU:      runtime.NumCPU(),
+			}
 
-		// 1. Write atomically to temp file
-		err = os.WriteFile(tempPath, payload, 0644)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Write error: %v\n", err)
-			continue
-		}
+			payload, err := json.Marshal(metrics)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Serialization error: %v\n", err)
+				continue
+			}
 
-		// 2. Rename atomically to trigger fs.watch cleanly
-		err = os.Rename(tempPath, targetPath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Rename error: %v\n", err)
+			// 1. Write atomically to temp file
+			err = os.WriteFile(tempPath, payload, 0644)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Write error: %v\n", err)
+				continue
+			}
+
+			// 2. Rename atomically to trigger fs.watch cleanly
+			err = os.Rename(tempPath, targetPath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Rename error: %v\n", err)
+			}
 		}
 	}
 }

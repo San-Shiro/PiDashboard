@@ -20,6 +20,10 @@ To get started with specific aspects of the project, follow these modular guides
    *Deep-dive into core code layers (Bun, React, WebSocket) explaining design decisions and runtime memory advantages.*
 6. [**API Reference Guide**](./api-reference.md)
    *Detailed documentation of all authentication, canvas, widgets, media, and system REST API endpoints.*
+7. [**Scheduler & Compositor Internals**](./scheduler-compositor-internals.md)
+   *Technical details on the HTML compostor flow, scheduler backoff loops, watch events debouncing, and custom environment configurations.*
+8. [**Troubleshooting & FAQ Guide**](./troubleshooting-faq.md)
+   *Troubleshoot blank displays, inactive widgets, reset admin keys, collect active logs, and verify version updates.*
 
 ---
 
