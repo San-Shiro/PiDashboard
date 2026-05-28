@@ -5,7 +5,7 @@ PiDashboard is initialized with a modular, lightweight, high-performance archite
 
 ## Phases
 
-- [ ] **Phase A: Restructure & Directory Layout** - Set up the new, clean directory architecture, separating production files from UI-Draft1.
+- [x] **Phase A: Restructure & Directory Layout** - Set up the new, clean directory architecture, separating production files from UI-Draft1.
 - [ ] **Phase B: Bun Backend Server & Compositor** - Build the central Bun backend containing dynamic composition, core API endpoints, basic auth, upload endpoints, and Maintenance Mode.
 - [ ] **Phase C: Admin Panel Extraction** - Extract and clean the React-Tailwind SPA from UI-Draft1, compiling it to Vite static files served by Bun.
 - [ ] **Phase D: Widget Fragment System** - Implement self-contained vanilla HTML/JS/CSS fragments, manifests parsing, and compositor injection.
@@ -26,7 +26,7 @@ PiDashboard is initialized with a modular, lightweight, high-performance archite
 - **Plans**: 1 plan
 
 Plans:
-- [ ] A-01: Establish structural folders, workspace package.json, and configurations.
+- [x] A-01: Establish structural folders, workspace package.json, and configurations.
 
 ### Phase B: Bun Backend Server & Compositor
 - **Goal**: Deploy a functional Bun web server, static admin server, cookie auth gate, and vanilla HTML layout compositor.
@@ -106,7 +106,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |:---|:---|:---|:---|
-| Phase A: Restructure & Directory Layout | 0/1 | Not started | - |
+| Phase A: Restructure & Directory Layout | 1/1 | Complete | 2026-05-28 |
 | Phase B: Bun Backend Server & Compositor | 0/3 | Not started | - |
 | Phase C: Admin Panel Extraction | 0/2 | Not started | - |
 | Phase D: Widget Fragment System | 0/2 | Not started | - |
