@@ -6,14 +6,14 @@
 ## v1 Requirements
 
 ### Core Server & Compositor (SERV)
-- [ ] **SERV-01**: Bun HTTP and WebSocket server running as a single lightweight daemon on the Pi.
-- [ ] **SERV-02**: Compositor reads canvas JSON and dynamic widget fragments, wrapping them in structured containers and outputting a single vanilla HTML page.
-- [ ] **SERV-03**: Kiosk display script dynamically handles window scaling and auto-fit using vanilla JS to match display resolutions.
+- [x] **SERV-01**: Bun HTTP and WebSocket server running as a single lightweight daemon on the Pi.
+- [x] **SERV-02**: Compositor reads canvas JSON and dynamic widget fragments, wrapping them in structured containers and outputting a single vanilla HTML page.
+- [x] **SERV-03**: Kiosk display script dynamically handles window scaling and auto-fit using vanilla JS to match display resolutions.
 
 ### Drag-and-Drop Layout (LAYT)
 - [ ] **LAYT-01**: Admin dashboard provides interactive drag-and-drop widget arrangement with resizing, z-index layering, and opacity sliders.
 - [ ] **LAYT-02**: Save and load layouts as named templates (canvases/saved/*.json) and activate layouts client-side.
-- [ ] **LAYT-03**: Published layouts are written atomically to `canvases/active.json` to act as the single source of truth for the display page.
+- [x] **LAYT-03**: Published layouts are written atomically to `canvases/active.json` to act as the single source of truth for the display page.
 
 ### Widget Fragments (FRAG)
 - [ ] **FRAG-01**: Widgets are packaged as self-contained HTML/CSS/JS snippet files (fragments) with zero dependencies on JS frameworks.
@@ -26,9 +26,9 @@
 - [ ] **PIPE-03**: Real-time push websocket sends data updates, full kiosk reloads, and maintenance alerts using a strict 3-message protocol.
 
 ### Security, Media, & Operations (SECO)
-- [ ] **SECO-01**: Web admin is protected by an Argon2 password session gate with secure cookies.
-- [ ] **SECO-02**: Media manager API handles image/video asset uploads, metadata retrieval, and references validation against active canvases.
-- [ ] **SECO-03**: Maintenance mode pauses all polling intervals and stops active daemons, rendering a minimal, low-resource static page on kiosks to drop RAM usage.
+- [x] **SECO-01**: Web admin is protected by an Argon2 password session gate with secure cookies.
+- [x] **SECO-02**: Media manager API handles image/video asset uploads, metadata retrieval, and references validation against active canvases.
+- [x] **SECO-03**: Maintenance mode pauses all polling intervals and stops active daemons, rendering a minimal, low-resource static page on kiosks to drop RAM usage.
 
 ### Logging & Crash Recovery (LOGG)
 - [ ] **LOGG-01**: Structured, lightweight logging system records messages across 4 levels and 11 distinct system categories.
@@ -50,21 +50,21 @@
 
 | Requirement | Phase | Status |
 |:---|:---|:---|
-| SERV-01 | Phase B | Pending |
-| SERV-02 | Phase B | Pending |
-| SERV-03 | Phase B | Pending |
+| SERV-01 | Phase B | Complete |
+| SERV-02 | Phase B | Complete |
+| SERV-03 | Phase B | Complete |
 | LAYT-01 | Phase C | Pending |
 | LAYT-02 | Phase C | Pending |
-| LAYT-03 | Phase B | Pending |
+| LAYT-03 | Phase B | Complete |
 | FRAG-01 | Phase D | Pending |
 | FRAG-02 | Phase D | Pending |
 | FRAG-03 | Phase C | Pending |
 | PIPE-01 | Phase E | Pending |
 | PIPE-02 | Phase E | Pending |
 | PIPE-03 | Phase D | Pending |
-| SECO-01 | Phase B | Pending |
-| SECO-02 | Phase B | Pending |
-| SECO-03 | Phase B | Pending |
+| SECO-01 | Phase B | Complete |
+| SECO-02 | Phase B | Complete |
+| SECO-03 | Phase B | Complete |
 | LOGG-01 | Phase F | Pending |
 | LOGG-02 | Phase F | Pending |
 | LOGG-03 | Phase F | Pending |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-05-28*
-*Last updated: 2026-05-28 after initial definition*
+*Last updated: 2026-05-28 after Phase B completion*
