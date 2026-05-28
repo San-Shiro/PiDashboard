@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PiDashboard Widget Manifest Schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["1a", "1b", "2"]
+    },
+    "entrypoints": {
+      "type": "object",
+      "properties": {
+        "fragment": { "type": "string" },
+        "fetchModule": { "type": "string" },
+        "daemon": { "type": "string" }
+      },
+      "required": ["fragment"]
+    },
+    "polling": {
+      "type": "object",
+      "properties": {
+        "pollIntervalSec": { "type": "integer" }
+      }
+    },
+    "configSchema": {
+      "type": "object"
+    }
+  },
+  "required": ["id", "name", "version", "tier", "entrypoints"]
+}
