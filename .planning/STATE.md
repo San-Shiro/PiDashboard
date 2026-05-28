@@ -5,29 +5,28 @@
 See: .planning/PROJECT.md (updated 2026-05-28)
 
 **Core value:** Deliver premium, low-overhead kiosk dashboards via a decoupled admin SPA and vanilla composed client.
-**Current focus:** Phase B: Bun Backend Server & Compositor
+**Current focus:** Phase C: Admin Panel Extraction
 
 ## Progress Summary
 - Total phases: 6
-- Completed phases: 1
-- Active phase: Phase B
+- Completed phases: 2
+- Active phase: Phase C
 
 ---
 
-## Active Phase: Phase B: Bun Backend Server & Compositor
-- **Status**: Ready to execute
-- **Plans**: 3 plans (`B-01-PLAN.md`, `B-02-PLAN.md`, `B-03-PLAN.md`)
+## Active Phase: Phase C: Admin Panel Extraction
+- **Status**: Not started
+- **Plans**: 2 plans (`C-01-PLAN.md`, `C-02-PLAN.md`)
 
 ### Goals
-Deploy a functional Bun web server, static admin server, cookie auth gate, and vanilla HTML layout compositor.
+Prune the heavy prototype scaffolding and extract Vite-built static admin React components.
 
 ### Active Plan
-- **B-01: Build core Bun server with routes, static file server, and Argon2 cookie auth.**
+- **None — Phase C has not been planned yet.** Run `/gsd-plan-phase C` to plan this phase.
 
 ### Checklist
-- [ ] B-01: Build core Bun server with routes, static file server, and Argon2 cookie auth.
-- [ ] B-02: Implement the HTML dynamic layout compositor and auto-scaling kiosk client.
-- [ ] B-03: Implement the Maintenance Mode toggle and media management APIs.
+- [ ] C-01: Extract Vite React structure and configure API proxy setups.
+- [ ] C-02: Clean, compile, and link the drag-drop editor tabs to backend APIs.
 
 ### Issues & Risks
 - None.
@@ -35,6 +34,14 @@ Deploy a functional Bun web server, static admin server, cookie auth gate, and v
 ---
 
 ## Completed Phases
+
+### Phase B: Bun Backend Server & Compositor
+- **Completed**: 2026-05-28
+- **Plans Complete**: 3/3
+- **Checklist**:
+  - [x] B-01: Build core Bun server with routes, static file server, and Argon2 cookie auth.
+  - [x] B-02: Implement the HTML dynamic layout compositor and auto-scaling kiosk client.
+  - [x] B-03: Implement the Maintenance Mode toggle and media management APIs.
 
 ### Phase A: Restructure & Directory Layout
 - **Completed**: 2026-05-28
