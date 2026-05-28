@@ -21,10 +21,7 @@ const TABS = [
   { id: "layout", label: "Layout" },
   { id: "canvases", label: "Canvases" },
   { id: "media", label: "Media" },
-  { id: "themes", label: "Themes" },
   { id: "system", label: "System" },
-  { id: "marketplace", label: "Marketplace" },
-  { id: "docs", label: "Docs" },
 ];
 
 function AdminShell() {

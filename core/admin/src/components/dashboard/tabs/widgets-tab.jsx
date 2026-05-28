@@ -119,7 +119,7 @@ function AddWidgetMenu({ registry, onAdd, onClose }) {
         </div>
         <div className="p-3">
           {registry.map((w) => {
-            const m = w.manifest;
+            const m = w;
             const visuals = getWidgetVisuals(m);
             return (
               <button
