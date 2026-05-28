@@ -3,12 +3,12 @@
   "private": true,
   "workspaces": [
     "admin",
-    "core/server"
+    "server"
   ],
   "scripts": {
-    "dev:server": "bun --hot core/server/index.ts",
+    "dev:server": "bun --hot server/index.ts",
     "dev:admin": "npm run dev --workspace=admin",
     "build:admin": "npm run build --workspace=admin",
-    "install:all": "npm install && bun install --cwd core/server"
+    "install:all": "npm install && bun install --cwd server"
   }
 }
