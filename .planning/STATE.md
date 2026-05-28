@@ -15,9 +15,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ---
 
 ## Active Phase: Phase A: Restructure & Directory Layout
+- **Status**: Ready to execute
+- **Plans**: 1 plan (`A-01-PLAN.md`)
 
 ### Goals
-Set up the production workspace structures and initial scaffolding files without modifying `src-anything/UI-Draft1`.
+Set up the new, clean directory architecture, separating production files from UI-Draft1.
 
 ### Active Plan
 - **A-01: Establish structural folders, workspace package.json, and configurations.**
@@ -32,4 +34,4 @@ Set up the production workspace structures and initial scaffolding files without
 - [ ] Write `core/server/package.json` for Bun server dependencies
 
 ### Issues & Risks
-- None at initialization.
+- None.
