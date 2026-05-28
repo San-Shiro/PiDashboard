@@ -5,7 +5,7 @@ import { join } from "path";
 const fragmentCache = new Map<string, string>();
 
 /**
- * Scan all subfolders inside the widgets/ directory and cache fragment *.html files in RAM
+ * Scan all subfolders inside the widgets/ directory and cache fragment files in RAM based on manifest entrypoints
  */
 export function cacheWidgetFragments(): void {
   const widgetsDir = join(process.cwd(), "widgets");
@@ -14,9 +14,29 @@ export function cacheWidgetFragments(): void {
   try {
     const folders = readdirSync(widgetsDir);
     folders.forEach((folder) => {
+      if (folder.startsWith("_") || folder.startsWith(".")) return;
       const widgetPath = join(widgetsDir, folder);
-      if (!lstatSync(widgetPath).isDirectory() || folder.startsWith("_")) return;
+      if (!lstatSync(widgetPath).isDirectory()) return;
 
+      const manifestPath = join(widgetPath, "manifest.json");
+      if (existsSync(manifestPath)) {
+        try {
+          const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+          const fragmentRelativePath = manifest.entrypoints?.fragment;
+          if (fragmentRelativePath) {
+            const fullFragmentPath = join(widgetPath, fragmentRelativePath);
+            if (existsSync(fullFragmentPath)) {
+              const content = readFileSync(fullFragmentPath, "utf8");
+              fragmentCache.set(folder, content);
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn(`[compositor] Manifest parse error for ${folder}: ${(e as Error).message}`);
+        }
+      }
+
+      // Fallback: search fragment/*.html if no manifest or missing fragment entrypoint
       const fragmentDir = join(widgetPath, "fragment");
       if (existsSync(fragmentDir)) {
         const files = readdirSync(fragmentDir);

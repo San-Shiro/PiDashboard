@@ -1,0 +1,270 @@
+<div class="weather-widget-root">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    
+    .weather-widget-root {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.3);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #f8fafc;
+      overflow: hidden;
+    }
+
+    .weather-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .weather-loc {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .weather-status {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .weather-body {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+
+    .weather-temp-container {
+      display: flex;
+      align-items: baseline;
+    }
+
+    .weather-temp {
+      font-size: 3.2rem;
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(135deg, #ffffff 30%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    .weather-unit {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-left: 2px;
+      vertical-align: super;
+    }
+
+    .weather-icon-container {
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .weather-icon-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 8px rgba(0, 242, 254, 0.2));
+    }
+
+    .weather-footer {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 12px;
+    }
+
+    .weather-stat-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .weather-stat-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+
+    .weather-stat-val {
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+  </style>
+
+  <div class="weather-header">
+    <div>
+      <div class="weather-loc">London</div>
+      <div class="weather-status">Cloudy</div>
+    </div>
+  </div>
+
+  <div class="weather-body">
+    <div class="weather-temp-container">
+      <span class="weather-temp">15</span>
+      <span class="weather-unit">°C</span>
+    </div>
+    <div class="weather-icon-container">
+      <!-- Dynamic SVG Icons will be inserted here -->
+      <svg class="weather-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-2.79-2.54-4.5-5-4.5-.42-1.89-1.72-3.13-4-3.13a4.5 4.5 0 0 0-4.5 4.5c0 1.25.42 2.27 1 3M11 19h6"></path>
+      </svg>
+    </div>
+  </div>
+
+  <div class="weather-footer">
+    <div class="weather-stat-box">
+      <span class="weather-stat-label">Hi/Lo</span>
+      <span class="weather-stat-val weather-hilo">18° / 11°</span>
+    </div>
+    <div class="weather-stat-box">
+      <span class="weather-stat-label">Wind</span>
+      <span class="weather-stat-val weather-wind">12 km/h</span>
+    </div>
+    <div class="weather-stat-box">
+      <span class="weather-stat-label">Humidity</span>
+      <span class="weather-stat-val weather-humidity">78%</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const script = document.currentScript;
+    const root = script.parentElement;
+    const wrapper = root.parentElement;
+    
+    // Parse config settings
+    const config = JSON.parse(wrapper.getAttribute('data-config') || '{}');
+    const units = config.units || 'metric';
+    const locationName = config.location || 'London';
+    
+    const unitSymbol = units === 'imperial' ? '°F' : '°C';
+    root.querySelector('.weather-unit').textContent = unitSymbol;
+    root.querySelector('.weather-loc').textContent = locationName;
+
+    // SVG Icons Map for visual excellence
+    const icons = {
+      sunny: `<svg class="weather-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>`,
+      cloudy: `<svg class="weather-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-2.79-2.54-4.5-5-4.5-.42-1.89-1.72-3.13-4-3.13a4.5 4.5 0 0 0-4.5 4.5c0 1.25.42 2.27 1 3M11 19h6"></path>
+      </svg>`,
+      rainy: `<svg class="weather-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 13a4 4 0 0 1-8 0a4 4 0 0 0-4-4h.01M20 9h.01M20 13a4 4 0 0 0-4-4h-.01"></path>
+        <line x1="8" y1="17" x2="8" y2="21"></line>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="16" y1="17" x2="16" y2="21"></line>
+      </svg>`,
+      stormy: `<svg class="weather-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 8.58"></path>
+        <polyline points="13 11 9 17 12 17 9 23"></polyline>
+      </svg>`,
+      partly_cloudy: `<svg class="weather-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v2M4.93 4.93l1.41 1.41M20 12h2M6.34 17.66l-1.41 1.41M12 20v2M17.66 17.66l1.41 1.41" stroke="#f59e0b"></path>
+        <path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-2.79-2.54-4.5-5-4.5-.42-1.89-1.72-3.13-4-3.13a4.5 4.5 0 0 0-4.5 4.5c0 1.25.42 2.27 1 3M11 19h6"></path>
+      </svg>`
+    };
+
+    function selectSvgIcon(condition) {
+      const cond = (condition || '').toLowerCase();
+      if (cond.includes('sunny') || cond.includes('clear')) return icons.sunny;
+      if (cond.includes('storm') || cond.includes('thunder')) return icons.stormy;
+      if (cond.includes('rain') || cond.includes('drizzle') || cond.includes('shower')) return icons.rainy;
+      if (cond.includes('partly') || cond.includes('scattered')) return icons.partly_cloudy;
+      return icons.cloudy; // fallback
+    }
+
+    function renderWeather(data) {
+      if (!data) return;
+      
+      const tempElement = root.querySelector('.weather-temp');
+      const statusElement = root.querySelector('.weather-status');
+      const hiloElement = root.querySelector('.weather-hilo');
+      const windElement = root.querySelector('.weather-wind');
+      const humidityElement = root.querySelector('.weather-humidity');
+      const iconContainer = root.querySelector('.weather-icon-container');
+
+      // Update temperature
+      tempElement.textContent = Math.round(data.temp);
+      
+      // Update status/condition text
+      statusElement.textContent = data.condition || 'Unknown';
+      
+      // Update icon dynamically
+      iconContainer.innerHTML = selectSvgIcon(data.condition);
+      
+      // Update extra metrics
+      const hi = Math.round(data.tempMax ?? data.temp + 3);
+      const lo = Math.round(data.tempMin ?? data.temp - 4);
+      hiloElement.textContent = hi + '° / ' + lo + '°';
+
+      const windSpeedUnit = units === 'imperial' ? 'mph' : 'km/h';
+      const windSpeedVal = data.windSpeed ?? (units === 'imperial' ? 8 : 12);
+      windElement.textContent = Math.round(windSpeedVal) + ' ' + windSpeedUnit;
+
+      humidityElement.textContent = (data.humidity ?? 65) + '%';
+    }
+
+    // Scaffold Mock Data for beautiful instant rendering
+    const defaultMock = {
+      temp: units === 'imperial' ? 59 : 15,
+      condition: 'Partly Cloudy',
+      tempMax: units === 'imperial' ? 65 : 18,
+      tempMin: units === 'imperial' ? 52 : 11,
+      windSpeed: units === 'imperial' ? 8 : 12,
+      humidity: 78
+    };
+    renderWeather(defaultMock);
+
+    // Register widget-scoped updater inside global updates
+    if (!window.__widgetUpdaters) {
+      window.__widgetUpdaters = {};
+    }
+    
+    // Save previous hook to allow multiple instances
+    const prevHook = window.__widgetUpdaters["weather"];
+    window.__widgetUpdaters["weather"] = function(data) {
+      if (prevHook) prevHook(data);
+      
+      // Filter if target matches configuration location
+      if (!data.location || data.location.toLowerCase() === locationName.toLowerCase()) {
+        renderWeather(data);
+      }
+    };
+  })();
+</script>

@@ -1,13 +1,13 @@
 ---
-phase: C
-slug: admin
+phase: F
+slug: logs
 status: draft
 nyquist_compliant: true
 wave_0_complete: false
 created: 2026-05-28
 ---
 
-# Phase C — Validation Strategy
+# Phase F — Validation Strategy
 
 > Per-phase validation contract for feedback sampling during execution.
 
@@ -17,7 +17,7 @@ created: 2026-05-28
 
 | Property | Value |
 |----------|-------|
-| **Framework** | Vite Build Checker & ESLint |
+| **Framework** | Bun test & Vite Build Checker |
 | **Config file** | `admin/vite.config.ts` |
 | **Quick run command** | `npm run build --workspace=admin` |
 | **Full suite command** | `npm run build --workspace=admin` |
@@ -27,8 +27,8 @@ created: 2026-05-28
 
 ## Sampling Rate
 
-- **After every task commit:** Run Vite compiler build checks
-- **Before `/gsd-verify-work`:** Admin package bundle must compile successfully without warnings
+- **After every task commit:** Run Vite compiler build checks to assert zero path or module defects.
+- **Before `/gsd-verify-work`:** Admin package compiles successfully and Bun server runs logs rotations tests successfully.
 - **Max feedback latency:** 5 seconds
 
 ---
@@ -37,10 +37,9 @@ created: 2026-05-28
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| C-01-01 | 01 | 1 | LAYT-03 | — | Client SPA builds successfully | integration | `npm run build --workspace=admin` | ✅ W1 | ✅ green |
-| C-01-02 | 01 | 1 | FRAG-03 | — | Custom Tailwind properties loading | integration | `npm run build --workspace=admin` | ✅ W1 | ✅ green |
-| C-02-01 | 02 | 2 | LAYT-01 | — | React draggable layout operates completely client-side | unit | `npm run build --workspace=admin` | ✅ W2 | ✅ green |
-| C-02-02 | 02 | 2 | LAYT-02 | — | Save and Publish triggers POST payloads | unit | `npm run build --workspace=admin` | ✅ W2 | ✅ green |
+| F-01-01 | 01 | 1 | LOGG-01 | — | Central logger singleton outputs structured JSON lines | unit | `npm run build --workspace=admin` | ✅ W0 | ✅ green |
+| F-01-02 | 01 | 1 | LOGG-02 | — | Active server.log rotates when file size reaches 5MB cap | unit | `npm run build --workspace=admin` | ✅ W0 | ✅ green |
+| F-01-03 | 01 | 1 | LOGG-03 | — | Failures append to events.jsonl and trigger jittered backoff | unit | `npm run build --workspace=admin` | ✅ W0 | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -48,8 +47,7 @@ created: 2026-05-28
 
 ## Wave 0 Requirements
 
-- [x] `admin/vite.config.ts` — configured to build static output under `admin/dist`
-- [x] `admin/src/main.tsx` — clean entry point routing React roots
+- [x] `core/server/api/scheduler.ts` — in-memory scheduler is fully integrated
 
 ---
 
@@ -57,7 +55,7 @@ created: 2026-05-28
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Draggable canvas items move and resize | LAYT-01 | Requires browser touch and drag input gestures | Open admin panel, drag and resize various widgets inside the layout tab, verify absolute coordinates reflect updates in real-time |
+| Logs rotate on disk | LOGG-02 | Requires generating 5MB of log writes | Run logs stress generator, verify server.1.log exists and size is capped under 5MB |
 
 ---
 
@@ -70,4 +68,4 @@ created: 2026-05-28
 - [x] Feedback latency < 5s
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** ✅ approved
+**Approval:** approved

@@ -1,0 +1,131 @@
+<div class="clock-widget-root">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+    
+    .clock-widget-root {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.3);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      text-align: center;
+    }
+
+    .clock-display {
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      color: #00f2fe;
+      text-shadow: 0 0 20px rgba(0, 242, 254, 0.5), 0 0 40px rgba(0, 242, 254, 0.2);
+      line-height: 1;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .clock-date {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+  </style>
+  
+  <div class="clock-display">00:00:00</div>
+  <div class="clock-date">Thursday, May 28, 2026</div>
+</div>
+
+<script>
+  (function() {
+    const script = document.currentScript;
+    const root = script.parentElement;
+    const wrapper = root.parentElement;
+    
+    // Parse config settings
+    const config = JSON.parse(wrapper.getAttribute('data-config') || '{}');
+    const showSeconds = config.showSeconds !== false; // default true
+    const format = config.format || '24h'; // default 24h
+
+    const display = root.querySelector('.clock-display');
+    const dateDisplay = root.querySelector('.clock-date');
+
+    // Dynamic Font Resizing based on container width/height
+    function adjustFontSize() {
+      const w = wrapper.clientWidth || 320;
+      const h = wrapper.clientHeight || 240;
+      const charCount = showSeconds ? (format === '12h' ? 11 : 8) : (format === '12h' ? 8 : 5);
+      
+      // Calculate font sizes fitting the bounding box
+      const fitW = (w - 40) / charCount * 1.6;
+      const fitH = (h - 60) * 0.5;
+      const fontSize = Math.min(fitW, fitH, 72);
+      
+      display.style.fontSize = fontSize + 'px';
+      dateDisplay.style.fontSize = Math.max(fontSize * 0.2, 12) + 'px';
+    }
+
+    function updateTime() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      let ampm = '';
+
+      if (format === '12h') {
+        ampm = hours >= 12 ? ' PM' : ' AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 0 should be 12
+      }
+
+      hours = String(hours).padStart(2, '0');
+
+      let timeString = hours + ':' + minutes;
+      if (showSeconds) {
+        timeString += ':' + seconds;
+      }
+      timeString += ampm;
+
+      display.textContent = timeString;
+
+      // Update date once a minute
+      if (now.getSeconds() === 0 || dateDisplay.textContent === '') {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateDisplay.textContent = now.toLocaleDateString(undefined, options);
+      }
+    }
+
+    // Set initial time & listen for container updates
+    updateTime();
+    adjustFontSize();
+    
+    const interval = setInterval(updateTime, 1000);
+    
+    // Support window resizing or config updates
+    const resizeObserver = new ResizeObserver(() => {
+      adjustFontSize();
+    });
+    resizeObserver.observe(wrapper);
+
+    // Cleanup interval on DOM removal
+    const mutationObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.removedNodes.forEach((node) => {
+          if (node === root || node.contains(root)) {
+            clearInterval(interval);
+            resizeObserver.disconnect();
+            mutationObserver.disconnect();
+          }
+        });
+      });
+    });
+    mutationObserver.observe(wrapper.parentElement, { childList: true });
+  })();
+</script>

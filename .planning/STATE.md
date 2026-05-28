@@ -5,35 +5,44 @@
 See: .planning/PROJECT.md (updated 2026-05-28)
 
 **Core value:** Deliver premium, low-overhead kiosk dashboards via a decoupled admin SPA and vanilla composed client.
-**Current focus:** Phase C: Admin Panel Extraction
+**Current focus:** Planning next milestone (v2.0 Marketplace & Multi-Display)
 
 ## Progress Summary
-- Total phases: 6
-- Completed phases: 2
-- Active phase: Phase C
+- Total phases: 6 completed in v1.0, 2 planned in v2.0
+- Completed phases: 6
+- Active phase: None
 
----
-
-## Active Phase: Phase C: Admin Panel Extraction
-- **Status**: Ready to execute
-- **Plans**: 2 plans (`C-01-PLAN.md`, `C-02-PLAN.md`)
-
-### Goals
-Prune the heavy prototype scaffolding and extract Vite-built static admin React components.
-
-### Active Plan
-- **C-01: Extract Vite React structure and configure API proxy setups.**
-
-### Checklist
-- [ ] C-01: Extract Vite React structure and configure API proxy setups.
-- [ ] C-02: Clean, compile, and link the drag-drop editor tabs to backend APIs.
-
-### Issues & Risks
-- None.
 
 ---
 
 ## Completed Phases
+
+### Phase F: Logging & Tiered Error Recovery
+- **Completed**: 2026-05-28
+- **Plans Complete**: 1/1
+- **Checklist**:
+  - [x] F-01: Implement rotation-aware logger, crash analyst recorder, and tiered error handler.
+
+### Phase E: tmpfs IPC & Data Pipeline
+- **Completed**: 2026-05-28
+- **Plans Complete**: 2/2
+- **Checklist**:
+  - [x] E-01: Build Tier 1b scheduler and local /tmp/ watcher IPC.
+  - [x] E-02: Implement WebSocket server and websocket browser client push handlers.
+
+### Phase D: Widget Fragment System
+- **Completed**: 2026-05-28
+- **Plans Complete**: 2/2
+- **Checklist**:
+  - [x] D-01: Implement manifest validation schema and fragment injection functions.
+  - [x] D-02: Adapt primary widget fragments (Clock, Weather, Sysinfo) to vanilla specifications.
+
+### Phase C: Admin Panel Extraction
+- **Completed**: 2026-05-28
+- **Plans Complete**: 2/2
+- **Checklist**:
+  - [x] C-01: Extract Vite React structure and configure API proxy setups.
+  - [x] C-02: Clean, compile, and link the drag-drop editor tabs to backend APIs.
 
 ### Phase B: Bun Backend Server & Compositor
 - **Completed**: 2026-05-28

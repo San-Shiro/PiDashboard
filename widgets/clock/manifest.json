@@ -1,0 +1,24 @@
+{
+  "id": "clock",
+  "name": "Digital Clock",
+  "version": "1.0.0",
+  "tier": "1a",
+  "entrypoints": {
+    "fragment": "fragment/clock.html"
+  },
+  "configSchema": [
+    {
+      "key": "showSeconds",
+      "type": "boolean",
+      "default": true,
+      "label": "Show Seconds"
+    },
+    {
+      "key": "format",
+      "type": "select",
+      "options": ["12h", "24h"],
+      "default": "24h",
+      "label": "Time Format"
+    }
+  ]
+}

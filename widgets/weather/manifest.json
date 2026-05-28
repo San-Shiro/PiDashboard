@@ -1,0 +1,24 @@
+{
+  "id": "weather",
+  "name": "Live Weather",
+  "version": "1.0.0",
+  "tier": "1b",
+  "entrypoints": {
+    "fragment": "fragment/weather.html"
+  },
+  "configSchema": [
+    {
+      "key": "location",
+      "type": "text",
+      "default": "London",
+      "label": "Location"
+    },
+    {
+      "key": "units",
+      "type": "select",
+      "options": ["metric", "imperial"],
+      "default": "metric",
+      "label": "Temperature Unit"
+    }
+  ]
+}
