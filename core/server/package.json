@@ -1,0 +1,9 @@
+{
+  "name": "core-server",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "argon2": "^0.40.1"
+  }
+}
