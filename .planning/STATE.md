@@ -15,14 +15,14 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ---
 
 ## Active Phase: Phase C: Admin Panel Extraction
-- **Status**: Not started
+- **Status**: Ready to execute
 - **Plans**: 2 plans (`C-01-PLAN.md`, `C-02-PLAN.md`)
 
 ### Goals
 Prune the heavy prototype scaffolding and extract Vite-built static admin React components.
 
 ### Active Plan
-- **None — Phase C has not been planned yet.** Run `/gsd-plan-phase C` to plan this phase.
+- **C-01: Extract Vite React structure and configure API proxy setups.**
 
 ### Checklist
 - [ ] C-01: Extract Vite React structure and configure API proxy setups.
