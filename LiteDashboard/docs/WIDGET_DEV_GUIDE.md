@@ -236,20 +236,26 @@ el.textContent = "25°C";
 
 ## Config Schema
 
-Define configurable fields in `configSchema`. These render as form controls in the admin panel's widget edit panel.
+Define configurable fields in `configSchema`. **The admin panel automatically generates a settings UI for your widget** using its own design system — you just define the fields in JSON and the panel renders matching premium controls (sliders, toggles, color pickers, etc.) that visually match the rest of the dashboard.
+
+> **Key concept**: Widgets don't render their own settings UI. You declare what you need in `configSchema` and the admin panel does the rest. This means your widget's settings panel will always look native and consistent, regardless of who built the widget.
+
+Your widget reads user-chosen values at runtime via `PiWidget.config.keyName`.
 
 ### Field Types
 
-| Type | Renders As | Extra Props |
+| Type | Admin Renders | Extra Props |
 |------|-----------|-------------|
-| `text` | Text input | `placeholder`, `hint` |
-| `number` | Number input | `min`, `max`, `step` |
-| `boolean` | Toggle switch | — |
-| `select` | Dropdown | `options: [{ label, value }]` |
-| `radio` | Radio buttons | `options: [{ label, value }]` |
-| `color` | Color picker | — |
-| `slider` | Range slider | `min`, `max`, `step`, `unit` |
-| `file` | Media file picker | `accept` (mime types) |
+| `text` | Text input with label | `placeholder`, `hint` |
+| `number` | Number input (with stepper) | `min`, `max`, `step` |
+| `boolean` / `toggle` | iOS-style toggle switch | — |
+| `select` | Styled dropdown | `options: [{ label, value }]` |
+| `radio` | Visual radio cards (segmented) | `options: [{ label, value }]` |
+| `color` | Premium color picker with saturation map, hue bar, hex input & presets | — |
+| `slider` | Range slider with numeric input & accent fill | `min`, `max`, `step`, `unit` |
+| `file` | Media picker with upload + gallery browse | `accept` (mime types) |
+| `time` | Time input | — |
+| `timezone` | Searchable timezone input (datalist) | — |
 
 ### Example
 
@@ -309,6 +315,69 @@ Show a field only when another field has a specific value:
   "showIf": { "key": "theme", "value": "custom" }
 }
 ```
+
+### Real-World Example: Widget with Custom Sliders
+
+Say you're building a "Dual Ring" widget where the user can control the inner and outer border radius plus colors. You define the settings in `configSchema` — the admin panel renders matching sliders, color pickers, and toggles using its own design system automatically:
+
+**manifest.json** (partial):
+```json
+"configSchema": [
+  {
+    "key": "outerRadius",
+    "type": "slider",
+    "label": "Outer Border Radius",
+    "min": 0,
+    "max": 50,
+    "step": 1,
+    "unit": "px",
+    "default": 16
+  },
+  {
+    "key": "innerRadius",
+    "type": "slider",
+    "label": "Inner Border Radius",
+    "min": 0,
+    "max": 50,
+    "step": 1,
+    "unit": "px",
+    "default": 8
+  },
+  {
+    "key": "ringColor",
+    "type": "color",
+    "label": "Ring Accent Color",
+    "default": "#6366f1"
+  },
+  {
+    "key": "showGlow",
+    "type": "toggle",
+    "label": "Enable glow effect",
+    "default": true
+  }
+]
+```
+
+**In your widget HTML**, read the values via `PiWidget.config`:
+```html
+<script>
+(function() {
+  var cfg = PiWidget.config;
+  var outer = $('.outer-ring');
+  var inner = $('.inner-ring');
+
+  outer.style.borderRadius = (cfg.outerRadius || 16) + 'px';
+  inner.style.borderRadius = (cfg.innerRadius || 8) + 'px';
+  outer.style.borderColor = cfg.ringColor || '#6366f1';
+
+  if (cfg.showGlow) {
+    outer.style.boxShadow = '0 0 20px ' + (cfg.ringColor || '#6366f1') + '40';
+  }
+})();
+</script>
+```
+
+The admin panel will render two styled sliders with numeric readouts, a premium color picker with saturation map and preset swatches, and a toggle switch — all matching the dashboard's visual language.
 
 ---
 

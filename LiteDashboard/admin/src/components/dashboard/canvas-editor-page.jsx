@@ -34,6 +34,7 @@ import {
   Check
 } from "lucide-react";
 import { CANVAS_THEMES, THEME_VAR_KEYS, DEFAULT_THEME } from "@/data/canvas-themes";
+import { CompactColorSwatch } from "./controls";
 
 function isWidgetActive(base) {
   const now = new Date();
@@ -148,8 +149,7 @@ function CanvasSettingsModal({ canvasData, onSave, onClose }) {
           <div>
             <label className={labelCls} style={{ color: 'var(--color-text-secondary)' }}>Background Color</label>
             <div className="flex items-center gap-3">
-              <input type="color" value={bg} onChange={e => setBg(e.target.value)}
-                className="w-10 h-10 rounded-lg border cursor-pointer" style={{ borderColor: 'var(--color-border)' }} />
+              <CompactColorSwatch value={bg} onChange={setBg} varName="background" />
               <input type="text" value={bg} onChange={e => setBg(e.target.value)}
                 className={inputCls + " flex-1 font-mono"} style={inputStyle} />
             </div>
@@ -212,9 +212,11 @@ function CanvasSettingsModal({ canvasData, onSave, onClose }) {
                 <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>Define custom CSS variables for your canvas theme:</p>
                 {THEME_VAR_KEYS.map(varKey => (
                   <div key={varKey} className="flex items-center gap-3">
-                    <input type="color" value={customVars[varKey] || '#000000'}
-                      onChange={e => setCustomVars(prev => ({ ...prev, [varKey]: e.target.value }))}
-                      className="w-8 h-8 rounded-lg border cursor-pointer shrink-0" style={{ borderColor: 'var(--color-border)' }} />
+                    <CompactColorSwatch
+                      value={customVars[varKey] || '#000000'}
+                      onChange={c => setCustomVars(prev => ({ ...prev, [varKey]: c }))}
+                      varName={varKey}
+                    />
                     <div className="flex-1 min-w-0">
                       <label className="text-[10px] font-mono" style={{ color: 'var(--color-text-secondary)' }}>{varKey}</label>
                       <input type="text" value={customVars[varKey] || ''}

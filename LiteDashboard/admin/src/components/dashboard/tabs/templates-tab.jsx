@@ -24,6 +24,7 @@ import {
   Edit2,
   X,
 } from "lucide-react";
+import { CompactColorSwatch } from "../controls";
 
 const PRESET_RESOLUTIONS = [
   { label: "1280 × 720  (HD)", width: 1280, height: 720 },
@@ -208,13 +209,7 @@ function CanvasSettingsPanel({ canvas, onClose, onSave }) {
             <div>
               <FieldLabel>Background colour</FieldLabel>
               <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={bg}
-                  onChange={(e) => setBg(e.target.value)}
-                  className="w-9 h-9 rounded-lg border cursor-pointer p-0.5"
-                  style={{ borderColor: "var(--color-border)" }}
-                />
+                <CompactColorSwatch value={bg} onChange={setBg} varName="background" />
                 <input
                   type="text"
                   value={bg}
@@ -427,13 +422,7 @@ export default function TemplatesTab({ onAfterApply }) {
             <div>
               <FieldLabel>Background</FieldLabel>
               <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={newBg}
-                  onChange={(e) => setNewBg(e.target.value)}
-                  className="w-9 h-9 rounded-lg border cursor-pointer p-0.5"
-                  style={{ borderColor: "var(--color-border)" }}
-                />
+                <CompactColorSwatch value={newBg} onChange={setNewBg} varName="background" />
                 <input
                   type="text"
                   value={newBg}

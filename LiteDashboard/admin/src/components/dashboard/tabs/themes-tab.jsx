@@ -12,6 +12,7 @@ import {
   Spinner,
   FieldLabel,
 } from "../ui-primitives";
+import { CompactColorSwatch } from "../controls";
 import { Check, Trash2, Plus, Sun, Moon } from "lucide-react";
 
 const TOKEN_LABELS = {
@@ -181,14 +182,10 @@ function CustomThemeBuilder({ onSave, onClose }) {
                 <div key={key}>
                   <FieldLabel>{label}</FieldLabel>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="color"
+                    <CompactColorSwatch
                       value={config[key] || "#000000"}
-                      onChange={(e) =>
-                        setConfig((c) => ({ ...c, [key]: e.target.value }))
-                      }
-                      className="w-8 h-8 rounded border cursor-pointer p-0.5"
-                      style={{ borderColor: "var(--color-border)" }}
+                      onChange={(c) => setConfig((prev) => ({ ...prev, [key]: c }))}
+                      varName={key}
                     />
                     <input
                       type="text"

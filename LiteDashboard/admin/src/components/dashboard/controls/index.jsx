@@ -15,7 +15,14 @@ function ControlLabel({ label, description }) {
 
 import { HexColorPicker } from "react-colorful";
 
-// 1. Color Picker (Modern with preview bubble)
+const COLOR_PRESETS = [
+  "#ef4444", "#f97316", "#f59e0b", "#84cc16",
+  "#22c55e", "#06b6d4", "#3b82f6", "#6366f1",
+  "#8b5cf6", "#ec4899", "#f43f5e", "#ffffff",
+  "#94a3b8", "#475569", "#1e293b", "#000000",
+];
+
+// 1. Color Picker (Premium inline popover)
 export function ColorPicker({ label, description, value, onChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const popover = useRef();
@@ -33,25 +40,185 @@ export function ColorPicker({ label, description, value, onChange }) {
   return (
     <div className="mb-5 relative">
       <ControlLabel label={label} description={description} />
-      <div className="flex items-center gap-2 mt-1.5 p-1 rounded-lg border focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all bg-white shadow-sm" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-        <div 
-          className="relative w-7 h-7 rounded-md overflow-hidden shadow-inner flex-shrink-0 cursor-pointer border"
-          style={{ backgroundColor: value || "#FFFFFF", borderColor: "var(--color-border)" }}
-          onClick={() => setIsOpen(true)}
+      <div
+        className="flex items-center gap-2.5 mt-1.5 p-1.5 rounded-lg border transition-all cursor-pointer"
+        style={{ backgroundColor: "var(--color-surface)", borderColor: isOpen ? "var(--color-accent)" : "var(--color-border)" }}
+        onClick={() => setIsOpen(true)}
+      >
+        <div
+          className="w-8 h-8 rounded-md shadow-inner shrink-0 border"
+          style={{
+            backgroundColor: value || "#000000",
+            borderColor: "var(--color-border)",
+            backgroundImage: !value ? "linear-gradient(45deg, #808080 25%, transparent 25%), linear-gradient(-45deg, #808080 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #808080 75%), linear-gradient(-45deg, transparent 75%, #808080 75%)" : "none",
+            backgroundSize: "8px 8px",
+            backgroundPosition: "0 0, 0 4px, 4px -4px, -4px 0px",
+          }}
         />
-        <input
-          type="text"
-          value={value || ""}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="#000000"
-          className="flex-1 bg-transparent border-0 outline-none text-xs text-gray-700 uppercase font-mono px-1"
-          style={{ color: "var(--color-text-primary)" }}
-        />
+        <span className="flex-1 text-xs font-mono uppercase tracking-wide" style={{ color: "var(--color-text-primary)" }}>
+          {value || "None"}
+        </span>
+        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: "var(--color-text-muted)" }} />
       </div>
-      
+
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 z-50 p-3 rounded-xl shadow-2xl border" ref={popover} style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-          <HexColorPicker color={value || "#ffffff"} onChange={onChange} />
+        <div
+          ref={popover}
+          className="absolute top-full left-0 mt-2 z-50 rounded-xl shadow-2xl border overflow-hidden"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderColor: "var(--color-border)",
+            animation: "colorPickerIn 0.15s ease-out",
+          }}
+        >
+          <style>{`
+            @keyframes colorPickerIn {
+              from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+              to { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            .color-picker-popover .react-colorful {
+              width: 240px !important;
+              height: auto !important;
+            }
+            .color-picker-popover .react-colorful__saturation {
+              height: 160px !important;
+              border-radius: 8px 8px 0 0 !important;
+              border-bottom: none !important;
+            }
+            .color-picker-popover .react-colorful__hue {
+              height: 12px !important;
+              border-radius: 6px !important;
+              margin: 0 !important;
+            }
+            .color-picker-popover .react-colorful__saturation-pointer,
+            .color-picker-popover .react-colorful__hue-pointer {
+              width: 16px !important;
+              height: 16px !important;
+              border: 2px solid #fff !important;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
+            }
+          `}</style>
+          <div className="color-picker-popover p-3">
+            <HexColorPicker color={value || "#000000"} onChange={onChange} />
+
+            {/* Hex input */}
+            <div className="flex items-center gap-2 mt-3">
+              <div className="w-6 h-6 rounded-md shrink-0 border" style={{ backgroundColor: value || "#000000", borderColor: "var(--color-border)" }} />
+              <input
+                type="text"
+                value={value || ""}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="#000000"
+                className="flex-1 border rounded-md px-2 py-1.5 text-xs font-mono uppercase tracking-wide outline-none transition-colors"
+                style={{
+                  backgroundColor: "var(--color-bg)",
+                  borderColor: "var(--color-border)",
+                  color: "var(--color-text-primary)",
+                }}
+                onFocus={(e) => e.target.select()}
+              />
+            </div>
+
+            {/* Quick presets */}
+            <div className="grid grid-cols-8 gap-1 mt-3 pt-3" style={{ borderTop: "1px solid var(--color-border)" }}>
+              {COLOR_PRESETS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => onChange(c)}
+                  className="w-6 h-6 rounded-md border transition-transform hover:scale-110 active:scale-95"
+                  style={{
+                    backgroundColor: c,
+                    borderColor: value === c ? "var(--color-accent)" : "var(--color-border)",
+                    boxShadow: value === c ? "0 0 0 2px var(--color-accent)" : "none",
+                  }}
+                  title={c}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Compact color swatch — used in grids (themes, canvas settings). No label. */
+export function CompactColorSwatch({ value, onChange, varName }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const popover = useRef();
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (popover.current && !popover.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative inline-block">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-8 h-8 rounded-lg border cursor-pointer transition-transform hover:scale-110 active:scale-95 shrink-0"
+        style={{ backgroundColor: value || "#000000", borderColor: "var(--color-border)" }}
+        title={varName || value}
+      />
+      {isOpen && (
+        <div
+          ref={popover}
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 rounded-xl shadow-2xl border overflow-hidden"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderColor: "var(--color-border)",
+            animation: "colorPickerIn 0.15s ease-out",
+          }}
+        >
+          <style>{`
+            @keyframes colorPickerIn {
+              from { opacity: 0; transform: translateY(4px) scale(0.98); }
+              to { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            .compact-picker .react-colorful {
+              width: 200px !important;
+              height: auto !important;
+            }
+            .compact-picker .react-colorful__saturation {
+              height: 130px !important;
+              border-radius: 8px 8px 0 0 !important;
+              border-bottom: none !important;
+            }
+            .compact-picker .react-colorful__hue {
+              height: 10px !important;
+              border-radius: 5px !important;
+            }
+            .compact-picker .react-colorful__saturation-pointer,
+            .compact-picker .react-colorful__hue-pointer {
+              width: 14px !important;
+              height: 14px !important;
+              border: 2px solid #fff !important;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
+            }
+          `}</style>
+          <div className="compact-picker p-2.5">
+            <HexColorPicker color={value || "#000000"} onChange={onChange} />
+            <input
+              type="text"
+              value={value || ""}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="#000000"
+              className="w-full mt-2 border rounded-md px-2 py-1 text-[10px] font-mono uppercase outline-none"
+              style={{
+                backgroundColor: "var(--color-bg)",
+                borderColor: "var(--color-border)",
+                color: "var(--color-text-primary)",
+              }}
+              onFocus={(e) => e.target.select()}
+            />
+          </div>
         </div>
       )}
     </div>
