@@ -432,7 +432,7 @@ function AdminShell() {
             </Pill>
 
             <a
-              href="/display/main"
+              href="/"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold shadow-md transition-all hover:scale-[1.03] active:scale-[0.98] duration-200"

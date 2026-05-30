@@ -9,33 +9,46 @@ function slugify(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-function listCanvases(): any[] {
-  if (!existsSync(CANVASES_DIR)) return [];
-  const files = readdirSync(CANVASES_DIR).filter(f => f.endsWith('.json') && f !== 'active.json');
-  const canvases: any[] = [];
+/** Build a map of canvas ID → filename, and return parsed canvas list */
+function loadAllCanvases(): { list: any[]; idToFile: Map<string, string> } {
+  const list: any[] = [];
+  const idToFile = new Map<string, string>();
+  if (!existsSync(CANVASES_DIR)) return { list, idToFile };
 
+  const files = readdirSync(CANVASES_DIR).filter(f => f.endsWith('.json') && f !== 'active.json');
   for (const file of files) {
     try {
       const content = readFileSync(join(CANVASES_DIR, file), 'utf8');
       const data = JSON.parse(content);
-      data.id = data.id || file.replace('.json', '');
-      canvases.push(data);
+      const id = data.id || file.replace('.json', '');
+      data.id = id;
+      list.push(data);
+      idToFile.set(id, file);
     } catch { /* skip broken files */ }
   }
-  return canvases;
+  return { list, idToFile };
+}
+
+/** Find the actual filename for a canvas ID */
+function resolveCanvasFile(id: string): string | null {
+  const direct = join(CANVASES_DIR, `${id}.json`);
+  if (existsSync(direct)) return `${id}.json`;
+
+  const { idToFile } = loadAllCanvases();
+  return idToFile.get(id) || null;
 }
 
 export function registerTemplateRoutes(router: Router) {
   // GET /api/canvases — list all (backward compat alias)
   router.get('/api/canvases', () => {
-    const items = listCanvases();
-    return json({ canvases: items, templates: items });
+    const { list } = loadAllCanvases();
+    return json({ canvases: list, templates: list });
   });
 
   // GET /api/templates — list all
   router.get('/api/templates', () => {
-    const items = listCanvases();
-    return json({ templates: items });
+    const { list } = loadAllCanvases();
+    return json({ templates: list });
   });
 
   // POST /api/templates — create new canvas
@@ -63,43 +76,44 @@ export function registerTemplateRoutes(router: Router) {
 
   // GET /api/templates/:id — get single canvas
   router.get('/api/templates/:id', (req, params) => {
-    const filePath = join(CANVASES_DIR, `${params.id}.json`);
-    if (!existsSync(filePath)) return error('Canvas not found', 404);
+    const filename = resolveCanvasFile(params.id);
+    if (!filename) return error('Canvas not found', 404);
 
-    const data = JSON.parse(readFileSync(filePath, 'utf8'));
+    const data = JSON.parse(readFileSync(join(CANVASES_DIR, filename), 'utf8'));
     data.id = data.id || params.id;
     return json(data);
   });
 
   // PUT /api/templates/:id — save canvas with widgets
   router.put('/api/templates/:id', async (req, params) => {
-    const filePath = join(CANVASES_DIR, `${params.id}.json`);
+    const filename = resolveCanvasFile(params.id);
+    const targetFile = filename ? join(CANVASES_DIR, filename) : join(CANVASES_DIR, `${params.id}.json`);
     const body = await req.json() as any;
 
     body.id = params.id;
     body.updated_at = new Date().toISOString();
-    writeFileSync(filePath, JSON.stringify(body, null, 2), 'utf8');
+    writeFileSync(targetFile, JSON.stringify(body, null, 2), 'utf8');
 
     return json({ success: true });
   });
 
   // DELETE /api/templates/:id — delete canvas
   router.delete('/api/templates/:id', (req, params) => {
-    const filePath = join(CANVASES_DIR, `${params.id}.json`);
-    if (!existsSync(filePath)) return error('Canvas not found', 404);
+    const filename = resolveCanvasFile(params.id);
+    if (!filename) return error('Canvas not found', 404);
 
-    unlinkSync(filePath);
+    unlinkSync(join(CANVASES_DIR, filename));
     return json({ success: true });
   });
 
   // POST /api/templates/:id/apply — make canvas active and reload kiosk display
   router.post('/api/templates/:id/apply', (req, params) => {
-    const filePath = join(CANVASES_DIR, `${params.id}.json`);
-    if (!existsSync(filePath)) return error('Canvas not found', 404);
+    const filename = resolveCanvasFile(params.id);
+    if (!filename) return error('Canvas not found', 404);
 
-    const canvasData = JSON.parse(readFileSync(filePath, 'utf8'));
+    const canvasData = JSON.parse(readFileSync(join(CANVASES_DIR, filename), 'utf8'));
 
-    // Mark all canvases as inactive, then mark this one active
+    // Mark all canvases as inactive
     const allFiles = readdirSync(CANVASES_DIR).filter(f => f.endsWith('.json') && f !== 'active.json');
     for (const f of allFiles) {
       try {
@@ -114,14 +128,12 @@ export function registerTemplateRoutes(router: Router) {
 
     canvasData.is_active = true;
     canvasData.id = params.id;
-    writeFileSync(filePath, JSON.stringify(canvasData, null, 2), 'utf8');
+    writeFileSync(join(CANVASES_DIR, filename), JSON.stringify(canvasData, null, 2), 'utf8');
 
     // Write active.json for the compositor
     writeFileSync(join(CANVASES_DIR, 'active.json'), JSON.stringify(canvasData, null, 2), 'utf8');
 
-    // Trigger kiosk display reload
     pushReload();
-
     return json({ success: true });
   });
 }
