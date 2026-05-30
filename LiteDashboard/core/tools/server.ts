@@ -89,9 +89,18 @@ export function generateCanvasHTML(canvasFile?: string) {
   const finalPath = existsSync(canvasPath) ? canvasPath : join(ROOT, 'canvases', 'hd_preview.json');
   const rawCanvas = JSON.parse(readFileSync(finalPath, 'utf8'));
 
+  // Normalize: admin panel saves as 'canvas_config', compositor expects 'canvas'
+  if (rawCanvas.canvas_config && !rawCanvas.canvas) {
+    rawCanvas.canvas = rawCanvas.canvas_config;
+    delete rawCanvas.canvas_config;
+  }
+
   const registry = loadWidgetRegistry();
   const result = validateCanvas(rawCanvas, registry.map(r => r.id));
-  if (!result.valid) throw new Error('Invalid canvas');
+  if (!result.valid) {
+    console.error('[Compositor] Validation errors:', result.errors);
+    throw new Error(`Invalid canvas: ${result.errors.join(', ')}`);
+  }
   const canvas = result.sanitized as CanvasConfig;
 
   // Register persistable states
