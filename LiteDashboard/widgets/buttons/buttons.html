@@ -1,0 +1,56 @@
+
+<style>
+  .btn-container { display: flex; gap: 20px; align-items: center; justify-content: center; height: 100%; background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); padding: 20px; }
+  .btn-dynamic { 
+    padding: 15px 30px; 
+    border-radius: 50px; 
+    border: none; 
+    font-size: 16px; 
+    font-weight: bold; 
+    color: white; 
+    cursor: pointer;
+    background: linear-gradient(45deg, #ff007f, #7f00ff);
+    box-shadow: 0 4px 15px rgba(127,0,255,0.4);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .btn-dynamic:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(255,0,127,0.6);
+  }
+  .btn-dynamic:active {
+    transform: translateY(2px) scale(0.95);
+  }
+  .btn-pulse {
+    background: linear-gradient(45deg, #00f2fe, #4facfe);
+    box-shadow: 0 0 0 0 rgba(79,172,254, 0.7);
+    animation: pulse-ring 2s infinite cubic-bezier(0.66, 0, 0, 1);
+  }
+  @keyframes pulse-ring {
+    to { box-shadow: 0 0 0 20px rgba(79,172,254, 0); }
+  }
+</style>
+<div class="btn-container">
+  <div style="position: absolute; top: 10px; right: 20px; color: white; font-weight: bold; font-family: sans-serif; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 10px;">
+    IPC Clicks: <span id="click-counter">0</span>
+  </div>
+  <button class="btn-dynamic" id="btn-hover">Hover Me</button>
+  <button class="btn-dynamic btn-pulse" id="btn-pulse">Pulsing</button>
+</div>
+<script>
+  var hoverBtn = $('#btn-hover');
+  var pulseBtn = $('#btn-pulse');
+  var counter = $('#click-counter');
+
+  function sendClick() {
+    widget.callDaemon({ action: 'click' });
+  }
+
+  hoverBtn.addEventListener('click', sendClick);
+  pulseBtn.addEventListener('click', sendClick);
+
+  function onState(state) {
+    if (state && state.clicks !== undefined) {
+      counter.innerText = state.clicks;
+    }
+  }
+</script>

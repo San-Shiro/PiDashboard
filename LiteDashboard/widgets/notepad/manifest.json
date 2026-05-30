@@ -1,0 +1,18 @@
+{
+  "id": "notepad",
+  "name": "Interactive Notepad",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "persistence": true
+  },
+  "fragment": {
+    "file": "notepad.html",
+    "format": "snippet"
+  },
+  "configSchema": [],
+  "stateMode": "instance",
+  "persist": true
+}

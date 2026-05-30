@@ -1,0 +1,18 @@
+{
+  "id": "media",
+  "name": "Media Player",
+  "version": "1.0.0",
+  "trust": "core",
+  "permissions": {
+    "network": true,
+    "disk": false
+  },
+  "fragment": {
+    "file": "media.html",
+    "format": "snippet"
+  },
+  "configSchema": [],
+  "stateMode": "global",
+  "daemon": "media",
+  "persist": false
+}

@@ -1,0 +1,25 @@
+{
+  "id": "clock",
+  "name": "Digital Clock",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "A simple digital clock",
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "clock.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "showSeconds",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false
+}

@@ -1,0 +1,50 @@
+{
+  "id": "dummy-weather",
+  "name": "Dummy Weather",
+  "version": "1.2.0",
+  "author": "Antigravity",
+  "description": "A weather widget with advanced layout controls for testing.",
+  "category": "Weather",
+  "icon": "cloud-sun",
+  "tier": "native",
+  "estimatedRamMb": 10,
+  "defaults": {
+    "width": 400,
+    "height": 200
+  },
+  "configSchema": [
+    {
+      "key": "location",
+      "label": "Location",
+      "type": "text",
+      "placeholder": "e.g. New York, NY",
+      "default": "London, UK"
+    },
+    {
+      "key": "forecastDays",
+      "label": "Forecast Days",
+      "type": "select",
+      "options": [
+        { "label": "1 Day", "value": 1 },
+        { "label": "3 Days", "value": 3 },
+        { "label": "7 Days", "value": 7 }
+      ],
+      "default": 3
+    },
+    {
+      "key": "refreshRate",
+      "label": "Refresh Rate (Minutes)",
+      "type": "number",
+      "min": 5,
+      "max": 60,
+      "step": 5,
+      "default": 15
+    },
+    {
+      "key": "backgroundImage",
+      "label": "Background Image",
+      "type": "file",
+      "accepts": "image/*"
+    }
+  ]
+}

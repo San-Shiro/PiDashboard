@@ -1,0 +1,55 @@
+{
+  "id": "dummy-clock",
+  "name": "Dummy Clock",
+  "version": "1.0.0",
+  "author": "Antigravity",
+  "description": "A simple clock widget for testing the new Elementor-style properties panel.",
+  "category": "Time",
+  "icon": "clock",
+  "tier": "native",
+  "estimatedRamMb": 5,
+  "defaults": {
+    "width": 300,
+    "height": 150
+  },
+  "configSchema": [
+    {
+      "key": "theme",
+      "label": "Theme Style",
+      "type": "radio",
+      "options": [
+        { "label": "Light", "value": "light" },
+        { "label": "Dark", "value": "dark" }
+      ],
+      "default": "dark"
+    },
+    {
+      "key": "showSeconds",
+      "label": "Show Seconds",
+      "hint": "Display the seconds counter in the clock.",
+      "type": "toggle",
+      "default": true
+    },
+    {
+      "key": "clockColor",
+      "label": "Text Color",
+      "type": "color",
+      "default": "#3b82f6"
+    },
+    {
+      "key": "clockSize",
+      "label": "Font Size",
+      "type": "slider",
+      "min": 12,
+      "max": 120,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "key": "timezone",
+      "label": "Timezone Override",
+      "type": "timezone",
+      "hint": "Leave blank for system default."
+    }
+  ]
+}

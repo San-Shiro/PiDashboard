@@ -1,0 +1,23 @@
+
+<div id="clock-display" style="font-family: monospace; font-size: 48px; color: #00ffcc; text-shadow: 0 0 10px #00ffcc; display: flex; align-items: center; justify-content: center; height: 100%; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid #333;">
+  00:00:00
+</div>
+<script>
+  var el = $('#clock-display');
+  var showSeconds = widget.config.showSeconds !== false;
+  
+  function update() {
+    var d = new Date();
+    var hh = String(d.getHours()).padStart(2, '0');
+    var mm = String(d.getMinutes()).padStart(2, '0');
+    var ss = String(d.getSeconds()).padStart(2, '0');
+    el.textContent = hh + ':' + mm + (showSeconds ? ':' + ss : '');
+  }
+  
+  setInterval(update, 1000);
+  update();
+  
+  function onDestroy() { 
+    console.log("Clock destroyed"); 
+  }
+</script>

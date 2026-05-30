@@ -1,0 +1,17 @@
+{
+  "id": "lottie",
+  "name": "Lottie Animation",
+  "version": "1.0.0",
+  "trust": "community",
+  "permissions": {
+    "network": true,
+    "disk": false
+  },
+  "fragment": {
+    "file": "lottie.html",
+    "format": "snippet"
+  },
+  "configSchema": [],
+  "stateMode": "global",
+  "persist": false
+}

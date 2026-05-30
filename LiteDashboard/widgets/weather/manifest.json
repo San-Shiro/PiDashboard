@@ -1,0 +1,18 @@
+{
+  "id": "weather",
+  "name": "Live Weather",
+  "version": "1.0.0",
+  "trust": "core",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "weather.html",
+    "format": "snippet"
+  },
+  "configSchema": [],
+  "stateMode": "global",
+  "daemon": "weather",
+  "persist": false
+}

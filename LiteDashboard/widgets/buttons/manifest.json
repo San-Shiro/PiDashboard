@@ -1,0 +1,18 @@
+{
+  "id": "buttons",
+  "name": "Animated Buttons",
+  "version": "1.0.0",
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "buttons.html",
+    "format": "snippet"
+  },
+  "configSchema": [],
+  "stateMode": "global",
+  "persist": false,
+  "daemon": "buttons"
+}

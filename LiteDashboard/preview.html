@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PiDashboard</title>
+  
+  
+  <script src="/media/libs/pi-widget-sdk.js"></script>
+  
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body { background: #0d1117; }
+    #kiosk-viewport { 
+      position: relative; 
+      width: 1920px; 
+      height: 1080px; 
+      overflow: hidden; 
+    }
+  </style>
+</head>
+<body>
+  <div id="kiosk-viewport" data-canvas-id="hd-test">
+    
+    <div data-widget="sysinfo" data-instance="sysinfo_1" data-config='{}' data-trust="community" style="position: absolute; left: 1400px; top: 100px; width: 400px; height: 300px; z-index: 5; opacity: 0.9; border-radius: 12px; overflow: hidden">
+      <iframe sandbox="allow-scripts" 
+              srcdoc="
+    <html><body style=&quot;margin:0;padding:0;overflow:hidden;&quot;>
+    <script>var __WIDGET_CONFIG__ = {};
+    var __WIDGET_TYPE__ = 'sysinfo';
+    var __INSTANCE_ID__ = 'sysinfo_1';
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'widget_data') {
+        if (window.__communityOnData) window.__communityOnData(e.data.payload);
+      }
+    });
+    </script>
+    
+<style>
+  body { color: white; font-family: sans-serif; background: linear-gradient(135deg, #1e1e1e, #2a2a2a); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  .bar-container { width: 80%; height: 20px; background: #333; border-radius: 10px; margin: 10px 0; overflow: hidden; }
+  .bar { height: 100%; background: #ff4757; width: 0%; transition: width 0.3s; }
+  h3 { margin: 0; font-weight: 300; }
+</style>
+<div style=&quot;text-align: center; width: 100%;&quot;>
+  <h3>CPU Usage</h3>
+  <div class=&quot;bar-container&quot;><div class=&quot;bar&quot; id=&quot;cpu-bar&quot;></div></div>
+  <h3>RAM Usage</h3>
+  <div class=&quot;bar-container&quot;><div class=&quot;bar&quot; id=&quot;ram-bar&quot; style=&quot;background: #2ed573;&quot;></div></div>
+</div>
+<script>
+  // Fake update for testing
+  setInterval(function() {
+    document.getElementById('cpu-bar').style.width = Math.floor(Math.random() * 100) + '%';
+    document.getElementById('ram-bar').style.width = Math.floor(Math.random() * 100) + '%';
+  }, 2000);
+  
+  // Test receiving IPC data from community handler
+  window.__communityOnData = function(data) {
+    if (data.cpu) document.getElementById('cpu-bar').style.width = data.cpu + '%';
+    if (data.ram) document.getElementById('ram-bar').style.width = data.ram + '%';
+  };
+</script>
+
+    </body></html>
+  "
+              style="width:100%;height:100%;border:none;"></iframe>
+    </div>
+  \n
+    <div data-widget="clock" data-instance="clock_1" data-config='{&quot;showSeconds&quot;:true}' data-trust="verified" style="position: absolute; left: 100px; top: 100px; width: 400px; height: 150px; z-index: 10; opacity: 1; overflow: hidden; transition: all 0.3s">
+      
+<div id="clock-display" style="font-family: monospace; font-size: 48px; color: #00ffcc; text-shadow: 0 0 10px #00ffcc; display: flex; align-items: center; justify-content: center; height: 100%; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid #333;">
+  00:00:00
+</div>
+
+
+      
+      <script>
+      try {
+        
+  window.PiWidget.register(document.currentScript.parentElement, function(ctx) {
+    var el = ctx.root.querySelector('#clock-display');
+    var showSeconds = ctx.config.showSeconds !== false;
+    
+    function update() {
+      var d = new Date();
+      var hh = String(d.getHours()).padStart(2, '0');
+      var mm = String(d.getMinutes()).padStart(2, '0');
+      var ss = String(d.getSeconds()).padStart(2, '0');
+      el.textContent = hh + ':' + mm + (showSeconds ? ':' + ss : '');
+    }
+    
+    setInterval(update, 1000);
+    update();
+    
+    return {
+      onDestroy: function() { console.log("Clock destroyed"); }
+    };
+  });
+
+      } catch(__err) {
+        console.error('[PiWidget] Fatal error in clock:', __err);
+        var __el = document.currentScript ? document.currentScript.parentElement : null;
+        if (__el) __el.innerHTML += '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+        window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+      }
+      </script>
+    </div>
+  
+  </div>
+  
+  <script>
+    PiWidget.context.serverTimezone = 'UTC';
+    PiWidget.context.canvasId = 'hd-test';
+  </script>
+  
+  <script>
+    (function scheduleLoop() {
+      var tz = PiWidget.context.timezone;
+      var currentHHMM = new Date().toLocaleTimeString('en-US', {
+        timeZone: tz, hour12: false, hour: '2-digit', minute: '2-digit'
+      });
+      var today = new Date().toLocaleDateString('en-US', { timeZone: tz, weekday: 'short' }).toLowerCase();
+      
+      document.querySelectorAll('[data-schedule]').forEach(function(el) {
+        var sched = JSON.parse(el.getAttribute('data-schedule') || '{}');
+        var dayOk = !sched.days || sched.days.indexOf(today) !== -1;
+        var timeOk = true;
+        if (sched.from && sched.to) {
+          if (sched.from <= sched.to) {
+            timeOk = currentHHMM >= sched.from && currentHHMM < sched.to;
+          } else {
+            timeOk = currentHHMM >= sched.from || currentHHMM < sched.to;
+          }
+        }
+        el.style.display = (dayOk && timeOk) ? '' : 'none';
+      });
+      
+      setTimeout(scheduleLoop, 30000);
+    })();
+  </script>
+  <script>
+    (function() {
+      document.querySelectorAll('[data-widget]').forEach(function(container) {
+        if (container.dataset.trust === 'community') return;
+        if (!container.attachShadow) return;
+        
+        var shadow = container.attachShadow({ mode: 'open' });
+        
+        var fonts = container.dataset.fonts;
+        if (fonts) {
+          var link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://fonts.googleapis.com/css2?family=' + 
+                      fonts.split(',').map(function(f) { return f.trim().replace(/ /g, '+'); }).join('&family=') +
+                      '&display=swap';
+          shadow.appendChild(link);
+        }
+        
+        while (container.firstChild) {
+          shadow.appendChild(container.firstChild);
+        }
+      });
+    })();
+  </script>
+  
+  <!-- WebSocket client is injected externally or expected to be added here -->
+  <script>
+    if (window.PiWidget && window.PiWidget._startFrameLoop) {
+      window.PiWidget._startFrameLoop(60);
+    }
+  </script>
+</body>
+</html>

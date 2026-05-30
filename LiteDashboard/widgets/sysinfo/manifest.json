@@ -1,0 +1,20 @@
+{
+  "id": "sysinfo",
+  "name": "System Stats",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Shows CPU and RAM usage",
+  "trust": "community",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "sysinfo.html",
+    "format": "snippet"
+  },
+  "configSchema": [],
+  "stateMode": "global",
+  "daemon": "sysinfo",
+  "persist": false
+}

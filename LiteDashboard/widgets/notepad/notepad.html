@@ -1,0 +1,25 @@
+
+<style>
+  .notepad-wrap { display: flex; flex-direction: column; height: 100%; background: #fff2cc; border-radius: 8px; padding: 10px; font-family: 'Comic Sans MS', cursive, sans-serif; color: #333; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+  .notepad-wrap h4 { margin: 0 0 5px 0; }
+  .notepad-wrap textarea { flex: 1; background: transparent; border: none; resize: none; font-family: inherit; font-size: 16px; outline: none; }
+</style>
+<div class="notepad-wrap">
+  <h4>Quick Notes</h4>
+  <textarea id="note-input" placeholder="Type something..."></textarea>
+</div>
+<script>
+  var ta = $('#note-input');
+  
+  function onState(state) {
+    if (state && state.text !== undefined) {
+      if (ta.getRootNode().activeElement !== ta) {
+        ta.value = state.text || '';
+      }
+    }
+  }
+
+  ta.addEventListener('input', function() {
+    widget.patchState({ text: ta.value });
+  });
+</script>

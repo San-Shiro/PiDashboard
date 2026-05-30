@@ -1,0 +1,124 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .sysinfo-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .metric {
+    margin-bottom: 15px;
+  }
+  .metric:last-child {
+    margin-bottom: 0;
+  }
+  .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 6px;
+  }
+  .label {
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    opacity: 0.7;
+  }
+  .value {
+    font-size: 16px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .bar-bg {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .bar-fg {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 1s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.5s ease;
+  }
+  #cpu-bar {
+    background-color: #00e5ff;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+  }
+  #ram-bar {
+    background-color: #b388ff;
+    box-shadow: 0 0 10px rgba(179, 136, 255, 0.4);
+  }
+</style>
+
+<div class="sysinfo-container">
+  <div class="metric">
+    <div class="label-row">
+      <span class="label">CPU Usage</span>
+      <span class="value" id="cpu-val">--%</span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fg" id="cpu-bar"></div>
+    </div>
+  </div>
+  
+  <div class="metric">
+    <div class="label-row">
+      <span class="label">RAM Usage</span>
+      <span class="value" id="ram-val">--%</span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fg" id="ram-bar"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getColorForUsage(percentage, baseColor) {
+    if (percentage > 85) return '#ff1744'; // Red for high usage
+    if (percentage > 65) return '#ff9100'; // Orange for warning
+    return baseColor;
+  }
+
+  function onState(state) {
+    var cpuBar = $('#cpu-bar');
+    var cpuVal = $('#cpu-val');
+    var ramBar = $('#ram-bar');
+    var ramVal = $('#ram-val');
+    if (cpuVal && state.cpu !== undefined) {
+      var cpu = parseFloat(state.cpu).toFixed(1);
+      cpuVal.textContent = cpu + '%';
+      if (cpuBar) {
+        cpuBar.style.width = cpu + '%';
+        var color = getColorForUsage(cpu, '#00e5ff');
+        cpuBar.style.backgroundColor = color;
+        cpuBar.style.boxShadow = '0 0 10px ' + color + '80';
+      }
+    }
+    if (ramVal && state.ram !== undefined) {
+      var ram = parseFloat(state.ram).toFixed(1);
+      ramVal.textContent = ram + '%';
+      if (ramBar) {
+        ramBar.style.width = ram + '%';
+        var color = getColorForUsage(ram, '#b388ff');
+        ramBar.style.backgroundColor = color;
+        ramBar.style.boxShadow = '0 0 10px ' + color + '80';
+      }
+    }
+  }
+
+  if (widget && widget.state && widget.state.cpu !== undefined) {
+    onState(widget.state);
+  }
+</script>

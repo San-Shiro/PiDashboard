@@ -1,0 +1,119 @@
+{
+  "id": "hd-test",
+  "schemaVersion": 2,
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "background": "#0d1117",
+    "fps": 60
+  },
+  "widgets": [
+    {
+      "id": "clock_1",
+      "widget_id": "clock",
+      "enabled": true,
+      "layout": {
+        "x": 50,
+        "y": 50,
+        "width": 350,
+        "height": 120,
+        "zIndex": 10,
+        "opacity": 1
+      },
+      "config": {
+        "showSeconds": true
+      }
+    },
+    {
+      "id": "sysinfo_1",
+      "widget_id": "sysinfo",
+      "enabled": true,
+      "layout": {
+        "x": 50,
+        "y": 200,
+        "width": 350,
+        "height": 300,
+        "zIndex": 5,
+        "opacity": 0.9,
+        "borderRadius": 12
+      },
+      "config": {}
+    },
+    {
+      "id": "notepad_1",
+      "widget_id": "notepad",
+      "enabled": true,
+      "layout": {
+        "x": 50,
+        "y": 550,
+        "width": 350,
+        "height": 300,
+        "zIndex": 6,
+        "opacity": 1
+      },
+      "config": {}
+    },
+    {
+      "id": "media_1",
+      "widget_id": "media",
+      "enabled": true,
+      "layout": {
+        "x": 450,
+        "y": 50,
+        "width": 1000,
+        "height": 562,
+        "zIndex": 2,
+        "opacity": 1,
+        "borderRadius": 16,
+        "overflow": "hidden"
+      },
+      "config": {}
+    },
+    {
+      "id": "buttons_1",
+      "widget_id": "buttons",
+      "enabled": true,
+      "layout": {
+        "x": 450,
+        "y": 650,
+        "width": 500,
+        "height": 150,
+        "zIndex": 8,
+        "opacity": 1
+      },
+      "config": {}
+    },
+    {
+      "id": "lottie_1",
+      "widget_id": "lottie",
+      "enabled": true,
+      "layout": {
+        "x": 1000,
+        "y": 650,
+        "width": 450,
+        "height": 300,
+        "zIndex": 7,
+        "opacity": 1,
+        "borderRadius": 16,
+        "overflow": "hidden"
+      },
+      "config": {}
+    },
+    {
+      "id": "weather_1",
+      "widget_id": "weather",
+      "enabled": true,
+      "layout": {
+        "x": 1500,
+        "y": 50,
+        "width": 370,
+        "height": 250,
+        "zIndex": 5,
+        "opacity": 1,
+        "borderRadius": 16,
+        "overflow": "hidden"
+      },
+      "config": {}
+    }
+  ]
+}

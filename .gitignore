@@ -1,0 +1,11 @@
+.planning/
+node_modules/
+dist/
+*.log
+.DS_Store
+Thumbs.db
+tmp_widgets/
+state/
+*.lock
+bun.lock
+.env
