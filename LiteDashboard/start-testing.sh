@@ -5,8 +5,8 @@ trap 'kill $(jobs -p) 2>/dev/null; exit' EXIT INT TERM
 
 echo "Starting PiDashboard Testing Environment..."
 
-# 1. Start the main Test Server
-~/.bun/bin/bun run core/tools/test-server.ts &
+# 1. Start the unified server
+~/.bun/bin/bun run core/tools/server.ts &
 SERVER_PID=$!
 
 echo "Waiting 2 seconds for server to start..."
@@ -26,8 +26,11 @@ echo "Starting Weather Daemon..."
 ~/.bun/bin/bun run core/tools/daemon-bridge.ts --widget weather --cmd './scripts/wsl-weather.sh' &
 
 echo "====================================================="
-echo "Testing environment is LIVE!"
-echo "Open your browser to: http://localhost:3000/?canvas=test"
+echo "PiDashboard is LIVE!"
+echo ""
+echo "  Kiosk Display:  http://localhost:3000/"
+echo "  Admin Panel:    http://localhost:3000/admin/"
+echo ""
 echo "Press Ctrl+C to stop all services."
 echo "====================================================="
 
