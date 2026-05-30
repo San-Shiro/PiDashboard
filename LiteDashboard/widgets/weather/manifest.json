@@ -14,5 +14,15 @@
   "configSchema": [],
   "stateMode": "global",
   "daemon": "weather",
-  "persist": false
+  "persist": false,
+  "author": "PiDashboard",
+  "description": "Live weather conditions and temperature display",
+  "category": "Weather",
+  "icon": "cloud-sun",
+  "tier": "native",
+  "estimatedRamMb": 2,
+  "defaults": {
+    "width": 300,
+    "height": 200
+  }
 }

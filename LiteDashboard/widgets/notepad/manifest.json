@@ -14,5 +14,14 @@
   },
   "configSchema": [],
   "stateMode": "instance",
-  "persist": true
+  "persist": true,
+  "description": "Persistent sticky note for quick notes on your dashboard",
+  "category": "Productivity",
+  "icon": "edit-3",
+  "tier": "native",
+  "estimatedRamMb": 2,
+  "defaults": {
+    "width": 300,
+    "height": 250
+  }
 }

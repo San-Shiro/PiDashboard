@@ -14,5 +14,15 @@
   "configSchema": [],
   "stateMode": "global",
   "persist": false,
-  "daemon": "buttons"
+  "daemon": "buttons",
+  "author": "PiDashboard",
+  "description": "Interactive animated button controls",
+  "category": "Interactive",
+  "icon": "mouse-pointer",
+  "tier": "native",
+  "estimatedRamMb": 1,
+  "defaults": {
+    "width": 200,
+    "height": 100
+  }
 }

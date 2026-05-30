@@ -1,0 +1,40 @@
+{
+  "id": "greeting",
+  "name": "Greeting Banner",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "A classy time-aware greeting widget with elegant typography and personalized messages.",
+  "category": "Info",
+  "icon": "sun",
+  "tier": "native",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "greeting.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Your Name",
+      "default": ""
+    },
+    {
+      "key": "showDate",
+      "type": "boolean",
+      "label": "Show Date",
+      "default": true
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 400,
+    "height": 120
+  }
+}

@@ -321,6 +321,21 @@ export function composeHTML(
   ${scriptsHtml}
   
   <style>
+    :root {
+      ${(() => {
+        const theme = (canvas as any).canvas?.theme?.vars || (canvas as any).theme?.vars || {};
+        const defaults: Record<string, string> = {
+          '--canvas-bg': canvas.canvas.background || '#0a0a0a',
+          '--canvas-text': '#e0e0e0',
+          '--canvas-accent': '#6366f1',
+          '--canvas-surface': '#1a1a2e',
+          '--canvas-border': '#2a2a3e',
+          '--canvas-muted': '#888888',
+        };
+        const merged = { ...defaults, ...theme };
+        return Object.entries(merged).map(([k, v]) => `${k}: ${v};`).join('\n      ');
+      })()}
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; overflow: hidden; }
     body { background: ${canvas.canvas.background}; }

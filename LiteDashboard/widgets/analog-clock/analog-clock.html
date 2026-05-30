@@ -1,0 +1,236 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .clock-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    inset: 0;
+  }
+  svg.clock {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    filter: drop-shadow(0 0 18px rgba(0,0,0,0.25));
+  }
+  /* Face */
+  .clock-face {
+    fill: var(--canvas-surface, #1a1a2e);
+    stroke: var(--canvas-border, #333);
+    stroke-width: 1.5;
+  }
+  .clock-face-inner {
+    fill: none;
+    stroke: var(--canvas-border, #333);
+    stroke-width: 0.4;
+    opacity: 0.3;
+  }
+  /* Markers */
+  .hour-marker {
+    stroke: var(--canvas-text, #e0e0e0);
+    stroke-linecap: round;
+  }
+  .minute-marker {
+    stroke: var(--canvas-muted, #666);
+    stroke-linecap: round;
+  }
+  /* Classic style numerals */
+  .hour-numeral {
+    fill: var(--canvas-text, #e0e0e0);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 7px;
+    text-anchor: middle;
+    dominant-baseline: central;
+    opacity: 0.85;
+    letter-spacing: -0.3px;
+  }
+  /* Hands */
+  .hand-hour {
+    stroke: var(--canvas-text, #e0e0e0);
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  }
+  .hand-minute {
+    stroke: var(--canvas-text, #e0e0e0);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  }
+  .hand-second {
+    stroke: var(--canvas-accent, #ff6b6b);
+    stroke-width: 0.8;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px var(--canvas-accent, #ff6b6b));
+  }
+  .hand-second-tail {
+    stroke: var(--canvas-accent, #ff6b6b);
+    stroke-width: 1;
+    stroke-linecap: round;
+    opacity: 0.7;
+  }
+  /* Center pin */
+  .center-dot {
+    fill: var(--canvas-accent, #ff6b6b);
+    filter: drop-shadow(0 0 3px var(--canvas-accent, #ff6b6b));
+  }
+  .center-dot-inner {
+    fill: var(--canvas-surface, #1a1a2e);
+  }
+  /* Smooth rotation */
+  .hand-group {
+    transform-origin: 50px 50px;
+    will-change: transform;
+  }
+  .smooth {
+    transition: none;
+  }
+</style>
+
+<div class="clock-container">
+  <svg class="clock" viewBox="0 0 100 100" id="clockSvg">
+    <!-- Face -->
+    <circle class="clock-face" cx="50" cy="50" r="48" />
+    <circle class="clock-face-inner" cx="50" cy="50" r="44" />
+
+    <!-- Markers group (populated by JS based on style) -->
+    <g id="markersGroup"></g>
+
+    <!-- Hour hand -->
+    <g class="hand-group" id="hourHand">
+      <line class="hand-hour" x1="50" y1="50" x2="50" y2="22" />
+    </g>
+
+    <!-- Minute hand -->
+    <g class="hand-group" id="minuteHand">
+      <line class="hand-minute" x1="50" y1="50" x2="50" y2="14" />
+    </g>
+
+    <!-- Second hand -->
+    <g class="hand-group" id="secondHand">
+      <line class="hand-second" x1="50" y1="50" x2="50" y2="12" />
+      <line class="hand-second-tail" x1="50" y1="50" x2="50" y2="57" />
+    </g>
+
+    <!-- Center -->
+    <circle class="center-dot" cx="50" cy="50" r="2.2" />
+    <circle class="center-dot-inner" cx="50" cy="50" r="0.8" />
+  </svg>
+</div>
+
+<script>
+(function () {
+  var config = (typeof PiWidget !== 'undefined' && PiWidget.config) || {};
+  var showSeconds = config.showSeconds !== false;
+  var style = config.style || 'minimal';
+
+  var hourHand = document.getElementById('hourHand');
+  var minuteHand = document.getElementById('minuteHand');
+  var secondHand = document.getElementById('secondHand');
+  var markersGroup = document.getElementById('markersGroup');
+
+  // Hide seconds hand if configured
+  if (!showSeconds) {
+    secondHand.style.display = 'none';
+  }
+
+  // Build markers based on style
+  function buildMarkers() {
+    markersGroup.innerHTML = '';
+    var ns = 'http://www.w3.org/2000/svg';
+
+    if (style === 'classic') {
+      // Classic: Roman-inspired numerals at hour positions + thin minute ticks
+      var numerals = ['12','1','2','3','4','5','6','7','8','9','10','11'];
+      for (var i = 0; i < 12; i++) {
+        var angle = (i * 30) * Math.PI / 180;
+        var nx = 50 + 38 * Math.sin(angle);
+        var ny = 50 - 38 * Math.cos(angle);
+        var text = document.createElementNS(ns, 'text');
+        text.setAttribute('class', 'hour-numeral');
+        text.setAttribute('x', nx);
+        text.setAttribute('y', ny);
+        text.textContent = numerals[i];
+        markersGroup.appendChild(text);
+      }
+      // Minute ticks (skip hour positions)
+      for (var m = 0; m < 60; m++) {
+        if (m % 5 === 0) continue;
+        var ma = (m * 6) * Math.PI / 180;
+        var line = document.createElementNS(ns, 'line');
+        line.setAttribute('class', 'minute-marker');
+        line.setAttribute('x1', 50 + 44 * Math.sin(ma));
+        line.setAttribute('y1', 50 - 44 * Math.cos(ma));
+        line.setAttribute('x2', 50 + 46 * Math.sin(ma));
+        line.setAttribute('y2', 50 - 46 * Math.cos(ma));
+        line.setAttribute('stroke-width', '0.3');
+        markersGroup.appendChild(line);
+      }
+    } else {
+      // Minimal: elegant hour dashes + subtle minute dots
+      for (var h = 0; h < 12; h++) {
+        var ha = (h * 30) * Math.PI / 180;
+        var isQuarter = (h % 3 === 0);
+        var line = document.createElementNS(ns, 'line');
+        line.setAttribute('class', 'hour-marker');
+        var outerR = 46;
+        var innerR = isQuarter ? 40 : 42;
+        var sw = isQuarter ? 1.8 : 0.9;
+        line.setAttribute('x1', 50 + innerR * Math.sin(ha));
+        line.setAttribute('y1', 50 - innerR * Math.cos(ha));
+        line.setAttribute('x2', 50 + outerR * Math.sin(ha));
+        line.setAttribute('y2', 50 - outerR * Math.cos(ha));
+        line.setAttribute('stroke-width', sw);
+        markersGroup.appendChild(line);
+      }
+      // Subtle minute dots
+      for (var md = 0; md < 60; md++) {
+        if (md % 5 === 0) continue;
+        var mda = (md * 6) * Math.PI / 180;
+        var dot = document.createElementNS(ns, 'circle');
+        dot.setAttribute('class', 'minute-marker');
+        dot.setAttribute('cx', 50 + 45.5 * Math.sin(mda));
+        dot.setAttribute('cy', 50 - 45.5 * Math.cos(mda));
+        dot.setAttribute('r', '0.35');
+        dot.setAttribute('fill', 'var(--canvas-muted, #666)');
+        dot.setAttribute('stroke', 'none');
+        markersGroup.appendChild(dot);
+      }
+    }
+  }
+
+  buildMarkers();
+
+  // Update clock hands using requestAnimationFrame for smooth motion
+  function updateClock() {
+    var now = new Date();
+    var h = now.getHours() % 12;
+    var m = now.getMinutes();
+    var s = now.getSeconds();
+    var ms = now.getMilliseconds();
+
+    // Continuous angles
+    var secAngle = (s + ms / 1000) * 6;
+    var minAngle = (m + s / 60) * 6;
+    var hourAngle = (h + m / 60) * 30;
+
+    hourHand.style.transform = 'rotate(' + hourAngle + 'deg)';
+    minuteHand.style.transform = 'rotate(' + minAngle + 'deg)';
+
+    if (showSeconds) {
+      secondHand.style.transform = 'rotate(' + secAngle + 'deg)';
+    }
+
+    requestAnimationFrame(updateClock);
+  }
+
+  requestAnimationFrame(updateClock);
+})();
+</script>

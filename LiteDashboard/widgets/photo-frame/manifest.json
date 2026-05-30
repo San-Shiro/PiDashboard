@@ -1,0 +1,50 @@
+{
+  "id": "photo-frame",
+  "name": "Photo Frame",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "An elegant photo display widget with smooth crossfade transitions and configurable framing.",
+  "category": "Media",
+  "icon": "image",
+  "tier": "native",
+  "estimatedRamMb": 2,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "photo-frame.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "imageUrl",
+      "type": "text",
+      "label": "Image URL",
+      "default": "/media/photo.jpg"
+    },
+    {
+      "key": "interval",
+      "type": "number",
+      "label": "Transition Interval (seconds)",
+      "default": 10,
+      "min": 3,
+      "max": 60,
+      "step": 1
+    },
+    {
+      "key": "objectFit",
+      "type": "select",
+      "label": "Image Fit",
+      "options": ["cover", "contain", "fill"],
+      "default": "cover"
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 400,
+    "height": 300
+  }
+}

@@ -13,5 +13,15 @@
   },
   "configSchema": [],
   "stateMode": "global",
-  "persist": false
+  "persist": false,
+  "author": "PiDashboard",
+  "description": "Lottie JSON animation player",
+  "category": "Animation",
+  "icon": "sparkles",
+  "tier": "native",
+  "estimatedRamMb": 3,
+  "defaults": {
+    "width": 300,
+    "height": 300
+  }
 }

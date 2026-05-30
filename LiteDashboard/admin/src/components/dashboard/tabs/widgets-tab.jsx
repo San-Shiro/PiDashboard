@@ -52,8 +52,8 @@ function WidgetRegistryCard({ widget }) {
 
       <div className="flex flex-wrap gap-1.5 mb-4">
         <Pill>{widget.category || 'General'}</Pill>
-        <Pill>{widget.estimatedRamMb || 0} MB</Pill>
-        <Pill>{widget.tier === 'daemon' ? "Daemon" : "Native"}</Pill>
+        <Pill>{widget.estimatedRamMb ? `${widget.estimatedRamMb} MB` : '< 1 MB'}</Pill>
+        <Pill>{widget.daemon ? "Daemon" : "Native"}</Pill>
       </div>
     </Card>
   );
@@ -126,9 +126,9 @@ function AddWidgetMenu({ registry, onAdd, onClose }) {
                     {m.description}
                   </p>
                   <div className="flex gap-1.5 mt-2">
-                    <Pill>{m.category}</Pill>
-                    <Pill>{m.estimatedRamMb || 0} MB</Pill>
-                    <Pill>{m.tier === 2 ? "Daemon" : "Native"}</Pill>
+                    <Pill>{m.category || 'General'}</Pill>
+                    <Pill>{m.estimatedRamMb ? `${m.estimatedRamMb} MB` : '< 1 MB'}</Pill>
+                    <Pill>{m.daemon ? "Daemon" : "Native"}</Pill>
                   </div>
                 </div>
               </button>

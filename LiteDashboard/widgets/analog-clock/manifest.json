@@ -1,0 +1,41 @@
+{
+  "id": "analog-clock",
+  "name": "Analog Clock",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "A stunning SVG-based analog clock with smooth second hand animation and minimalist design.",
+  "category": "Time",
+  "icon": "clock",
+  "tier": "native",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "analog-clock.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "showSeconds",
+      "type": "boolean",
+      "label": "Show Seconds Hand",
+      "default": true
+    },
+    {
+      "key": "style",
+      "type": "radio",
+      "label": "Clock Style",
+      "options": ["minimal", "classic"],
+      "default": "minimal"
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 200,
+    "height": 200
+  }
+}

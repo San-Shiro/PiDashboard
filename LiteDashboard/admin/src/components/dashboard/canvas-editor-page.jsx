@@ -27,8 +27,13 @@ import {
   Trash2,
   Monitor,
   PanelRight,
-  PanelRightClose
+  PanelRightClose,
+  Settings,
+  Palette,
+  X,
+  Check
 } from "lucide-react";
+import { CANVAS_THEMES, THEME_VAR_KEYS, DEFAULT_THEME } from "@/data/canvas-themes";
 
 function isWidgetActive(base) {
   const now = new Date();
@@ -38,6 +43,226 @@ function isWidgetActive(base) {
   if (!base.activeFrom || !base.activeTo) return true;
   if (base.activeFrom === "00:00" && base.activeTo === "23:59") return true;
   return current >= base.activeFrom && current <= base.activeTo;
+}
+
+const DIMENSION_PRESETS = [
+  { label: '1920 × 1080 (Full HD)', w: 1920, h: 1080 },
+  { label: '1280 × 720 (HD)', w: 1280, h: 720 },
+  { label: '800 × 480 (Pi Touch)', w: 800, h: 480 },
+  { label: '3840 × 2160 (4K)', w: 3840, h: 2160 },
+  { label: '1024 × 600 (7" Display)', w: 1024, h: 600 },
+];
+
+function CanvasSettingsModal({ canvasData, onSave, onClose }) {
+  const cc = canvasData?.canvas_config || {};
+  const [width, setWidth] = useState(cc.width || 1920);
+  const [height, setHeight] = useState(cc.height || 1080);
+  const [bg, setBg] = useState(cc.background || '#0a0a0a');
+  const [name, setName] = useState(canvasData?.name || '');
+  const [themeTab, setThemeTab] = useState('presets');
+  
+  // Theme state
+  const currentTheme = cc.theme || DEFAULT_THEME;
+  const [selectedThemeId, setSelectedThemeId] = useState(currentTheme.id || 'midnight');
+  const [customVars, setCustomVars] = useState(currentTheme.vars || DEFAULT_THEME.vars);
+
+  const activePreset = CANVAS_THEMES.find(t => t.id === selectedThemeId);
+  const effectiveVars = themeTab === 'custom' ? customVars : (activePreset?.vars || DEFAULT_THEME.vars);
+
+  function handleSave() {
+    const theme = themeTab === 'custom'
+      ? { id: 'custom', name: 'Custom', vars: customVars }
+      : activePreset || DEFAULT_THEME;
+    onSave({
+      name,
+      canvas_config: {
+        ...cc,
+        width: Number(width),
+        height: Number(height),
+        background: bg,
+        theme: { id: theme.id, name: theme.name, vars: themeTab === 'custom' ? customVars : theme.vars },
+      },
+    });
+    onClose();
+  }
+
+  const inputCls = "w-full border rounded-lg px-3 py-2 text-sm transition-all shadow-sm";
+  const inputStyle = { backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' };
+  const labelCls = "block text-[10px] font-semibold uppercase text-gray-500 mb-1.5";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ pointerEvents: 'none' }}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ pointerEvents: 'auto' }} onClick={onClose} />
+      <div
+        className="relative border rounded-xl w-full max-w-xl max-h-[85vh] overflow-y-auto"
+        style={{ pointerEvents: 'auto', backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+      >
+        {/* Header */}
+        <div className="sticky top-0 px-5 py-4 z-10 flex items-center justify-between"
+          style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}>
+          <div className="flex items-center gap-2">
+            <Settings size={16} style={{ color: 'var(--color-accent)' }} />
+            <h3 style={{ color: 'var(--color-text-primary)' }} className="text-sm font-semibold">Canvas Settings</h3>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/10 transition-colors" style={{ color: 'var(--color-text-secondary)' }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-6">
+          {/* Name */}
+          <div>
+            <label className={labelCls} style={{ color: 'var(--color-text-secondary)' }}>Canvas Name</label>
+            <input type="text" value={name} onChange={e => setName(e.target.value)} className={inputCls} style={inputStyle} />
+          </div>
+
+          {/* Dimensions */}
+          <div>
+            <label className={labelCls} style={{ color: 'var(--color-text-secondary)' }}>Dimensions</label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {DIMENSION_PRESETS.map(p => (
+                <button key={p.label} onClick={() => { setWidth(p.w); setHeight(p.h); }}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors"
+                  style={{
+                    borderColor: (width === p.w && height === p.h) ? 'var(--color-accent)' : 'var(--color-border)',
+                    backgroundColor: (width === p.w && height === p.h) ? 'var(--color-accent-bg)' : 'transparent',
+                    color: (width === p.w && height === p.h) ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                  }}>
+                  {p.w}×{p.h}
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelCls} style={{ color: 'var(--color-text-secondary)' }}>Width</label>
+                <input type="number" value={width} min={320} max={7680} onChange={e => setWidth(Number(e.target.value))} className={inputCls} style={inputStyle} />
+              </div>
+              <div>
+                <label className={labelCls} style={{ color: 'var(--color-text-secondary)' }}>Height</label>
+                <input type="number" value={height} min={240} max={4320} onChange={e => setHeight(Number(e.target.value))} className={inputCls} style={inputStyle} />
+              </div>
+            </div>
+          </div>
+
+          {/* Background */}
+          <div>
+            <label className={labelCls} style={{ color: 'var(--color-text-secondary)' }}>Background Color</label>
+            <div className="flex items-center gap-3">
+              <input type="color" value={bg} onChange={e => setBg(e.target.value)}
+                className="w-10 h-10 rounded-lg border cursor-pointer" style={{ borderColor: 'var(--color-border)' }} />
+              <input type="text" value={bg} onChange={e => setBg(e.target.value)}
+                className={inputCls + " flex-1 font-mono"} style={inputStyle} />
+            </div>
+          </div>
+
+          {/* Theme Section */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Palette size={14} style={{ color: 'var(--color-accent)' }} />
+              <label className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-primary)' }}>Canvas Theme</label>
+            </div>
+            <p className="text-[11px] mb-3" style={{ color: 'var(--color-text-muted)' }}>
+              Theme colors are injected as CSS variables. Widgets use <code className="font-mono">var(--canvas-accent)</code> etc. to adapt.
+            </p>
+
+            {/* Preset / Custom tabs */}
+            <div className="flex gap-1 mb-4 p-1 rounded-lg" style={{ backgroundColor: 'var(--color-bg)' }}>
+              {['presets', 'custom'].map(tab => (
+                <button key={tab} onClick={() => setThemeTab(tab)}
+                  className="flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors capitalize"
+                  style={{
+                    backgroundColor: themeTab === tab ? 'var(--color-surface)' : 'transparent',
+                    color: themeTab === tab ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+                    boxShadow: themeTab === tab ? '0 1px 3px rgba(0,0,0,0.2)' : 'none',
+                  }}>
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {themeTab === 'presets' ? (
+              <div className="grid grid-cols-2 gap-2">
+                {CANVAS_THEMES.map(theme => (
+                  <button key={theme.id} onClick={() => { setSelectedThemeId(theme.id); setBg(theme.vars['--canvas-bg']); }}
+                    className="relative p-3 rounded-xl border transition-all text-left group"
+                    style={{
+                      borderColor: selectedThemeId === theme.id ? 'var(--color-accent)' : 'var(--color-border)',
+                      backgroundColor: theme.preview.bg,
+                    }}>
+                    {selectedThemeId === theme.id && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: 'var(--color-accent)' }}>
+                        <Check size={10} color="#fff" />
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-4 h-4 rounded-full border" style={{ backgroundColor: theme.preview.accent, borderColor: theme.preview.accent }} />
+                      <span className="text-xs font-semibold" style={{ color: theme.vars['--canvas-text'] }}>{theme.name}</span>
+                    </div>
+                    <div className="flex gap-1">
+                      {Object.values(theme.vars).slice(0, 5).map((c, i) => (
+                        <div key={i} className="w-4 h-4 rounded" style={{ backgroundColor: c }} />
+                      ))}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>Define custom CSS variables for your canvas theme:</p>
+                {THEME_VAR_KEYS.map(varKey => (
+                  <div key={varKey} className="flex items-center gap-3">
+                    <input type="color" value={customVars[varKey] || '#000000'}
+                      onChange={e => setCustomVars(prev => ({ ...prev, [varKey]: e.target.value }))}
+                      className="w-8 h-8 rounded-lg border cursor-pointer shrink-0" style={{ borderColor: 'var(--color-border)' }} />
+                    <div className="flex-1 min-w-0">
+                      <label className="text-[10px] font-mono" style={{ color: 'var(--color-text-secondary)' }}>{varKey}</label>
+                      <input type="text" value={customVars[varKey] || ''}
+                        onChange={e => setCustomVars(prev => ({ ...prev, [varKey]: e.target.value }))}
+                        className={inputCls + " font-mono text-xs"} style={inputStyle} />
+                    </div>
+                  </div>
+                ))}
+                {/* Copy from preset */}
+                <div className="flex flex-wrap gap-1.5 pt-2" style={{ borderTop: '1px solid var(--color-border)' }}>
+                  <span className="text-[10px] w-full mb-1" style={{ color: 'var(--color-text-muted)' }}>Start from a preset:</span>
+                  {CANVAS_THEMES.map(t => (
+                    <button key={t.id} onClick={() => setCustomVars({ ...t.vars })}
+                      className="px-2 py-1 rounded text-[10px] font-medium border transition-colors"
+                      style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                      {t.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Theme preview strip */}
+            <div className="mt-4 p-3 rounded-lg border" style={{ backgroundColor: effectiveVars['--canvas-bg'], borderColor: effectiveVars['--canvas-border'] }}>
+              <p className="text-xs font-semibold mb-2" style={{ color: effectiveVars['--canvas-text'] }}>Theme Preview</p>
+              <div className="flex gap-2">
+                {Object.entries(effectiveVars).map(([k, v]) => (
+                  <div key={k} className="flex flex-col items-center gap-1">
+                    <div className="w-6 h-6 rounded-md border" style={{ backgroundColor: v, borderColor: effectiveVars['--canvas-border'] }} />
+                    <span className="text-[8px] font-mono" style={{ color: effectiveVars['--canvas-muted'] }}>{k.replace('--canvas-', '')}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 px-5 py-3 flex justify-end gap-3"
+          style={{ backgroundColor: 'var(--color-surface)', borderTop: '1px solid var(--color-border)' }}>
+          <GhostButton onClick={onClose}>Cancel</GhostButton>
+          <PrimaryButton onClick={handleSave}>
+            <Check size={12} /> Apply Settings
+          </PrimaryButton>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function AddWidgetModal({ registry, onAdd, onClose }) {
@@ -117,8 +342,8 @@ function AddWidgetModal({ registry, onAdd, onClose }) {
                     {w.description}
                   </p>
                   <div className="flex gap-1.5 mt-2">
-                    <Pill>{w.category}</Pill>
-                    <Pill>{w.estimatedRamMb || 0} MB</Pill>
+                    <Pill>{w.category || 'General'}</Pill>
+                    <Pill>{w.daemon ? 'Daemon' : 'Native'}</Pill>
                   </div>
                 </div>
               </button>
@@ -140,6 +365,7 @@ function CanvasEditorShell() {
   const [showGrid, setShowGrid] = useState(true);
   const [showPreview, setShowPreview] = useState(true);
   const [showAddWidget, setShowAddWidget] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [editingInstanceId, setEditingInstanceId] = useState(null);
   const [now, setNow] = useState(() => new Date());
@@ -188,12 +414,23 @@ function CanvasEditorShell() {
   });
 
   const registry = registryData?.widgets || [];
-  // API returns flat array; derive mime_type from extension for FileInput filtering
-  const mediaFiles = (Array.isArray(mediaData) ? mediaData : []).map((f) => {
+  // API returns { files: [...] }; derive mime_type from extension for FileInput filtering
+  const rawMedia = Array.isArray(mediaData?.files) ? mediaData.files : (Array.isArray(mediaData) ? mediaData : []);
+  const mediaFiles = rawMedia.map((f) => {
     const ext = (f.filename || "").split(".").pop()?.toLowerCase() || "";
     const mimeMap = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif", svg: "image/svg+xml", webp: "image/webp", mp4: "video/mp4", webm: "video/webm" };
     return { ...f, id: f.filename, mime_type: mimeMap[ext] || "application/octet-stream" };
   });
+
+  // Canvas settings save handler
+  const updateCanvasSettings = useCallback((changes) => {
+    // Optimistically update the query cache
+    queryClient.setQueryData(["canvas", canvasId], (old) => ({
+      ...old,
+      ...changes,
+    }));
+    setDirty(true);
+  }, [queryClient, canvasId]);
 
   // Canvas dimensions from data
   const CANVAS_W = canvasData?.canvas_config?.width || canvasData?.width || 1920;
@@ -564,6 +801,18 @@ function CanvasEditorShell() {
             <Plus size={14} />
             Add widget
           </button>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors"
+            style={{
+              borderColor: "var(--color-border)",
+              color: "var(--color-text-secondary)",
+            }}
+            title="Canvas settings & themes"
+          >
+            <Settings size={12} />
+            Settings
+          </button>
           <GhostButton onClick={snapAll}>
             <Grid3x3 size={10} />
             Snap all
@@ -785,6 +1034,15 @@ function CanvasEditorShell() {
           registry={registry}
           onAdd={(wid) => addWidget.mutate(wid)}
           onClose={() => setShowAddWidget(false)}
+        />
+      )}
+
+      {/* Canvas settings modal */}
+      {showSettings && (
+        <CanvasSettingsModal
+          canvasData={canvasData}
+          onSave={updateCanvasSettings}
+          onClose={() => setShowSettings(false)}
         />
       )}
     </div>

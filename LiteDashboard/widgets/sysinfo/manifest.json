@@ -16,5 +16,13 @@
   "configSchema": [],
   "stateMode": "global",
   "daemon": "sysinfo",
-  "persist": false
+  "persist": false,
+  "category": "System",
+  "icon": "cpu",
+  "tier": "native",
+  "estimatedRamMb": 1,
+  "defaults": {
+    "width": 300,
+    "height": 200
+  }
 }

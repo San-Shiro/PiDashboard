@@ -166,9 +166,9 @@ export default function WidgetEditPanel({
                 <div className="flex justify-between">
                   <span>Tier</span>
                   <span style={{ color: "var(--color-text-primary)" }}>
-                    {manifest.tier === 2
-                      ? "Dedicated daemon"
-                      : "Bun-native fetch"}
+                    {manifest.daemon
+                      ? "Daemon-powered"
+                      : "Standalone"}
                   </span>
                 </div>
               </div>
@@ -297,6 +297,15 @@ export default function WidgetEditPanel({
                       style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}
                     />
                   </div>
+                  <SliderControl
+                    label="Border Radius"
+                    min={0}
+                    max={100}
+                    step={1}
+                    unit="px"
+                    value={base.borderRadius || 0}
+                    onChange={(val) => updateBase({ borderRadius: val })}
+                  />
                 </div>
               </div>
             </>

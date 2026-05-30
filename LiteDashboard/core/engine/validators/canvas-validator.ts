@@ -86,6 +86,7 @@ export function validateCanvas(raw: any, registryIds: string[]): ValidationResul
     w.layout.zIndex = clamp(w.layout.zIndex || 1, 1, 999);
     w.layout.opacity = clamp(w.layout.opacity ?? 1, 0, 1);
     w.layout.overflow = w.layout.overflow === "visible" ? "visible" : "hidden";
+    w.layout.borderRadius = clamp(w.layout.borderRadius || 0, 0, 100);
     
     const validBlendModes = [
       "normal","multiply","screen","overlay","darken","lighten",

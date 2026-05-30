@@ -21,5 +21,13 @@
     }
   ],
   "stateMode": "instance",
-  "persist": false
+  "persist": false,
+  "category": "Time",
+  "icon": "clock",
+  "tier": "native",
+  "estimatedRamMb": 1,
+  "defaults": {
+    "width": 300,
+    "height": 120
+  }
 }

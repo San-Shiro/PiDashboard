@@ -14,5 +14,15 @@
   "configSchema": [],
   "stateMode": "global",
   "daemon": "media",
-  "persist": false
+  "persist": false,
+  "author": "PiDashboard",
+  "description": "Music and media player controls with album art",
+  "category": "Media",
+  "icon": "music",
+  "tier": "native",
+  "estimatedRamMb": 5,
+  "defaults": {
+    "width": 400,
+    "height": 200
+  }
 }
