@@ -1,0 +1,10 @@
+{
+  "communication": {
+    "mode": "ipc_file",
+    "ipcFilename": "community-earthquakes.json"
+  },
+  "runtime": {
+    "command": "bun run ./daemon.ts",
+    "cwd": "daemon"
+  }
+}
