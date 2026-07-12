@@ -18,10 +18,13 @@
   "description": "Lottie JSON animation player",
   "category": "Animation",
   "icon": "sparkles",
-  "tier": "native",
+  "tier": "static",
   "estimatedRamMb": 3,
   "defaults": {
     "width": 300,
     "height": 300
+  },
+  "dataChannel": {
+    "type": "none"
   }
 }

@@ -1,1 +1,11 @@
-{"id":"missing-fragment","trust":"community","fragment":{"file":"fragment/does-not-exist.html","format":"snippet"}}
+{
+  "id": "missing-fragment",
+  "trust": "community",
+  "fragment": {
+    "file": "fragment/does-not-exist.html",
+    "format": "snippet"
+  },
+  "name": "test",
+  "version": "1.0",
+  "tier": "static"
+}

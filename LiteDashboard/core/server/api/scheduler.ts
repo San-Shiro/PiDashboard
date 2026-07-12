@@ -33,7 +33,10 @@ export function startScheduler(
     const manifest = registry.find(r => r.id === widget.widget_id);
     if (!manifest || manifest.tier !== 'pull' || !manifest.dataChannel.fetchModule) continue;
     
-    const intervalSec = manifest.polling?.intervalSec || 60;
+    const refreshMinutes = Number(widget.config?.refreshMinutes || 0);
+    const intervalSec = refreshMinutes > 0
+      ? refreshMinutes * 60
+      : (manifest.polling?.intervalSec || 60);
     const jitterSec = manifest.polling?.jitterSec || 0;
     
     const entry: SchedulerEntry = {

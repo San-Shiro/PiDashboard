@@ -1,0 +1,66 @@
+{
+  "id": "icon-text-info",
+  "name": "Icon + Text Info",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Compact icon-led info block for labels, details, and utility readouts.",
+  "category": "Info",
+  "icon": "info",
+  "tier": "static",
+  "runtimeTier": "lite",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "resources": {
+    "externalFonts": [
+      "Inter",
+      "Outfit",
+      "Plus Jakarta Sans",
+      "Poppins",
+      "Montserrat",
+      "Manrope",
+      "DM Sans",
+      "Space Grotesk",
+      "Roboto",
+      "Noto Sans",
+      "Noto Sans Devanagari",
+      "Noto Serif Devanagari",
+      "Mukta",
+      "Hind",
+      "Anek Devanagari"
+    ]
+  },
+  "fragment": {
+    "file": "icon-text-info.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    { "key": "icon", "type": "select", "label": "Icon", "options": [{ "value": "ℹ️", "label": "Info" }, { "value": "📍", "label": "Location" }, { "value": "📅", "label": "Date" }, { "value": "⏰", "label": "Time" }, { "value": "⭐", "label": "Star" }, { "value": "✅", "label": "Check" }, { "value": "⚠️", "label": "Alert" }, { "value": "📞", "label": "Phone" }, { "value": "✉️", "label": "Mail" }, { "value": "🌐", "label": "Globe" }], "default": "ℹ️" },
+    { "key": "label", "type": "text", "label": "Label", "default": "Office" },
+    { "key": "valueText", "type": "text", "label": "Value", "default": "Open 10:00 - 18:00" },
+    { "key": "subtext", "type": "text", "label": "Subtext", "default": "" },
+    { "key": "fontFamily", "type": "select", "label": "Font Family", "options": ["Inter, system-ui, sans-serif", "Outfit, system-ui, sans-serif", "\"Plus Jakarta Sans\", system-ui, sans-serif", "Poppins, system-ui, sans-serif", "Montserrat, system-ui, sans-serif", "Manrope, system-ui, sans-serif", "\"DM Sans\", system-ui, sans-serif", "\"Space Grotesk\", system-ui, sans-serif", "Roboto, Arial, sans-serif", "\"Noto Sans\", system-ui, sans-serif", "\"Noto Sans Devanagari\", system-ui, sans-serif", "\"Noto Serif Devanagari\", Georgia, serif", "Mukta, system-ui, sans-serif", "Hind, system-ui, sans-serif", "\"Anek Devanagari\", system-ui, sans-serif", "system-ui, sans-serif"], "default": "Inter, system-ui, sans-serif" },
+    { "key": "orientation", "type": "radio", "label": "Layout", "options": [{ "value": "row", "label": "Row" }, { "value": "column", "label": "Column" }], "default": "row" },
+    { "key": "alignment", "type": "radio", "label": "Align", "options": ["left", "center", "right"], "default": "left" },
+    { "key": "iconSize", "type": "slider", "label": "Icon Size", "min": 14, "max": 72, "step": 1, "unit": "px", "default": 30 },
+    { "key": "labelSize", "type": "slider", "label": "Label Size", "min": 10, "max": 32, "step": 1, "unit": "px", "default": 13 },
+    { "key": "valueSize", "type": "slider", "label": "Value Size", "min": 12, "max": 48, "step": 1, "unit": "px", "default": 24 },
+    { "key": "gap", "type": "slider", "label": "Gap", "min": 4, "max": 32, "step": 1, "unit": "px", "default": 12 },
+    { "key": "iconColor", "type": "color", "label": "Icon Color", "default": "#60a5fa" },
+    { "key": "textColor", "type": "color", "label": "Text Color", "default": "#ffffff" },
+    { "key": "mutedColor", "type": "color", "label": "Muted Color", "default": "rgba(255,255,255,0.68)" },
+    { "key": "showSubtext", "type": "boolean", "label": "Show Subtext", "default": true }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 360,
+    "height": 120
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

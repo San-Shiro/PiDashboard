@@ -191,55 +191,93 @@
 </div>
 
 <script>
+
+  var containerNode = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'player-card');
+  var shadowRoot = containerNode ? (containerNode.shadowRoot || containerNode) : document;
+  function $(sel) { return shadowRoot.querySelector(sel); }
+
   let isPlaying = false;
   
   function updateUI(state) {
-    if (state.title) $('#trackTitle').textContent = state.title;
-    if (state.artist) $('#trackArtist').textContent = state.artist;
-    if (state.lyrics) $('#trackLyrics').textContent = '"' + state.lyrics + '"';
-    if (state.progress !== undefined) {
-      $('#progressBar').style.width = state.progress + '%';
+    if (!state) return;
+    var trackTitle = $('#trackTitle');
+    var trackArtist = $('#trackArtist');
+    var trackLyrics = $('#trackLyrics');
+    var progressBar = $('#progressBar');
+    var svgPlay = $('#svgPlay');
+    var svgPause = $('#svgPause');
+    var albumArt = $('#albumArt');
+
+    if (state.title && trackTitle) trackTitle.textContent = state.title;
+    if (state.artist && trackArtist) trackArtist.textContent = state.artist;
+    if (state.lyrics && trackLyrics) trackLyrics.textContent = '"' + state.lyrics + '"';
+    if (state.progress !== undefined && progressBar) {
+      progressBar.style.width = state.progress + '%';
     }
     
     if (state.playing !== undefined) {
       isPlaying = (state.playing === 1);
       if (isPlaying) {
-        $('#svgPlay').style.display = 'none';
-        $('#svgPause').style.display = 'block';
-        $('#albumArt').style.transform = 'scale(1.05)';
-        $('#albumArt').style.boxShadow = '0 12px 30px rgba(78,205,196,0.5)';
+        if (svgPlay) svgPlay.style.display = 'none';
+        if (svgPause) svgPause.style.display = 'block';
+        if (albumArt) {
+          albumArt.style.transform = 'scale(1.05)';
+          albumArt.style.boxShadow = '0 12px 30px rgba(78,205,196,0.5)';
+        }
       } else {
-        $('#svgPlay').style.display = 'block';
-        $('#svgPause').style.display = 'none';
-        $('#albumArt').style.transform = 'scale(1)';
-        $('#albumArt').style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+        if (svgPlay) svgPlay.style.display = 'block';
+        if (svgPause) svgPause.style.display = 'none';
+        if (albumArt) {
+          albumArt.style.transform = 'scale(1)';
+          albumArt.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+        }
       }
     }
   }
 
-  function onState(state) {
-    updateUI(state);
+  // Setup Interaction
+  var btnPlayPause = $('#btnPlayPause');
+  var btnNext = $('#btnNext');
+  var btnPrev = $('#btnPrev');
+
+  if (btnPlayPause) {
+    btnPlayPause.addEventListener('click', function() {
+      // Optimistic UI update
+      isPlaying = !isPlaying;
+      updateUI({ playing: isPlaying ? 1 : 0 });
+      // Send to daemon
+      if (typeof widget !== 'undefined' && typeof widget.callDaemon === 'function') {
+        widget.callDaemon({ action: isPlaying ? 'play' : 'pause' });
+      }
+    });
   }
 
-  // Setup Interaction
-  $('#btnPlayPause').addEventListener('click', function() {
-    // Optimistic UI update
-    isPlaying = !isPlaying;
-    updateUI({ playing: isPlaying ? 1 : 0 });
-    // Send to daemon
-    widget.callDaemon({ action: isPlaying ? 'play' : 'pause' });
-  });
+  if (btnNext) {
+    btnNext.addEventListener('click', function() {
+      if (typeof widget !== 'undefined' && typeof widget.callDaemon === 'function') {
+        widget.callDaemon({ action: 'next' });
+      }
+    });
+  }
 
-  $('#btnNext').addEventListener('click', function() {
-    widget.callDaemon({ action: 'next' });
-  });
-
-  $('#btnPrev').addEventListener('click', function() {
-    widget.callDaemon({ action: 'prev' });
-  });
+  if (btnPrev) {
+    btnPrev.addEventListener('click', function() {
+      if (typeof widget !== 'undefined' && typeof widget.callDaemon === 'function') {
+        widget.callDaemon({ action: 'prev' });
+      }
+    });
+  }
 
   // Hydrate from initial state if present
-  if (widget.state && widget.state.title) {
-    updateUI(widget.state);
+  var st = typeof widget !== 'undefined' && widget.state ? widget.state : {};
+  if (typeof PiWidget !== 'undefined' && PiWidget.state) st = PiWidget.state;
+
+  if (st && st.title) {
+    updateUI(st);
   }
+
+  window.onState = function(state) {
+    updateUI(state);
+  };
+
 </script>

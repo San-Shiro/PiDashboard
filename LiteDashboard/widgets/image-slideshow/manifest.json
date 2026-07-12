@@ -1,0 +1,117 @@
+{
+  "id": "image-slideshow",
+  "name": "Image Slideshow",
+  "version": "2.0.0",
+  "author": "PiDashboard",
+  "description": "Smooth crossfade slideshow of uploaded images with configurable timing and effects",
+  "category": "Media",
+  "icon": "image",
+  "tier": "static",
+  "estimatedRamMb": 3,
+  "trust": "core",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "slideshow.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "images",
+      "type": "media-list",
+      "label": "Slideshow Images",
+      "hint": "Select images from your media library",
+      "accepts": "image/*",
+      "default": ""
+    },
+    {
+      "key": "interval",
+      "type": "slider",
+      "label": "Slide Duration",
+      "min": 2,
+      "max": 30,
+      "step": 1,
+      "unit": "s",
+      "default": 6,
+      "panel": "performance",
+      "hint": "Longer duration reduces how often slides need to transition.",
+      "hintDisplay": "icon"
+    },
+    {
+      "key": "transition",
+      "type": "radio",
+      "label": "Transition Effect",
+      "options": [
+        "crossfade",
+        "slide",
+        "zoom"
+      ],
+      "default": "crossfade"
+    },
+    {
+      "key": "transitionSpeed",
+      "type": "slider",
+      "label": "Transition Speed",
+      "min": 300,
+      "max": 2000,
+      "step": 100,
+      "unit": "ms",
+      "default": 800,
+      "panel": "performance",
+      "hint": "Slower transitions can be a little easier on lower-power devices.",
+      "hintDisplay": "icon"
+    },
+    {
+      "key": "fit",
+      "type": "radio",
+      "label": "Image Fit",
+      "options": [
+        "cover",
+        "contain",
+        "fill"
+      ],
+      "default": "cover"
+    },
+    {
+      "key": "showIndicators",
+      "type": "boolean",
+      "label": "Show Slide Indicators",
+      "default": true
+    },
+    {
+      "key": "pauseOnHover",
+      "type": "boolean",
+      "label": "Pause on Hover",
+      "default": false,
+      "panel": "performance"
+    },
+    {
+      "key": "shuffle",
+      "type": "boolean",
+      "label": "Shuffle Order",
+      "default": false,
+      "panel": "performance"
+    },
+    {
+      "key": "borderRadius",
+      "type": "slider",
+      "label": "Corner Radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 500,
+    "height": 300
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

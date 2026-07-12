@@ -1,0 +1,101 @@
+<style>
+  .ticker-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 0 20px;
+    position: relative;
+  }
+  .ticker-track {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    will-change: transform;
+    animation-name: tickerScroll;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  .ticker-separator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 var(--ticker-gap, 48px);
+  }
+  @keyframes tickerScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+</style>
+
+<div class="ticker-root" id="ticker-root">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<script>
+  var root = $('#ticker-root');
+  var track = $('#ticker-track');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+  var accentColor = PiTheme.getColor(cfg, cfg.accentColor, "--canvas-accent", "#60a5fa");
+  var bg = PiTheme.getBackground(cfg, cfg.background, "rgba(255,255,255,0.05)", "#111827", "transparent");
+
+  // Apply root styles
+  root.style.background = bg;
+  root.style.fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+  root.style.fontSize = Number(cfg.fontSize || 24) + "px";
+  root.style.fontWeight = cfg.fontWeight || "700";
+  root.style.textTransform = cfg.uppercase ? "uppercase" : "none";
+  root.style.border = "1px solid color-mix(in srgb, var(--canvas-border, rgba(255,255,255,0.08)) 42%, transparent)";
+  root.style.boxShadow = "0 10px 30px rgba(0,0,0,0.15)";
+  root.style.borderRadius = "12px";
+
+  // Build items list
+  var itemsRaw = cfg.items || "Welcome to PiDashboard\nTeam standup at 10:30\nScreening room opens at 18:00";
+  var items = itemsRaw.split('\n').map(function(item) { return item.trim(); }).filter(Boolean);
+  if (!items.length) items = ["Welcome to PiDashboard"];
+
+  var sep = cfg.separator || "•";
+  
+  // Set gap CSS variable
+  track.style.setProperty('--ticker-gap', Number(cfg.gap || 48) + 'px');
+
+  // We populate track with 2 sets of items for seamless infinite scroll
+  function buildTrackHTML() {
+    var content = "";
+    for (var i = 0; i < items.length; i++) {
+      content += '<span style="color: ' + textColor + '">' + items[i] + '</span>';
+      content += '<span class="ticker-separator" style="color: ' + accentColor + '">' + sep + '</span>';
+    }
+    return content + content; // duplicate for wrapping
+  }
+
+  track.innerHTML = buildTrackHTML();
+
+  // Calculate animation speed
+  var speedVal = Number(cfg.speed || 70);
+  
+  function adjustSpeed() {
+    var halfWidth = track.offsetWidth / 2;
+    var duration = halfWidth > 0 ? (halfWidth / speedVal) : 20;
+    track.style.animationDuration = duration + "s";
+  }
+
+  track.style.animationDirection = cfg.direction === "right" ? "reverse" : "normal";
+
+  if (cfg.pauseOnHover) {
+    track.addEventListener('mouseenter', function() {
+      track.style.animationPlayState = 'paused';
+    });
+    track.addEventListener('mouseleave', function() {
+      track.style.animationPlayState = 'running';
+    });
+  }
+
+  setTimeout(adjustSpeed, 100);
+  window.addEventListener('load', adjustSpeed);
+</script>

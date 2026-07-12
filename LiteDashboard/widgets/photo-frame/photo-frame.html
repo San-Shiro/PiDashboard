@@ -121,17 +121,20 @@
       Loading…
     </div>
     <div class="photo-layer" id="layerA"></div>
-    <div class="photo-layer" id="layerB"></div>
     <div class="vignette"></div>
   </div>
 </div>
 
 <script>
-(function () {
-  var config = (typeof PiWidget !== 'undefined' && PiWidget.config) || {};
-  var imageUrl = config.imageUrl || '/media/photo.jpg';
-  var interval = Math.max(3, Math.min(60, parseInt(config.interval, 10) || 10));
-  var objectFit = config.objectFit || 'cover';
+
+  var containerNode = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'default');
+  var shadowRoot = containerNode ? (containerNode.shadowRoot || containerNode) : document;
+  function $(sel) { return shadowRoot.querySelector(sel); }
+  function $(sel) { return shadowRoot.querySelectorAll(sel); }
+  var cfg = (typeof PiWidget !== 'undefined' && PiWidget.config) || (typeof config !== 'undefined' ? config : {});
+  var imageUrl = cfg.imageUrl || '/media/photo.jpg';
+  var interval = Math.max(3, Math.min(60, parseInt(cfg.interval, 10) || 10));
+  var objectFit = cfg.objectFit || 'cover';
 
   var layerA = document.getElementById('layerA');
   var layerB = document.getElementById('layerB');
@@ -183,8 +186,9 @@
   // For a single image URL, we just keep it displayed.
   // The crossfade infrastructure supports future multi-image arrays.
   // Re-check the image periodically in case it changes on disk.
+  var timer = null;
   if (interval > 0) {
-    setInterval(function () {
+    timer = setInterval(function () {
       loadImage(imageUrl + '?t=' + Date.now())
         .then(function (url) {
           showImage(url);
@@ -194,5 +198,9 @@
         });
     }, interval * 1000);
   }
-})();
+
+  var onDestroy = function() {
+    if (timer) clearInterval(timer);
+  };
+
 </script>

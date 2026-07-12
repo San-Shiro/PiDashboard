@@ -96,4 +96,22 @@ export function registerAuthRoutes(router: Router) {
       'Set-Cookie': 'pi-session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0',
     });
   });
+
+  // POST /api/auth/change-password
+  router.post('/api/auth/change-password', async (req) => {
+    const session = getSessionFromRequest(req);
+    if (!session) return error('Not authenticated', 401);
+
+    const body = await req.json() as { currentPassword?: string; newPassword?: string };
+    if (!body.currentPassword || !body.newPassword) return error('Both passwords required', 400);
+    if (body.newPassword.length < 4) return error('New password must be at least 4 characters', 400);
+
+    const config = loadConfig();
+    const valid = await Bun.password.verify(body.currentPassword, config.passwordHash);
+    if (!valid) return json({ error: 'Current password is incorrect' }, 401);
+
+    config.passwordHash = await Bun.password.hash(body.newPassword, 'argon2id');
+    saveConfig(config);
+    return json({ success: true });
+  });
 }

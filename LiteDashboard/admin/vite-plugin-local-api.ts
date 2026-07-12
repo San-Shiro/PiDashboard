@@ -7,7 +7,7 @@ export function localApiPlugin(): Plugin {
     name: 'local-api',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        if (!req.url?.startsWith('/api/')) {
+        if (!req.url?.startsWith('/api/') && !req.url?.startsWith('/weather/')) {
           return next();
         }
 
@@ -18,6 +18,20 @@ export function localApiPlugin(): Plugin {
         const baseDir = path.resolve(__dirname, '..');
         const canvasesDir = path.join(baseDir, 'canvases');
         const widgetsDir = path.join(baseDir, 'widgets');
+        const activeWidgetsPath = path.join(baseDir, 'config', 'active-widgets.json');
+
+        const getActiveWidgetSet = async () => {
+          if (!(await fs.stat(activeWidgetsPath).catch(() => false))) return null;
+          try {
+            const raw = await fs.readFile(activeWidgetsPath, 'utf-8');
+            const parsed = JSON.parse(raw);
+            const ids = Array.isArray(parsed?.activeWidgets) ? parsed.activeWidgets : [];
+            const clean = ids.filter((id: unknown) => typeof id === 'string' && id.trim().length > 0);
+            return clean.length ? new Set(clean) : null;
+          } catch {
+            return null;
+          }
+        };
 
         // Helper to send JSON
         const sendJSON = (data: any, status = 200) => {
@@ -89,6 +103,7 @@ export function localApiPlugin(): Plugin {
           }
 
           if (pathname === '/api/widgets/registry' && method === 'GET') {
+            const activeWidgets = await getActiveWidgetSet();
             const folders = await fs.readdir(widgetsDir);
             const widgets = [];
             for (const folder of folders) {
@@ -96,10 +111,48 @@ export function localApiPlugin(): Plugin {
               const manifestPath = path.join(widgetsDir, folder, 'manifest.json');
               if (await fs.stat(manifestPath).catch(() => false)) {
                 const content = await fs.readFile(manifestPath, 'utf-8');
-                widgets.push(JSON.parse(content));
+                const manifest = JSON.parse(content);
+                if (activeWidgets && !activeWidgets.has(manifest.id)) continue;
+                widgets.push(manifest);
               }
             }
             return sendJSON({ widgets });
+          }
+
+          if (pathname === '/weather/search' && method === 'GET') {
+            const q = String(url.searchParams.get('q') || '').toLowerCase();
+            const seed = [
+              { name: 'Mumbai', admin1: 'Maharashtra', country: 'India', latitude: 19.076, longitude: 72.8777, timezone: 'Asia/Kolkata' },
+              { name: 'Delhi', admin1: 'Delhi', country: 'India', latitude: 28.6139, longitude: 77.209, timezone: 'Asia/Kolkata' },
+              { name: 'Kolkata', admin1: 'West Bengal', country: 'India', latitude: 22.5726, longitude: 88.3639, timezone: 'Asia/Kolkata' },
+              { name: 'London', admin1: 'England', country: 'United Kingdom', latitude: 51.5072, longitude: -0.1276, timezone: 'Europe/London' },
+            ];
+            const results = seed
+              .filter((item) => !q || `${item.name} ${item.admin1} ${item.country}`.toLowerCase().includes(q))
+              .map((item) => ({ ...item, label: [item.name, item.admin1, item.country].filter(Boolean).join(', ') }));
+            return sendJSON({ results });
+          }
+
+          if (pathname === '/weather/current' && method === 'GET') {
+            const units = url.searchParams.get('units') === 'fahrenheit' ? 'fahrenheit' : 'celsius';
+            const label = String(url.searchParams.get('label') || url.searchParams.get('name') || 'Preview City');
+            const latRaw = url.searchParams.get('lat');
+            const lonRaw = url.searchParams.get('lon');
+            const baseTemp = 29;
+            const temperature = units === 'fahrenheit' ? 84 : baseTemp;
+            return sendJSON({
+              location: label,
+              latitude: latRaw == null || latRaw === '' ? 0 : Number(latRaw),
+              longitude: lonRaw == null || lonRaw === '' ? 0 : Number(lonRaw),
+              temperature,
+              humidity: 68,
+              feels_like: units === 'fahrenheit' ? 89 : 31,
+              wind: 14,
+              condition: 'Partly cloudy',
+              weatherCode: 2,
+              isDay: true,
+              units,
+            });
           }
 
           // System Stats mock for the sidebar
@@ -112,8 +165,48 @@ export function localApiPlugin(): Plugin {
             });
           }
 
+          // In-memory array for mock uploads
+          if (!global.__MOCK_MEDIA) global.__MOCK_MEDIA = [];
+
           if (pathname === '/api/media' && method === 'GET') {
-            return sendJSON({ files: [] }); // TODO: read media dir
+            return sendJSON({ files: global.__MOCK_MEDIA });
+          }
+
+          if (pathname === '/api/media/upload' && method === 'POST') {
+            // Mock upload response for local UI testing
+            const filename = `mock_uploaded_${Date.now()}.webp`;
+            const newFile = {
+              filename,
+              url: `/media/${filename}`,
+              size: 150000,
+              mime_type: 'image/webp',
+              usage: { activeUses: [], inactiveTemplateUses: [] }
+            };
+            global.__MOCK_MEDIA.push(newFile);
+            return sendJSON({ success: true, filename: newFile.filename, url: newFile.url });
+          }
+
+          if (pathname.match(/^\/api\/media\/(.+)$/) && method === 'DELETE') {
+            const match = pathname.match(/^\/api\/media\/(.+)$/);
+            const filename = decodeURIComponent(match ? match[1] : '');
+            global.__MOCK_MEDIA = (global.__MOCK_MEDIA || []).filter((f: any) => f.filename !== filename);
+            return sendJSON({ success: true });
+          }
+
+          if (pathname.match(/^\/api\/media\/(.+)$/) && method === 'PATCH') {
+            const match = pathname.match(/^\/api\/media\/(.+)$/);
+            const oldName = decodeURIComponent(match ? match[1] : '');
+            const buffers: Buffer[] = [];
+            for await (const chunk of req) buffers.push(chunk);
+            const body = JSON.parse(Buffer.concat(buffers).toString() || '{}');
+            const nextName = String(body?.filename || '').trim();
+            if (!nextName) return sendJSON({ error: 'Invalid new filename' }, 400);
+
+            const row = (global.__MOCK_MEDIA || []).find((f: any) => f.filename === oldName);
+            if (!row) return sendJSON({ error: 'File not found' }, 404);
+            row.filename = nextName;
+            row.url = `/media/${encodeURIComponent(nextName)}`;
+            return sendJSON({ success: true, filename: row.filename, url: row.url });
           }
 
           if (pathname === '/api/system/state' && method === 'GET') {

@@ -94,7 +94,7 @@
   }
 </style>
 
-<div class="clock-container">
+<div class="clock-container" id="clock-container">
   <svg class="clock" viewBox="0 0 100 100" id="clockSvg">
     <!-- Face -->
     <circle class="clock-face" cx="50" cy="50" r="48" />
@@ -126,28 +126,29 @@
 </div>
 
 <script>
-(function () {
-  var config = (typeof PiWidget !== 'undefined' && PiWidget.config) || {};
-  var showSeconds = config.showSeconds !== false;
-  var style = config.style || 'minimal';
 
-  var hourHand = document.getElementById('hourHand');
-  var minuteHand = document.getElementById('minuteHand');
-  var secondHand = document.getElementById('secondHand');
-  var markersGroup = document.getElementById('markersGroup');
+  var cfg = (typeof widget !== "undefined" && widget.config) ? widget.config : ((typeof PiWidget !== "undefined" && PiWidget.config) || (typeof config !== "undefined" ? config : {}));
+  var showSeconds = cfg.showSeconds !== false;
+  var style = cfg.style || 'minimal';
 
-  // Hide seconds hand if configured
+  var container = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'clock-container');
+  var shadowRoot = container ? (container.shadowRoot || container) : document;
+
+  var hourHand = shadowRoot.querySelector('#hourHand');
+  var minuteHand = shadowRoot.querySelector('#minuteHand');
+  var secondHand = shadowRoot.querySelector('#secondHand');
+  var markersGroup = shadowRoot.querySelector('#markersGroup');
+  if (!hourHand || !minuteHand || !secondHand || !markersGroup) return;
+
   if (!showSeconds) {
     secondHand.style.display = 'none';
   }
 
-  // Build markers based on style
   function buildMarkers() {
     markersGroup.innerHTML = '';
     var ns = 'http://www.w3.org/2000/svg';
 
     if (style === 'classic') {
-      // Classic: Roman-inspired numerals at hour positions + thin minute ticks
       var numerals = ['12','1','2','3','4','5','6','7','8','9','10','11'];
       for (var i = 0; i < 12; i++) {
         var angle = (i * 30) * Math.PI / 180;
@@ -160,7 +161,6 @@
         text.textContent = numerals[i];
         markersGroup.appendChild(text);
       }
-      // Minute ticks (skip hour positions)
       for (var m = 0; m < 60; m++) {
         if (m % 5 === 0) continue;
         var ma = (m * 6) * Math.PI / 180;
@@ -174,7 +174,6 @@
         markersGroup.appendChild(line);
       }
     } else {
-      // Minimal: elegant hour dashes + subtle minute dots
       for (var h = 0; h < 12; h++) {
         var ha = (h * 30) * Math.PI / 180;
         var isQuarter = (h % 3 === 0);
@@ -190,7 +189,6 @@
         line.setAttribute('stroke-width', sw);
         markersGroup.appendChild(line);
       }
-      // Subtle minute dots
       for (var md = 0; md < 60; md++) {
         if (md % 5 === 0) continue;
         var mda = (md * 6) * Math.PI / 180;
@@ -208,15 +206,16 @@
 
   buildMarkers();
 
-  // Update clock hands using requestAnimationFrame for smooth motion
+  var destroyed = false;
   function updateClock() {
+    if (destroyed) return;
+    
     var now = new Date();
     var h = now.getHours() % 12;
     var m = now.getMinutes();
     var s = now.getSeconds();
     var ms = now.getMilliseconds();
 
-    // Continuous angles
     var secAngle = (s + ms / 1000) * 6;
     var minAngle = (m + s / 60) * 6;
     var hourAngle = (h + m / 60) * 30;
@@ -232,5 +231,9 @@
   }
 
   requestAnimationFrame(updateClock);
-})();
+
+  window.onDestroy = function() {
+    destroyed = true;
+  };
+
 </script>

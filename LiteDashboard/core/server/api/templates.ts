@@ -2,14 +2,13 @@ import { readFileSync, writeFileSync, readdirSync, existsSync, unlinkSync } from
 import { join } from 'path';
 import { Router, json, error } from '../router';
 import { pushReload } from '../ws/display';
+import { daemonManager } from '../daemon/daemon-manager';
 
 const CANVASES_DIR = join(process.cwd(), 'canvases');
 
 function slugify(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
-
-/** Build a map of canvas ID → filename, and return parsed canvas list */
 function loadAllCanvases(): { list: any[]; idToFile: Map<string, string> } {
   const list: any[] = [];
   const idToFile = new Map<string, string>();
@@ -36,6 +35,35 @@ function resolveCanvasFile(id: string): string | null {
 
   const { idToFile } = loadAllCanvases();
   return idToFile.get(id) || null;
+}
+
+function activateCanvasById(id: string): { ok: boolean; data?: any; filename?: string } {
+  const filename = resolveCanvasFile(id);
+  if (!filename) return { ok: false };
+
+  const activePath = join(CANVASES_DIR, filename);
+  const canvasData = JSON.parse(readFileSync(activePath, 'utf8'));
+
+  const allFiles = readdirSync(CANVASES_DIR).filter(f => f.endsWith('.json') && f !== 'active.json');
+  for (const f of allFiles) {
+    try {
+      const fp = join(CANVASES_DIR, f);
+      const d = JSON.parse(readFileSync(fp, 'utf8'));
+      if (d.is_active) {
+        d.is_active = false;
+        writeFileSync(fp, JSON.stringify(d, null, 2), 'utf8');
+      }
+    } catch { /* skip */ }
+  }
+
+  canvasData.is_active = true;
+  canvasData.id = id;
+  writeFileSync(activePath, JSON.stringify(canvasData, null, 2), 'utf8');
+  writeFileSync(join(CANVASES_DIR, 'active.json'), JSON.stringify(canvasData, null, 2), 'utf8');
+  daemonManager.reconcile(canvasData);
+
+  pushReload();
+  return { ok: true, data: canvasData, filename };
 }
 
 export function registerTemplateRoutes(router: Router) {
@@ -108,32 +136,16 @@ export function registerTemplateRoutes(router: Router) {
 
   // POST /api/templates/:id/apply — make canvas active and reload kiosk display
   router.post('/api/templates/:id/apply', (req, params) => {
-    const filename = resolveCanvasFile(params.id);
-    if (!filename) return error('Canvas not found', 404);
+    const activated = activateCanvasById(params.id);
+    if (!activated.ok) return error('Canvas not found', 404);
+    return json({ success: true });
+  });
 
-    const canvasData = JSON.parse(readFileSync(join(CANVASES_DIR, filename), 'utf8'));
-
-    // Mark all canvases as inactive
-    const allFiles = readdirSync(CANVASES_DIR).filter(f => f.endsWith('.json') && f !== 'active.json');
-    for (const f of allFiles) {
-      try {
-        const fp = join(CANVASES_DIR, f);
-        const d = JSON.parse(readFileSync(fp, 'utf8'));
-        if (d.is_active) {
-          d.is_active = false;
-          writeFileSync(fp, JSON.stringify(d, null, 2), 'utf8');
-        }
-      } catch { /* skip */ }
-    }
-
-    canvasData.is_active = true;
-    canvasData.id = params.id;
-    writeFileSync(join(CANVASES_DIR, filename), JSON.stringify(canvasData, null, 2), 'utf8');
-
-    // Write active.json for the compositor
-    writeFileSync(join(CANVASES_DIR, 'active.json'), JSON.stringify(canvasData, null, 2), 'utf8');
-
-    pushReload();
+  // POST /api/templates/:id/publish — save draft changes are expected to already be persisted,
+  // then mark this canvas active and reload kiosk display.
+  router.post('/api/templates/:id/publish', (req, params) => {
+    const activated = activateCanvasById(params.id);
+    if (!activated.ok) return error('Canvas not found', 404);
     return json({ success: true });
   });
 }

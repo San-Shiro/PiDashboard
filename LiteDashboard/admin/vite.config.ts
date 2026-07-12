@@ -19,6 +19,7 @@ export default defineConfig({
     proxy: useBunProxy ? {
       '/api': 'http://localhost:3000',
       '/media': 'http://localhost:3000',
+      '/weather': 'http://localhost:3000',
       '/ws': { target: 'ws://localhost:3000', ws: true },
     } : undefined,
   },

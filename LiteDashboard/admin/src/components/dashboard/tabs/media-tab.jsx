@@ -219,13 +219,29 @@ export default function MediaTab() {
     [handleFiles],
   );
 
-  const files = Array.isArray(data) ? data : [];
-  const totalSize = files.reduce((s, f) => s + (f.size || f.size_bytes || 0), 0);
-  const orphanCount = files.filter(
+  const allFiles = Array.isArray(data?.files) ? data.files : (Array.isArray(data) ? data : []);
+  const totalSize = allFiles.reduce((s, f) => s + (f.size || f.size_bytes || 0), 0);
+  const orphanCount = allFiles.filter(
     (f) =>
       (f.usage?.activeUses || []).length === 0 &&
       (f.usage?.inactiveTemplateUses || []).length === 0,
   ).length;
+
+  // Categorize
+  const imageFiles = allFiles.filter(f => f.mime_type?.startsWith("image/"));
+  const audioFiles = allFiles.filter(f => f.mime_type?.startsWith("audio/"));
+  const videoFiles = allFiles.filter(f => f.mime_type?.startsWith("video/"));
+  const [category, setCategory] = useState("all");
+  const filteredFiles = category === "all" ? allFiles
+    : category === "images" ? imageFiles
+    : category === "audio" ? audioFiles
+    : videoFiles;
+  const categories = [
+    { key: "all", label: "All", count: allFiles.length },
+    { key: "images", label: "Images", count: imageFiles.length, icon: "🖼" },
+    { key: "audio", label: "Audio", count: audioFiles.length, icon: "🎵" },
+    { key: "video", label: "Video", count: videoFiles.length, icon: "🎬" },
+  ].filter(c => c.key === "all" || c.count > 0);
 
   return (
     <div>
@@ -238,7 +254,7 @@ export default function MediaTab() {
               className="text-xs font-mono"
               style={{ color: "var(--color-text-muted)" }}
             >
-              {files.length} files · {formatSize(totalSize)}
+              {allFiles.length} files · {formatSize(totalSize)}
               {orphanCount > 0 && (
                 <span style={{ color: "var(--color-warn)", marginLeft: 4 }}>
                   · {orphanCount} unused
@@ -276,12 +292,34 @@ export default function MediaTab() {
         </div>
       )}
 
+      {/* Category tabs */}
+      {allFiles.length > 0 && (
+        <div className="flex gap-1 mb-4" style={{ borderBottom: "1px solid var(--color-border)", paddingBottom: "8px" }}>
+          {categories.map(c => (
+            <button
+              key={c.key}
+              onClick={() => setCategory(c.key)}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={{
+                backgroundColor: category === c.key ? "var(--color-accent-bg)" : "transparent",
+                color: category === c.key ? "var(--color-accent)" : "var(--color-text-muted)",
+                border: category === c.key ? "1px solid var(--color-accent)" : "1px solid transparent",
+              }}
+            >
+              {c.icon && <span className="mr-1">{c.icon}</span>}
+              {c.label}
+              <span className="ml-1 opacity-50">{c.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <div onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
         {isLoading ? (
           <Card className="py-16 flex justify-center">
             <Spinner size={20} />
           </Card>
-        ) : files.length === 0 ? (
+        ) : filteredFiles.length === 0 ? (
           <div
             className="border-2 border-dashed rounded-xl py-16 px-6 text-center"
             style={{ borderColor: "var(--color-border)" }}
@@ -306,7 +344,7 @@ export default function MediaTab() {
           </div>
         ) : (
           <Card>
-            {files.map((f) => (
+            {filteredFiles.map((f) => (
               <MediaFileRow
                 key={f.filename}
                 file={f}

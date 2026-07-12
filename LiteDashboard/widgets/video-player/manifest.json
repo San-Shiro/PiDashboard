@@ -1,0 +1,63 @@
+{
+  "id": "video-player",
+  "name": "Video Player",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "High-performance hardware-accelerated video playback",
+  "category": "Media",
+  "icon": "video",
+  "tier": "static",
+  "estimatedRamMb": 15,
+  "trust": "core",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "video-player.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "videoUrl",
+      "type": "text",
+      "label": "Video URL",
+      "hint": "Local file (e.g. /media/video.mp4) or remote URL",
+      "default": ""
+    },
+    {
+      "key": "autoplay",
+      "type": "boolean",
+      "label": "Autoplay",
+      "default": true
+    },
+    {
+      "key": "loop",
+      "type": "boolean",
+      "label": "Loop",
+      "default": true
+    },
+    {
+      "key": "muted",
+      "type": "boolean",
+      "label": "Muted",
+      "default": true
+    },
+    {
+      "key": "objectFit",
+      "type": "radio",
+      "label": "Video Fit",
+      "options": ["cover", "contain", "fill"],
+      "default": "cover"
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 400,
+    "height": 300
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

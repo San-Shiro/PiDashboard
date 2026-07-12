@@ -1,0 +1,46 @@
+{
+  "id": "clock-analog",
+  "name": "Analog Clock",
+  "version": "1.0.0",
+  "tier": "client",
+  "entrypoints": {
+    "fragment": "fragment/clock-analog.html"
+  },
+  "configSchema": [
+    {
+      "key": "timezone",
+      "type": "timezone",
+      "default": "",
+      "label": "Timezone"
+    },
+    {
+      "key": "showSeconds",
+      "type": "toggle",
+      "default": true,
+      "label": "Show sweeping second hand"
+    },
+    {
+      "key": "useManualTime",
+      "type": "toggle",
+      "default": false,
+      "label": "Set time completely manually (Overrides timezone)"
+    },
+    {
+      "key": "manualTime",
+      "type": "time",
+      "default": "12:00",
+      "label": "Manual Time",
+      "showIf": { "key": "useManualTime", "value": true }
+    },
+    {
+      "key": "theme",
+      "type": "select",
+      "options": [
+        {"label": "Dark Theme", "value": "dark"},
+        {"label": "Light Theme", "value": "light"}
+      ],
+      "default": "dark",
+      "label": "Clock Face Theme"
+    }
+  ]
+}

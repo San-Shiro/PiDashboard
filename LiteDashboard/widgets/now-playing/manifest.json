@@ -1,0 +1,54 @@
+{
+  "id": "now-playing",
+  "name": "Now Playing",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Elegant now-playing display with album art, progress bar, and marquee scrolling",
+  "category": "Media",
+  "icon": "disc",
+  "tier": "push",
+  "trust": "verified",
+  "estimatedRamMb": 3,
+  "permissions": {
+    "network": true,
+    "disk": false
+  },
+  "fragment": {
+    "file": "now-playing.html",
+    "format": "snippet"
+  },
+  "daemon": "media",
+  "configSchema": [
+    {
+      "key": "showAlbumArt",
+      "type": "boolean",
+      "default": true,
+      "label": "Show Album Art"
+    },
+    {
+      "key": "showProgress",
+      "type": "boolean",
+      "default": true,
+      "label": "Show Progress Bar"
+    },
+    {
+      "key": "marqueeSpeed",
+      "type": "number",
+      "default": 3,
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "label": "Marquee Speed"
+    }
+  ],
+  "stateMode": "global",
+  "persist": false,
+  "defaults": {
+    "width": 400,
+    "height": 180
+  },
+  "dataChannel": {
+    "type": "ipc_file",
+    "ipcFilename": "now-playing.json"
+  }
+}

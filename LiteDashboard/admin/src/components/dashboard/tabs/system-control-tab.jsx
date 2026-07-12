@@ -1,11 +1,14 @@
-// System control: WiFi, Bluetooth, display, power.
+// System control: Display, WiFi, Bluetooth, Security.
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   Pill,
   StatusDot,
   SectionHeader,
+  PrimaryButton,
   Spinner,
+  FieldLabel,
 } from "../ui-primitives";
 import {
   Wifi,
@@ -15,6 +18,9 @@ import {
   Sun,
   Moon,
   RotateCcw,
+  Shield,
+  Check,
+  AlertTriangle,
 } from "lucide-react";
 
 function signalBars(strength) {
@@ -293,6 +299,132 @@ function DisplayPowerSection() {
   );
 }
 
+function SecuritySection() {
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const changePw = useMutation({
+    mutationFn: async ({ currentPassword, newPassword }) => {
+      const r = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || data.message || "Failed");
+      return data;
+    },
+    onSuccess: () => {
+      setCurrentPw("");
+      setNewPw("");
+      setConfirmPw("");
+      setErrorMsg("");
+      setSuccessMsg("Password updated successfully!");
+      setTimeout(() => setSuccessMsg(""), 4000);
+    },
+    onError: (e) => {
+      setSuccessMsg("");
+      setErrorMsg(e.message || "Failed to change password");
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+    if (newPw !== confirmPw) {
+      setErrorMsg("New passwords don't match");
+      return;
+    }
+    if (newPw.length < 4) {
+      setErrorMsg("Password must be at least 4 characters");
+      return;
+    }
+    changePw.mutate({ currentPassword: currentPw, newPassword: newPw });
+  };
+
+  const inputCls = "w-full border rounded-lg px-3 py-2 text-sm";
+  const inputStyle = {
+    borderColor: "var(--color-border)",
+    color: "var(--color-text-primary)",
+    backgroundColor: "var(--color-surface)",
+  };
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Shield size={14} style={{ color: "var(--color-text-secondary)" }} />
+        <span style={{ color: "var(--color-text-primary)" }} className="text-sm font-medium">
+          Change admin password
+        </span>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+        <div>
+          <FieldLabel>Current password</FieldLabel>
+          <input
+            type="password"
+            value={currentPw}
+            onChange={(e) => setCurrentPw(e.target.value)}
+            className={inputCls}
+            style={inputStyle}
+            required
+          />
+        </div>
+        <div>
+          <FieldLabel>New password</FieldLabel>
+          <input
+            type="password"
+            value={newPw}
+            onChange={(e) => setNewPw(e.target.value)}
+            className={inputCls}
+            style={inputStyle}
+            placeholder="Min. 4 characters"
+            required
+          />
+        </div>
+        <div>
+          <FieldLabel>Confirm new password</FieldLabel>
+          <input
+            type="password"
+            value={confirmPw}
+            onChange={(e) => setConfirmPw(e.target.value)}
+            className={inputCls}
+            style={inputStyle}
+            required
+          />
+        </div>
+
+        {successMsg && (
+          <div
+            className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg"
+            style={{ backgroundColor: "var(--color-accent-bg)", color: "var(--color-accent)" }}
+          >
+            <Check size={13} />
+            {successMsg}
+          </div>
+        )}
+        {errorMsg && (
+          <div
+            className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg"
+            style={{ backgroundColor: "var(--color-danger-bg)", color: "var(--color-danger)" }}
+          >
+            <AlertTriangle size={13} />
+            {errorMsg}
+          </div>
+        )}
+
+        <PrimaryButton type="submit" disabled={changePw.isPending}>
+          {changePw.isPending ? <Spinner size={12} /> : <Shield size={12} />}
+          Update password
+        </PrimaryButton>
+      </form>
+    </Card>
+  );
+}
+
 export default function SystemControlTab() {
   return (
     <div className="space-y-8">
@@ -310,6 +442,10 @@ export default function SystemControlTab() {
       <div>
         <SectionHeader title="Bluetooth" subtitle="Paired and nearby devices" />
         <BluetoothSection />
+      </div>
+      <div>
+        <SectionHeader title="Security" subtitle="Change admin password" />
+        <SecuritySection />
       </div>
     </div>
   );

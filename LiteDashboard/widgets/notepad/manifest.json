@@ -18,10 +18,13 @@
   "description": "Persistent sticky note for quick notes on your dashboard",
   "category": "Productivity",
   "icon": "edit-3",
-  "tier": "native",
+  "tier": "static",
   "estimatedRamMb": 2,
   "defaults": {
     "width": 300,
     "height": 250
+  },
+  "dataChannel": {
+    "type": "none"
   }
 }

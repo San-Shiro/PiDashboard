@@ -1,0 +1,93 @@
+{
+  "id": "shape-polygon",
+  "name": "Polygon / Star",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Complex polygon shapes like triangles, pentagons, and stars with adjustable points.",
+  "category": "Design",
+  "icon": "hexagon",
+  "tier": "static",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "shape-polygon.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "shapeType",
+      "type": "radio",
+      "label": "Shape Type",
+      "options": [
+        "polygon",
+        "star"
+      ],
+      "default": "star"
+    },
+    {
+      "key": "points",
+      "type": "slider",
+      "label": "Number of Points/Sides",
+      "min": 3,
+      "max": 20,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "key": "innerRadius",
+      "type": "slider",
+      "label": "Star Inner Radius",
+      "hint": "Only applies to stars (lower = sharper)",
+      "min": 10,
+      "max": 90,
+      "step": 1,
+      "unit": "%",
+      "default": 40
+    },
+    {
+      "key": "background",
+      "type": "background",
+      "label": "Background",
+      "default": {
+        "type": "classic",
+        "color": "#F59E0B",
+        "stops": [
+          { "color": "#FDE68A", "position": 0 },
+          { "color": "#F59E0B", "position": 50 },
+          { "color": "#D97706", "position": 100 }
+        ],
+        "gradientType": "radial",
+        "angle": 135,
+        "color2": "#D97706"
+      }
+    },
+    {
+      "key": "border",
+      "type": "border",
+      "label": "Border",
+      "default": {
+        "type": "none",
+        "width": {
+          "top": 2,
+          "right": 2,
+          "bottom": 2,
+          "left": 2
+        },
+        "color": "#ffffff"
+      }
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 200,
+    "height": 200
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

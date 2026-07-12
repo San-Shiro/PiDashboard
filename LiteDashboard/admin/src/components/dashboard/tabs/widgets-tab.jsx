@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Icon from "../icon";
 import {
   Pill,
@@ -17,9 +17,16 @@ import {
   Layers,
   Clock,
 } from "lucide-react";
+import {
+  allowsTier,
+  getWidgetRuntimeTier,
+  loadSelectedRuntimeTier,
+  saveSelectedRuntimeTier,
+} from "../runtime-tier";
 
 function WidgetRegistryCard({ widget }) {
   const visuals = getWidgetVisuals(widget);
+  const runtimeTier = getWidgetRuntimeTier(widget);
 
   return (
     <Card className="p-5 hover:border-gray-300 transition-colors">
@@ -52,7 +59,8 @@ function WidgetRegistryCard({ widget }) {
 
       <div className="flex flex-wrap gap-1.5 mb-4">
         <Pill>{widget.category || 'General'}</Pill>
-        <Pill>{widget.estimatedRamMb ? `${widget.estimatedRamMb} MB` : '< 1 MB'}</Pill>
+        <Pill>{runtimeTier}</Pill>
+        <Pill>{widget.estimatedRamMb ? `~${widget.estimatedRamMb} MB RAM` : '< 1 MB RAM'}</Pill>
         <Pill>{widget.daemon ? "Daemon" : "Native"}</Pill>
       </div>
     </Card>
@@ -127,7 +135,7 @@ function AddWidgetMenu({ registry, onAdd, onClose }) {
                   </p>
                   <div className="flex gap-1.5 mt-2">
                     <Pill>{m.category || 'General'}</Pill>
-                    <Pill>{m.estimatedRamMb ? `${m.estimatedRamMb} MB` : '< 1 MB'}</Pill>
+                    <Pill>{m.estimatedRamMb ? `~${m.estimatedRamMb} MB RAM` : '< 1 MB RAM'}</Pill>
                     <Pill>{m.daemon ? "Daemon" : "Native"}</Pill>
                   </div>
                 </div>
@@ -141,6 +149,21 @@ function AddWidgetMenu({ registry, onAdd, onClose }) {
 }
 
 export default function WidgetsTab({ registry }) {
+  const [selectedTier, setSelectedTier] = useState(() => loadSelectedRuntimeTier());
+
+  const visibleRegistry = useMemo(
+    () =>
+      registry.filter((widget) =>
+        allowsTier(selectedTier, getWidgetRuntimeTier(widget)),
+      ),
+    [registry, selectedTier],
+  );
+
+  const handleTierChange = (tier) => {
+    setSelectedTier(tier);
+    saveSelectedRuntimeTier(tier);
+  };
+
   return (
     <div>
       <SectionHeader
@@ -148,15 +171,46 @@ export default function WidgetsTab({ registry }) {
         subtitle="Available widgets installed on the system that can be added to canvases."
       />
 
-      {registry.length === 0 ? (
+      <div className="mb-4">
+        <Card className="p-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p className="text-xs font-semibold" style={{ color: "var(--color-text-primary)" }}>
+                Runtime visibility
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: "var(--color-text-secondary)" }}>
+                Choose the max widget tier to show for this admin session.
+              </p>
+            </div>
+            <div className="inline-flex rounded-lg border overflow-hidden" style={{ borderColor: "var(--color-border)" }}>
+              {["lite", "standard", "heavy"].map((tier) => (
+                <button
+                  key={tier}
+                  onClick={() => handleTierChange(tier)}
+                  className="px-3 py-1.5 text-xs font-medium capitalize transition-colors"
+                  style={{
+                    backgroundColor: selectedTier === tier ? "var(--color-accent-bg)" : "transparent",
+                    color: selectedTier === tier ? "var(--color-accent)" : "var(--color-text-secondary)",
+                    borderRight: tier !== "heavy" ? "1px solid var(--color-border)" : "none",
+                  }}
+                >
+                  {tier}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {visibleRegistry.length === 0 ? (
         <EmptyState
           icon={<Layers size={28} />}
-          title="No widgets found"
-          description="Install widgets into the widgets directory."
+          title="No widgets in selected tier"
+          description="Increase runtime visibility to see standard/heavy widgets."
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {registry.map((widget) => (
+          {visibleRegistry.map((widget) => (
             <WidgetRegistryCard
               key={widget.id}
               widget={widget}

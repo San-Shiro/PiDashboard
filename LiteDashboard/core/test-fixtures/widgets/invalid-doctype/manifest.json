@@ -1,1 +1,11 @@
-{"id":"invalid-doctype","trust":"community","fragment":{"file":"fragment/invalid-doctype.html","format":"snippet"}}
+{
+  "id": "invalid-doctype",
+  "trust": "community",
+  "fragment": {
+    "file": "fragment/invalid-doctype.html",
+    "format": "snippet"
+  },
+  "name": "test",
+  "version": "1.0",
+  "tier": "static"
+}

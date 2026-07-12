@@ -1,0 +1,52 @@
+{
+  "id": "community-demo",
+  "name": "Community Demo",
+  "version": "1.0.0",
+  "author": "External Developer",
+  "description": "An example widget demonstrating the PiDashboard community SDK.",
+  "trust": "community",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "widget.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "greetingText",
+      "type": "text",
+      "label": "Greeting Text",
+      "default": "Hello from Community Widget!"
+    },
+    {
+      "key": "accentColor",
+      "type": "color",
+      "label": "Accent Color",
+      "default": "#ff0055"
+    },
+    {
+      "key": "textColor",
+      "type": "color",
+      "label": "Text Color",
+      "hint": "Leave blank to use canvas theme",
+      "default": ""
+    },
+    {
+      "key": "background",
+      "type": "background",
+      "label": "Background"
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "category": "Community",
+  "icon": "box",
+  "tier": "push",
+  "estimatedRamMb": 1,
+  "defaults": {
+    "width": 300,
+    "height": 200
+  }
+}

@@ -55,6 +55,11 @@ export function validateWidget(widgetDir: string): ValidationResult {
     error(`Invalid trust: '${manifest.trust}'`);
   }
 
+  const validRuntimeTiers = ['lite', 'standard', 'heavy'];
+  if (manifest.runtimeTier && !validRuntimeTiers.includes(manifest.runtimeTier)) {
+    error(`Invalid runtimeTier: '${manifest.runtimeTier}'. Must be: lite|standard|heavy`);
+  }
+
   if (manifest.id && manifest.id !== result.widgetId) {
     error(`Manifest id '${manifest.id}' doesn't match folder name '${result.widgetId}'`);
   }

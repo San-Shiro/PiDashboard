@@ -1,0 +1,95 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .text-title-root {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .text-title-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: hidden;
+  }
+</style>
+
+<div class="text-title-root" id="text-title-root">
+  <div class="text-title-content" id="text-title-content">Your Title</div>
+</div>
+
+<script>
+  var root = $('#text-title-root');
+  var content = $('#text-title-content');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+
+  // Layout & Alignment
+  root.style.justifyContent = cfg.verticalAlign || "center";
+  root.style.textAlign = cfg.alignment || "left";
+
+  // Content typography
+  content.textContent = cfg.textContent || "Your Title";
+  content.style.fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+  content.style.fontSize = Number(cfg.fontSize || 64) + "px";
+  content.style.fontWeight = cfg.fontWeight || "800";
+  content.style.lineHeight = cfg.lineHeight || 1.1;
+  content.style.letterSpacing = Number(cfg.letterSpacing || 0) + "px";
+  content.style.color = textColor;
+  content.style.textTransform = cfg.transform || "none";
+  content.style.fontStyle = cfg.italic ? "italic" : "normal";
+  content.style.opacity = Math.max(0.2, Math.min(1, Number(cfg.opacity !== undefined ? cfg.opacity : 1)));
+
+  // Wrap limit
+  if (cfg.wrap === false) {
+    content.style.whiteSpace = "nowrap";
+    content.style.textOverflow = "ellipsis";
+  } else {
+    content.style.whiteSpace = "pre-wrap";
+    content.style.textOverflow = "clip";
+  }
+
+  // Width limits
+  var textWidth = Number(cfg.textWidth || 0);
+  if (textWidth > 0) {
+    content.style.width = textWidth + "px";
+    content.style.maxWidth = textWidth + "px";
+    if (cfg.alignment === "center") {
+      content.style.margin = "0 auto";
+    } else if (cfg.alignment === "right") {
+      content.style.marginLeft = "auto";
+      content.style.marginRight = "0";
+    } else {
+      content.style.marginLeft = "0";
+      content.style.marginRight = "auto";
+    }
+  }
+
+  // Stroke / Outline
+  var strokeWidth = Number(cfg.strokeWidth || 0);
+  if (strokeWidth > 0) {
+    var strokeColor = cfg.strokeColor || "#000000";
+    content.style.webkitTextStroke = strokeWidth + "px " + strokeColor;
+  } else {
+    content.style.webkitTextStroke = "unset";
+  }
+
+  // Shadow effects
+  var shadowBlur = Number(cfg.shadowBlur || 0);
+  if (shadowBlur > 0) {
+    var shadowColor = cfg.shadowColor || "rgba(0,0,0,0.35)";
+    content.style.textShadow = "0 " + Math.round(shadowBlur / 2) + "px " + shadowBlur + "px " + shadowColor;
+  } else {
+    content.style.textShadow = "none";
+  }
+</script>

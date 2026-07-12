@@ -1,0 +1,467 @@
+{
+  "name": "bingo",
+  "description": "",
+  "canvas_config": {
+    "width": 1920,
+    "height": 1080,
+    "background": "#0a1628",
+    "displayTarget": "primary",
+    "pixelRatio": 1,
+    "theme": {
+      "id": "ocean",
+      "name": "Ocean",
+      "vars": {
+        "--canvas-bg": "#0a1628",
+        "--canvas-bg-2": "#102038",
+        "--canvas-bg-3": "#17304d",
+        "--canvas-text": "#b8d4e3",
+        "--canvas-text-2": "#8fc0d4",
+        "--canvas-text-3": "#6ea0b8",
+        "--canvas-accent": "#06b6d4",
+        "--canvas-accent-2": "#0891b2",
+        "--canvas-accent-3": "#67e8f9",
+        "--canvas-surface": "#0f2840",
+        "--canvas-surface-2": "#163654",
+        "--canvas-surface-3": "#20466a",
+        "--canvas-border": "#1a3d5c",
+        "--canvas-border-2": "#2f5d82",
+        "--canvas-muted": "#5b8fa8"
+      }
+    }
+  },
+  "widgets": [
+    {
+      "id": "97c387ee-7cb4-4b0a-b76c-43eae6efa0be",
+      "widget_id": "image-slideshow",
+      "label": "Image Slideshow",
+      "enabled": true,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "zIndex": 1,
+        "opacity": 0,
+        "overflow": "hidden",
+        "borderRadius": 0
+      },
+      "config": {
+        "images": "/media/from_the_decorated_a4_cardboard_202605241426_(1).webp, /media/from_the_decorated_a4_cardboard_202605241426_(2).webp, /media/from_the_decorated_a4_cardboard_202605241426_(3).webp, /media/from_the_decorated_a4_cardboard_202605241426_(4).webp, /media/from_the_decorated_a4_cardboard_202605241426.webp, /media/from_the_decorated_a4_cardboard_202605241427.webp, /media/landscape.webp",
+        "fit": "cover",
+        "renderMode": "pingpong",
+        "showIndicators": false,
+        "transition": "crossfade"
+      }
+    },
+    {
+      "id": "991f502e-6831-4054-a339-4c54d3361a81",
+      "widget_id": "text-paragraph",
+      "label": "Text Paragraph",
+      "enabled": true,
+      "layout": {
+        "x": 1500,
+        "y": 140,
+        "width": 400,
+        "height": 60,
+        "zIndex": 5,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "textContent": "Add paragraph content here.",
+        "fontFamily": "\"Merriweather\", Georgia, serif",
+        "fontSize": 24,
+        "fontWeight": "400",
+        "lineHeight": 1.5,
+        "letterSpacing": 0,
+        "textWidth": 700,
+        "textColor": "#f3f4f6",
+        "alignment": "left",
+        "verticalAlign": "flex-start",
+        "transform": "none",
+        "italic": false,
+        "maxLines": 0,
+        "shadowBlur": 0,
+        "shadowColor": "rgba(0,0,0,0.3)",
+        "opacity": 1
+      }
+    },
+    {
+      "id": "73b3a762-394f-43f6-96d6-e20019ded921",
+      "widget_id": "text-title",
+      "label": "Text Title",
+      "enabled": true,
+      "layout": {
+        "x": 1640,
+        "y": 340,
+        "width": 240,
+        "height": 60,
+        "zIndex": 6,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "textContent": "Your Title",
+        "fontFamily": "Poppins, system-ui, sans-serif",
+        "fontSize": 44,
+        "fontWeight": "800",
+        "lineHeight": 1.1,
+        "letterSpacing": 0,
+        "textWidth": 0,
+        "textColor": "var(--canvas-accent-2)",
+        "alignment": "left",
+        "verticalAlign": "center",
+        "transform": "none",
+        "wrap": true,
+        "italic": false,
+        "strokeWidth": 0,
+        "strokeColor": "#000000",
+        "shadowBlur": 0,
+        "shadowColor": "rgba(0,0,0,0.35)",
+        "opacity": 1,
+        "__themeMode": "canvas"
+      }
+    },
+    {
+      "id": "20e48efd-232f-446e-b8b6-4b4f533a4526",
+      "widget_id": "badge-label",
+      "label": "Badge / Label",
+      "enabled": true,
+      "layout": {
+        "x": 1457,
+        "y": 914,
+        "width": 311,
+        "height": 89,
+        "zIndex": 7,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "textContent": "Featured",
+        "fontFamily": "\"Bebas Neue\", system-ui, sans-serif",
+        "fontSize": 39,
+        "fontWeight": "700",
+        "textColor": "#ffffff",
+        "background": {
+          "type": "classic",
+          "color": "#ffffff",
+          "color2": "",
+          "stops": null,
+          "gradientType": "linear",
+          "angle": 135,
+          "mix": 50,
+          "softness": 100
+        },
+        "paddingX": 36,
+        "paddingY": 6,
+        "radius": 14,
+        "alignment": "left",
+        "uppercase": false,
+        "letterSpacing": 5.5,
+        "shadowBlur": 0,
+        "shadowColor": "rgba(0,0,0,0.25)"
+      }
+    },
+    {
+      "id": "4678baf3-901f-4173-8bc8-832d6c7f31c0",
+      "widget_id": "icon-text-info",
+      "label": "Icon + Text Info",
+      "enabled": true,
+      "layout": {
+        "x": 1600,
+        "y": 420,
+        "width": 280,
+        "height": 120,
+        "zIndex": 8,
+        "opacity": 1,
+        "overflow": "hidden",
+        "borderRadius": 0
+      },
+      "config": {
+        "icon": "✅",
+        "label": "Office",
+        "valueText": "Open 10:00 - 18:00",
+        "subtext": "",
+        "fontFamily": "Poppins, system-ui, sans-serif",
+        "orientation": "row",
+        "alignment": "left",
+        "iconSize": 46,
+        "labelSize": 13,
+        "valueSize": 16,
+        "gap": 4,
+        "iconColor": "#012a5c",
+        "textColor": "#230000",
+        "mutedColor": "#420000",
+        "showSubtext": true,
+        "__themeMode": "canvas"
+      }
+    },
+    {
+      "id": "360ca4aa-c298-474f-af6a-6400bb6cc711",
+      "widget_id": "quote-callout",
+      "label": "Quote / Callout",
+      "enabled": true,
+      "layout": {
+        "x": 1420,
+        "y": 720,
+        "width": 480,
+        "height": 140,
+        "zIndex": 9,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "quoteText": "Small moments of clarity compound into better work.",
+        "author": "PiDashboard",
+        "source": "",
+        "fontFamily": "\"Merriweather\", Georgia, serif",
+        "fontSize": 28,
+        "lineHeight": 1.35,
+        "alignment": "left",
+        "showQuoteMark": true,
+        "accentPosition": "left",
+        "accentColor": "#ffffff",
+        "textColor": "#ffffff",
+        "metaColor": "rgba(255,255,255,0.72)",
+        "sourceMode": "manual",
+        "__themeMode": "canvas",
+        "background": {
+          "type": "gradient",
+          "color": "color-mix(in srgb, var(--canvas-surface, #1a1a2e) 82%, transparent)",
+          "color2": "color-mix(in srgb, var(--canvas-accent, #6366f1) 12%, var(--canvas-surface, #1a1a2e))",
+          "stops": [
+            {
+              "color": "color-mix(in srgb, var(--canvas-surface, #1a1a2e) 88%, transparent)",
+              "position": 0
+            },
+            {
+              "color": "color-mix(in srgb, var(--canvas-accent, #6366f1) 10%, var(--canvas-surface, #1a1a2e))",
+              "position": 62
+            },
+            {
+              "color": "color-mix(in srgb, var(--canvas-accent, #6366f1) 18%, var(--canvas-surface, #1a1a2e))",
+              "position": 100
+            }
+          ],
+          "gradientType": "linear",
+          "angle": 135,
+          "mix": 48,
+          "softness": 100
+        }
+      }
+    },
+    {
+      "id": "05d35b1e-5c84-4766-9041-1d119855b2a8",
+      "widget_id": "stat-kpi-card",
+      "label": "Stat / KPI Card",
+      "enabled": true,
+      "layout": {
+        "x": 929,
+        "y": 732,
+        "width": 360,
+        "height": 140,
+        "zIndex": 10,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "label": "Revenue",
+        "valueText": "24.8K",
+        "suffix": "",
+        "deltaText": "+12.4% vs last week",
+        "showDelta": true,
+        "trend": "up",
+        "fontFamily": "Inter, system-ui, sans-serif",
+        "valueSize": 56,
+        "labelSize": 13,
+        "padding": 18,
+        "radius": 20,
+        "alignment": "left",
+        "background": {
+          "type": "classic",
+          "color": "#0f172a",
+          "color2": "#1e293b",
+          "gradientType": "linear",
+          "angle": 135,
+          "mix": 48,
+          "softness": 100
+        },
+        "textColor": "#ffffff",
+        "mutedColor": "rgba(255,255,255,0.7)",
+        "accentColor": "#38bdf8"
+      }
+    },
+    {
+      "id": "8cab9eea-5209-4528-80bd-d45f96906883",
+      "widget_id": "ticker-marquee-text",
+      "label": "Ticker / Marquee Text",
+      "enabled": true,
+      "layout": {
+        "x": 0,
+        "y": 48,
+        "width": 1920,
+        "height": 80,
+        "zIndex": 11,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "items": "Welcome to PiDashboard\nTeam standup at 10:30\nScreening room opens at 18:00",
+        "separator": "•",
+        "direction": "right",
+        "speed": 70,
+        "gap": 48,
+        "fontFamily": "Inter, system-ui, sans-serif",
+        "fontSize": 24,
+        "fontWeight": "700",
+        "uppercase": false,
+        "pauseOnHover": false,
+        "textColor": "#ffffff",
+        "accentColor": "#001632",
+        "background": {
+          "type": "classic",
+          "color": "rgba(255,255,255,0.05)",
+          "color2": "#111827",
+          "gradientType": "linear",
+          "angle": 135,
+          "mix": 50,
+          "softness": 100
+        },
+        "__themeMode": "canvas",
+        "fpsLimit": 30
+      }
+    },
+    {
+      "id": "3e07370c-0a3a-42f2-8e0e-ea7a4595caa9",
+      "widget_id": "weather",
+      "label": "Live Weather",
+      "enabled": true,
+      "layout": {
+        "x": 157,
+        "y": 343,
+        "width": 380,
+        "height": 180,
+        "zIndex": 12,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "locationData": {
+          "name": "Rājgarh",
+          "country": "India",
+          "admin1": "Madhya Pradesh",
+          "latitude": 22.67821,
+          "longitude": 74.94483,
+          "timezone": "Asia/Kolkata",
+          "label": "Rājgarh, Madhya Pradesh, India"
+        },
+        "units": "celsius",
+        "showHumidity": true,
+        "showWind": true,
+        "showFeelsLike": false,
+        "showIcon": true,
+        "fontFamily": "Inter, system-ui, sans-serif",
+        "compactMode": false,
+        "refreshMinutes": 10,
+        "textColor": "var(--canvas-text-3)",
+        "accentColor": "",
+        "__themeMode": "custom"
+      }
+    },
+    {
+      "id": "62c9fc69-4b5e-4932-b06b-29a950243f98",
+      "widget_id": "clock",
+      "label": "Digital Clock",
+      "enabled": true,
+      "layout": {
+        "x": 1580,
+        "y": 220,
+        "width": 300,
+        "height": 120,
+        "zIndex": 13,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "showSeconds": true,
+        "use24h": true,
+        "showDate": true,
+        "timezone": "Asia/Kolkata",
+        "fontFamily": "Inter, system-ui, sans-serif",
+        "fontWeight": "300",
+        "fontSize": 48,
+        "textColor": "var(--canvas-accent)",
+        "glowColor": "",
+        "separatorBlink": false,
+        "__themeMode": "canvas"
+      }
+    },
+    {
+      "id": "e79be01e-7da4-479d-b389-d7d573fe972f",
+      "widget_id": "line-basic",
+      "label": "Line",
+      "enabled": true,
+      "layout": {
+        "x": 0,
+        "y": 146,
+        "width": 1060,
+        "height": 40,
+        "zIndex": 14,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "orientation": "horizontal",
+        "angle": 0,
+        "lineStyle": "solid",
+        "lineCap": "square",
+        "thickness": 3,
+        "opacity": 1,
+        "background": {
+          "type": "gradient",
+          "color": "#4B5563",
+          "color2": "#94A3B8",
+          "stops": [
+            {
+              "color": "#4B5563",
+              "position": 0
+            },
+            {
+              "color": "#94A3B8",
+              "position": 100
+            }
+          ],
+          "gradientType": "linear",
+          "angle": 90,
+          "mix": 50,
+          "softness": 100
+        },
+        "__themeMode": "canvas"
+      }
+    },
+    {
+      "id": "w_mrglponmre8qd9jh4",
+      "widget_id": "community-complex",
+      "label": "Community Complex",
+      "enabled": true,
+      "layout": {
+        "x": 145,
+        "y": 693,
+        "width": 255,
+        "height": 258,
+        "zIndex": 15,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "title": "Network Load",
+        "textColor": ""
+      }
+    }
+  ],
+  "widget_count": 12,
+  "created_at": "2026-05-30T13:22:22.871Z",
+  "updated_at": "2026-07-12T07:47:24.860Z",
+  "is_active": true,
+  "id": "bingo-1780147342871"
+}

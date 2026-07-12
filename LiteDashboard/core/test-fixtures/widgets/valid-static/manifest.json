@@ -1,1 +1,11 @@
-{"id":"valid-static","trust":"community","fragment":{"file":"fragment/valid-static.html","format":"snippet"}}
+{
+  "id": "valid-static",
+  "trust": "community",
+  "fragment": {
+    "file": "fragment/valid-static.html",
+    "format": "snippet"
+  },
+  "name": "test",
+  "version": "1.0",
+  "tier": "static"
+}

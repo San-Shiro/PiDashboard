@@ -296,7 +296,6 @@ export default function LayoutTab({
                   </div>
                 )}
 
-                {/* Resize handle */}
                 <div
                   onMouseDown={(e) => startDrag(e, inst, "resize")}
                   className="absolute right-0 bottom-0 cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity"

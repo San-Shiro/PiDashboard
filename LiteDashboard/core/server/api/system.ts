@@ -1,4 +1,5 @@
 import * as os from 'os';
+import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { Router, json, error } from '../router';
 import { pushMaintenance } from '../ws/display';
@@ -6,6 +7,10 @@ import { pushMaintenance } from '../ws/display';
 // In-memory server state
 let maintenanceMode = false;
 let displayEnabled = true;
+
+// CPU state for delta calculation
+let lastTotalTick = 0;
+let lastTotalIdle = 0;
 
 export function registerSystemRoutes(router: Router) {
   // GET /api/system/stats — real system metrics
@@ -18,7 +23,19 @@ export function registerSystemRoutes(router: Router) {
       }
       totalIdle += cpu.times.idle;
     }
-    const cpuPercent = Math.round((1 - totalIdle / totalTick) * 100);
+    
+    let cpuPercent = 0;
+    if (lastTotalTick > 0) {
+      const deltaTick = totalTick - lastTotalTick;
+      const deltaIdle = totalIdle - lastTotalIdle;
+      cpuPercent = Math.round((1 - deltaIdle / deltaTick) * 100);
+    } else {
+      // First call fallback
+      cpuPercent = Math.round((1 - totalIdle / totalTick) * 100);
+    }
+    
+    lastTotalTick = totalTick;
+    lastTotalIdle = totalIdle;
 
     const totalMem = os.totalmem();
     const freeMem = os.freemem();
@@ -36,16 +53,26 @@ export function registerSystemRoutes(router: Router) {
       }
     } catch { /* no thermal data available */ }
 
+    // Disk percent (Linux)
+    let diskPercent = 0;
+    try {
+      const output = execSync('df -k / | tail -1').toString();
+      const match = output.match(/(\d+)%/);
+      if (match) diskPercent = parseInt(match[1]);
+    } catch { /* ignore error on Windows or if df fails */ }
+
     return json({
       cpu_percent: cpuPercent,
       mem_percent: memPercent,
       mem_used_mb: memUsedMb,
       mem_total_mb: memTotalMb,
       cpu_temp: cpuTemp,
+      disk_percent: diskPercent,
       uptime_seconds: Math.floor(os.uptime()),
       load_avg: os.loadavg(),
+      server_rss_mb: Math.round(process.memoryUsage().rss / 1024 / 1024),
       processes: {
-        bun: { ram_mb: Math.round(process.memoryUsage.rss() / 1024 / 1024), cpu: 0 },
+        bun: { ram_mb: Math.round(process.memoryUsage().rss / 1024 / 1024), cpu: 0 },
       },
     });
   });

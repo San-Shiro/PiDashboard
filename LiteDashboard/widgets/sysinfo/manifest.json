@@ -1,10 +1,10 @@
 {
   "id": "sysinfo",
   "name": "System Stats",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "PiDashboard",
-  "description": "Shows CPU and RAM usage",
-  "trust": "community",
+  "description": "Shows CPU usage, RAM usage, temperature, and disk with configurable layout",
+  "trust": "core",
   "permissions": {
     "network": false,
     "disk": false
@@ -13,16 +13,123 @@
     "file": "sysinfo.html",
     "format": "snippet"
   },
-  "configSchema": [],
+  "addons": ["pi-charts"],
+  "configSchema": [
+    {
+      "key": "showCpu",
+      "type": "boolean",
+      "label": "Show CPU Usage",
+      "default": true
+    },
+    {
+      "key": "showRam",
+      "type": "boolean",
+      "label": "Show RAM Usage",
+      "default": true
+    },
+    {
+      "key": "showTemp",
+      "type": "boolean",
+      "label": "Show Temperature",
+      "default": true
+    },
+    {
+      "key": "showDisk",
+      "type": "boolean",
+      "label": "Show Disk Usage",
+      "default": false
+    },
+    {
+      "key": "showUptime",
+      "type": "boolean",
+      "label": "Show Uptime",
+      "default": false
+    },
+    {
+      "key": "layout",
+      "type": "radio",
+      "label": "Layout",
+      "options": [
+        "bars",
+        "text",
+        "compact"
+      ],
+      "default": "bars"
+    },
+    {
+      "key": "textColor",
+      "type": "color",
+      "label": "Text Color",
+      "hint": "Color for labels (e.g. 'CPU Usage')",
+      "default": ""
+    },
+    {
+      "key": "valueColor",
+      "type": "color",
+      "label": "Value Color",
+      "hint": "Color for the percentage text",
+      "default": ""
+    },
+    {
+      "key": "barBgColor",
+      "type": "color",
+      "label": "Bar Background Color",
+      "hint": "Color for the empty part of the bar",
+      "default": ""
+    },
+    {
+      "key": "lowColor",
+      "type": "color",
+      "label": "Low Usage Color",
+      "hint": "Color when usage is below mid threshold",
+      "default": "#00e5ff"
+    },
+    {
+      "key": "midColor",
+      "type": "color",
+      "label": "Mid Usage Color",
+      "default": "#ff9100"
+    },
+    {
+      "key": "highColor",
+      "type": "color",
+      "label": "High Usage Color",
+      "default": "#ff1744"
+    },
+    {
+      "key": "midThreshold",
+      "type": "slider",
+      "label": "Mid Threshold",
+      "min": 20,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 60
+    },
+    {
+      "key": "highThreshold",
+      "type": "slider",
+      "label": "High Threshold",
+      "min": 50,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 85
+    }
+  ],
   "stateMode": "global",
   "daemon": "sysinfo",
   "persist": false,
   "category": "System",
   "icon": "cpu",
-  "tier": "native",
+  "tier": "push",
   "estimatedRamMb": 1,
   "defaults": {
     "width": 300,
     "height": 200
+  },
+  "dataChannel": {
+    "type": "ipc_file",
+    "ipcFilename": "sysinfo.json"
   }
 }

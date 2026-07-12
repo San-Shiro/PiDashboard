@@ -1,0 +1,247 @@
+<style>
+  .ss-wrap {
+    width: 100%; height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .ss-buf {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    will-change: opacity, transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    pointer-events: none;
+    z-index: 1;
+    transition: none; /* Default no transition for instant snap */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: var(--ss-fit-size, cover);
+  }
+  
+  /* Buffer States */
+  .ss-buf.active {
+    opacity: 1;
+    z-index: 2;
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: var(--ss-speed, 800ms);
+  }
+  .ss-buf.solid {
+    opacity: 1;
+    z-index: 1;
+    transition: none !important; /* Solid background underneath fade */
+  }
+
+  /* Effects */
+  /* Crossfade: Default (just opacity) */
+
+  /* Slide */
+  .ss-slide-fx .ss-buf { transform: translateX(100%) translateZ(0); opacity: 1; }
+  .ss-slide-fx .ss-buf.active { transform: translateX(0) translateZ(0); opacity: 1; }
+  .ss-slide-fx .ss-buf.solid { transform: translateX(0) translateZ(0); opacity: 1; }
+
+  /* Zoom */
+  .ss-zoom .ss-buf { transform: scale(1.1) translateZ(0); }
+  .ss-zoom .ss-buf.active { transform: scale(1) translateZ(0); }
+  .ss-zoom .ss-buf.solid { transform: scale(1) translateZ(0); }
+
+  /* Indicators */
+  .ss-indicators {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 10;
+  }
+  .ss-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    transition: all 0.3s ease;
+    border: none; cursor: pointer; padding: 0;
+  }
+  .ss-dot.active {
+    background: #fff;
+    transform: scale(1.3);
+    box-shadow: 0 0 6px rgba(255,255,255,0.5);
+  }
+  .ss-empty {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--canvas-muted, #666);
+    font-size: 12px;
+    text-align: center;
+    gap: 6px;
+  }
+  .ss-empty-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--canvas-surface, rgba(255,255,255,0.05));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; opacity: 0.4;
+  }
+</style>
+
+<div class="ss-wrap" id="ss-container">
+  <div class="ss-empty" id="ss-empty">
+    <div class="ss-empty-icon">🖼</div>
+    <span>No images configured</span>
+    <span style="font-size:10px;opacity:0.5">Add image URLs in widget config</span>
+  </div>
+</div>
+
+<script>
+  var cfg = (typeof widget !== "undefined" && widget.config) ? widget.config : ((typeof PiWidget !== "undefined" && PiWidget.config) || (typeof config !== "undefined" ? config : {}));
+  var container = $('#ss-container');
+  var emptyEl = $('#ss-empty');
+
+  if (!container) return;
+
+  // Configuration
+  var raw = (cfg.images || '').trim();
+  
+  if (raw) {
+    var urls = raw.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    if (urls.length) {
+      // Shuffle
+      if (cfg.shuffle) {
+        for (var i = urls.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = urls[i]; urls[i] = urls[j]; urls[j] = t;
+        }
+      }
+
+      var interval = (cfg.interval || 6) * 1000;
+      var speed = cfg.transitionSpeed || 800;
+      var effect = cfg.transition || 'crossfade';
+      var fit = cfg.fit || 'cover';
+      var fitSize = fit === 'fill' ? '100% 100%' : fit;
+      var radius = cfg.borderRadius || 0;
+      var showDots = cfg.showIndicators !== false;
+
+      if (emptyEl) emptyEl.style.display = 'none';
+      container.className = 'ss-wrap ss-' + (effect === 'slide' ? 'slide-fx' : effect);
+      container.style.setProperty('--ss-speed', speed + 'ms');
+      container.style.setProperty('--ss-fit', fit);
+      container.style.setProperty('--ss-fit-size', fitSize);
+      container.style.borderRadius = radius + 'px';
+
+      initPingPong();
+
+      function initPingPong() {
+        // Exactly 2 buffers
+        var bufA = document.createElement('div');
+        var bufB = document.createElement('div');
+        bufA.className = 'ss-buf solid';
+        bufB.className = 'ss-buf';
+        container.appendChild(bufA);
+        container.appendChild(bufB);
+
+        var buffers = [bufA, bufB];
+
+        function normalizeUrl(url) {
+          if (!url) return '';
+          if (/^(https?:)?\/\//.test(url) || url.startsWith('/')) return url;
+          return '/media/' + url.replace(/^\/+/, '');
+        }
+
+        function setBufferImage(buffer, url) {
+          buffer.style.backgroundImage = url ? 'url("' + normalizeUrl(url).replace(/"/g, '\\"') + '")' : 'none';
+        }
+
+        // Indicators
+        var dots = [];
+        if (showDots && urls.length > 1) {
+          var dotWrap = document.createElement('div');
+          dotWrap.className = 'ss-indicators';
+          urls.forEach(function(_, i) {
+            var btn = document.createElement('button');
+            btn.className = 'ss-dot';
+            dotWrap.appendChild(btn);
+            dots.push(btn);
+          });
+          container.appendChild(dotWrap);
+        }
+
+        // State
+        var currentIdx = 0;
+        var activeBuf = 0;
+        var timer = null;
+        var paused = false;
+
+        // Init frame 0
+        setBufferImage(buffers[0], urls[0]);
+        if (urls.length > 1) {
+          setBufferImage(buffers[1], urls[1]);
+        }
+        updateDots(0);
+
+        function updateDots(idx) {
+          dots.forEach(function(d, i) {
+            d.classList.toggle('active', i === idx);
+          });
+        }
+
+        function advance() {
+          if (paused) return;
+          var nextIdx = (currentIdx + 1) % urls.length;
+          var nextBuf = 1 - activeBuf;
+
+          // Force reflow before transition
+          void buffers[nextBuf].offsetWidth;
+
+          // Start fade in
+          buffers[nextBuf].classList.add('active');
+
+          // When fade in finishes...
+          var onFadeComplete = function() {
+            buffers[nextBuf].removeEventListener('transitionend', onFadeComplete);
+            
+            // Swap roles
+            buffers[activeBuf].classList.remove('solid'); // Snap back to opacity:0
+            buffers[nextBuf].classList.remove('active');
+            buffers[nextBuf].classList.add('solid');
+            
+            activeBuf = nextBuf;
+            currentIdx = nextIdx;
+            updateDots(currentIdx);
+
+            // Preload the next-next image in the background buffer
+            var preloadIdx = (currentIdx + 1) % urls.length;
+            setBufferImage(buffers[1 - activeBuf], urls[preloadIdx]);
+          };
+
+          if (speed > 0) {
+            buffers[nextBuf].addEventListener('transitionend', onFadeComplete);
+            // Fallback just in case transitionend drops
+            setTimeout(function() {
+              if (buffers[nextBuf].classList.contains('active')) {
+                onFadeComplete();
+              }
+            }, speed + 50);
+          } else {
+            onFadeComplete();
+          }
+        }
+
+        if (urls.length > 1) {
+          timer = setInterval(advance, interval);
+        }
+
+        if (cfg.pauseOnHover) {
+          container.addEventListener('mouseenter', function() { paused = true; });
+          container.addEventListener('mouseleave', function() { paused = false; });
+        }
+
+        function onDestroy() {
+          if (timer) clearInterval(timer);
+        };
+      }
+    }
+  }
+</script>

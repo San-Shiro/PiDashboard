@@ -1,0 +1,48 @@
+{
+  "id": "community-complex",
+  "name": "Community Complex",
+  "version": "1.0.0",
+  "description": "A complex community widget with daemon, animation, notepad, and actions.",
+  "author": "Community Author",
+  "trust": "community",
+  "permissions": {
+    "network": false,
+    "persistence": true
+  },
+  "daemon": "community-complex",
+  "fragment": {
+    "file": "widget.html"
+  },
+  "stateMode": "instance",
+  "persist": true,
+  "defaultLayout": {
+    "width": 400,
+    "height": 300
+  },
+  "configSchema": [
+    {
+      "key": "title",
+      "type": "text",
+      "label": "Title",
+      "default": "Network Load"
+    },
+    {
+      "key": "textColor",
+      "type": "color",
+      "label": "Text Color",
+      "hint": "Leave blank to use canvas theme",
+      "default": ""
+    },
+    {
+      "key": "background",
+      "type": "background",
+      "label": "Background"
+    }
+  ],
+  "stateMode": "instance",
+  "persist": true,
+  "permissions": {
+    "network": true,
+    "persistence": true
+  }
+}

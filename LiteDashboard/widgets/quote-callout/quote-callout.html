@@ -1,0 +1,149 @@
+<style>
+  .quote-root {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    overflow: hidden;
+  }
+  .quote-accent {
+    flex-shrink: 0;
+    border-radius: 999px;
+  }
+  .quote-body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    flex-grow: 1;
+  }
+  .quote-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .quote-status {
+    margin-top: 4px;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+</style>
+
+<div class="quote-root" id="quote-root">
+  <div class="quote-accent" id="quote-accent"></div>
+  <div class="quote-body" id="quote-body">
+    <div class="quote-text" id="quote-text">Small moments of clarity compound into better work.</div>
+    <div class="quote-meta" id="quote-meta">PiDashboard</div>
+    <div class="quote-status" id="quote-status" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+  var root = $('#quote-root');
+  var accent = $('#quote-accent');
+  var body = $('#quote-body');
+  var quoteTextEl = $('#quote-text');
+  var quoteMetaEl = $('#quote-meta');
+  var statusEl = $('#quote-status');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  function resolveQuotePath(source, pathSpec) {
+    if (source == null) return undefined;
+    var paths = String(pathSpec || "").split("|").map(function(part) { return part.trim(); }).filter(Boolean);
+    if (!paths.length) return undefined;
+    for (var i = 0; i < paths.length; i++) {
+      var path = paths[i];
+      var cursor = source;
+      var parts = path.split(".").map(function(part) { return part.trim(); }).filter(Boolean);
+      for (var j = 0; j < parts.length; j++) {
+        var part = parts[j];
+        if (cursor == null) break;
+        cursor = cursor[part];
+      }
+      if (cursor !== undefined && cursor !== null && String(cursor).trim() !== "") return cursor;
+    }
+    return undefined;
+  }
+
+  function normalizeQuotePayload(payload) {
+    if (Array.isArray(payload)) {
+      if (!payload.length) return {};
+      return payload[Math.floor(Math.random() * payload.length)] || {};
+    }
+    if (payload && Array.isArray(payload.results) && payload.results.length) {
+      return payload.results[Math.floor(Math.random() * payload.results.length)] || payload;
+    }
+    if (typeof payload === "string") return { quote: payload };
+    return payload || {};
+  }
+
+  function render(state) {
+    // Determine quote text & author
+    var quoteVal = cfg.quoteText || "Small moments of clarity compound into better work.";
+    var authorVal = cfg.author || "PiDashboard";
+    
+    if (cfg.sourceMode === 'remote' && state) {
+      var normalized = normalizeQuotePayload(state);
+      var resolvedQuote = resolveQuotePath(normalized, cfg.quotePath || "content|quote|text|body");
+      var resolvedAuthor = resolveQuotePath(normalized, cfg.authorPath || "author|name|by");
+      
+      if (resolvedQuote) quoteVal = resolvedQuote;
+      if (resolvedAuthor) authorVal = resolvedAuthor;
+      
+      if (cfg.source) {
+        authorVal = authorVal + " (" + cfg.source + ")";
+      }
+    } else if (cfg.source) {
+      authorVal = authorVal + " (" + cfg.source + ")";
+    }
+
+    // Styles
+    var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+    var metaColor = PiTheme.getColor(cfg, cfg.metaColor, "--canvas-muted", "rgba(255,255,255,0.72)");
+    var accentColor = PiTheme.getColor(cfg, cfg.accentColor, "--canvas-accent", "#a78bfa");
+    
+    var bg = PiTheme.getBackground(cfg, cfg.background, "rgba(25,25,46,0.8)", "rgba(99,102,241,0.18)", "linear-gradient(135deg, var(--canvas-surface, #1a1a2e) 88%, transparent)");
+
+    root.style.background = bg;
+    root.style.border = "1px solid color-mix(in srgb, var(--canvas-border, rgba(255,255,255,0.08)) 42%, transparent)";
+    root.style.boxShadow = "0 16px 36px rgba(0,0,0,0.16)";
+    root.style.fontFamily = cfg.fontFamily || "Merriweather, Georgia, serif";
+    root.style.borderRadius = "16px";
+    root.style.padding = "24px";
+    
+    var isLeft = cfg.accentPosition !== 'top';
+    root.style.flexDirection = isLeft ? "row" : "column";
+    root.style.gap = isLeft ? "20px" : "12px";
+
+    accent.style.background = accentColor;
+    accent.style.width = isLeft ? "4px" : "100%";
+    accent.style.height = isLeft ? "100%" : "4px";
+    accent.style.boxShadow = "0 0 12px " + accentColor;
+
+    quoteTextEl.style.fontSize = Number(cfg.fontSize || 28) + "px";
+    quoteTextEl.style.lineHeight = Number(cfg.lineHeight || 1.35);
+    quoteTextEl.style.color = textColor;
+    quoteTextEl.style.textAlign = cfg.alignment || "left";
+    
+    var quoteMark = cfg.showQuoteMark !== false ? "“" : "";
+    quoteTextEl.textContent = quoteMark + quoteVal;
+
+    quoteMetaEl.style.fontSize = "13px";
+    quoteMetaEl.style.color = metaColor;
+    quoteMetaEl.style.textAlign = cfg.alignment || "left";
+    quoteMetaEl.style.fontFamily = "Inter, system-ui, sans-serif";
+    quoteMetaEl.textContent = "— " + authorVal;
+  }
+
+  function onState(state) {
+    render(state);
+  }
+
+  // Initial render
+  var initialState = (typeof widget !== 'undefined' && widget.state) || (window.PiWidget && window.PiWidget.state) || null;
+  render(initialState);
+</script>

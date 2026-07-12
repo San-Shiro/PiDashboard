@@ -1,0 +1,78 @@
+{
+  "id": "divider-basic",
+  "name": "Divider",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "A structural line to separate content horizontally or vertically.",
+  "category": "Design",
+  "icon": "minus",
+  "tier": "static",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "divider.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "orientation",
+      "type": "radio",
+      "label": "Orientation",
+      "options": [
+        "horizontal",
+        "vertical"
+      ],
+      "default": "horizontal"
+    },
+    {
+      "key": "lineStyle",
+      "type": "radio",
+      "label": "Line Style",
+      "options": [
+        "solid",
+        "dashed",
+        "dotted"
+      ],
+      "default": "solid"
+    },
+    {
+      "key": "thickness",
+      "type": "slider",
+      "label": "Thickness",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "key": "background",
+      "type": "background",
+      "label": "Line Color",
+      "default": {
+        "type": "classic",
+        "color": "#4B5563",
+        "color2": "#94A3B8",
+        "stops": [
+          { "color": "#4B5563", "position": 0 },
+          { "color": "#94A3B8", "position": 100 }
+        ],
+        "gradientType": "linear",
+        "angle": 90
+      }
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 300,
+    "height": 20
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

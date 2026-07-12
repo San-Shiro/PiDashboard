@@ -165,3 +165,36 @@ export function Spinner({ size = 14 }) {
     />
   );
 }
+
+export function InspectorSection({ title, description, children, className = "" }) {
+  return (
+    <section
+      className={`rounded-lg border overflow-hidden ${className}`}
+      style={{
+        backgroundColor: "var(--color-surface-2)",
+        borderColor: "var(--color-border)",
+      }}
+    >
+      <div
+        className="px-4 py-3 border-b"
+        style={{ borderColor: "var(--color-border)" }}
+      >
+        <div
+          className="text-[11px] font-semibold uppercase tracking-[0.08em]"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
+          {title}
+        </div>
+        {description ? (
+          <p
+            className="mt-1 text-[10px] leading-4"
+            style={{ color: "var(--color-text-muted)" }}
+          >
+            {description}
+          </p>
+        ) : null}
+      </div>
+      <div className="px-4 py-4">{children}</div>
+    </section>
+  );
+}

@@ -1,0 +1,56 @@
+{
+  "id": "daily-quote",
+  "name": "Daily Quote",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Elegant rotating quotes with crossfade animations and decorative typography",
+  "category": "Lifestyle",
+  "icon": "quote",
+  "tier": "push",
+  "trust": "verified",
+  "estimatedRamMb": 1,
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "daily-quote.html",
+    "format": "snippet"
+  },
+  "daemon": "quotes",
+  "configSchema": [
+    {
+      "key": "fontSize",
+      "type": "number",
+      "default": 18,
+      "min": 14,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Font Size"
+    },
+    {
+      "key": "textColor",
+      "type": "color",
+      "label": "Text Color",
+      "hint": "Leave blank to use canvas theme",
+      "default": "#e0e0e0"
+    },
+    {
+      "key": "showAuthor",
+      "type": "boolean",
+      "default": true,
+      "label": "Show Author"
+    }
+  ],
+  "stateMode": "global",
+  "persist": false,
+  "defaults": {
+    "width": 500,
+    "height": 160
+  },
+  "dataChannel": {
+    "type": "ipc_file",
+    "ipcFilename": "daily-quote.json"
+  }
+}

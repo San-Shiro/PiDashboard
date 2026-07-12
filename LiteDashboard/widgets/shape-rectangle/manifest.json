@@ -1,0 +1,85 @@
+{
+  "id": "shape-rectangle",
+  "name": "Rectangle",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "A highly customizable rectangular shape with gradients, borders, and corner radii.",
+  "category": "Design",
+  "icon": "square",
+  "tier": "static",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "shape-rectangle.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "background",
+      "type": "background",
+      "label": "Background",
+      "default": {
+        "type": "classic",
+        "color": "#3B82F6",
+        "stops": [
+          { "color": "#60A5FA", "position": 0 },
+          { "color": "#3B82F6", "position": 48 },
+          { "color": "#1D4ED8", "position": 100 }
+        ],
+        "gradientType": "linear",
+        "angle": 135,
+        "color2": "#1D4ED8"
+      }
+    },
+    {
+      "key": "borderPosition",
+      "type": "radio",
+      "label": "Border Position",
+      "options": [
+        "outside",
+        "center",
+        "inside"
+      ],
+      "default": "center"
+    },
+    {
+      "key": "border",
+      "type": "border",
+      "label": "Border",
+      "default": {
+        "type": "none",
+        "width": {
+          "top": 2,
+          "right": 2,
+          "bottom": 2,
+          "left": 2
+        },
+        "color": "#ffffff"
+      }
+    },
+    {
+      "key": "radius",
+      "type": "radius",
+      "label": "Border Radius",
+      "default": {
+        "top": 16,
+        "right": 16,
+        "bottom": 16,
+        "left": 16
+      }
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 300,
+    "height": 200
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

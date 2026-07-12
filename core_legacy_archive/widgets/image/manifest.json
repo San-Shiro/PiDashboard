@@ -1,0 +1,42 @@
+{
+  "id": "image",
+  "name": "Image Display",
+  "version": "1.0.0",
+  "tier": "client",
+  "entrypoints": {
+    "fragment": "fragment/image.html"
+  },
+  "configSchema": [
+    {
+      "key": "imageUrl",
+      "type": "file",
+      "accepts": "image/*",
+      "default": "",
+      "label": "Image"
+    },
+    {
+      "key": "objectFit",
+      "type": "select",
+      "options": [
+        {"label": "Cover (Fill bounds)", "value": "cover"},
+        {"label": "Contain (Keep full image)", "value": "contain"},
+        {"label": "Fill (Stretch)", "value": "fill"},
+        {"label": "None", "value": "none"}
+      ],
+      "default": "cover",
+      "label": "Image Scaling Mode"
+    },
+    {
+      "key": "widthPercent",
+      "type": "number",
+      "default": 100,
+      "label": "Width Percentage (10 - 100)"
+    },
+    {
+      "key": "lockAspectRatio",
+      "type": "toggle",
+      "default": true,
+      "label": "Lock Aspect Ratio (Auto Height)"
+    }
+  ]
+}

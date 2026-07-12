@@ -1,0 +1,229 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .gauges-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 4vw, 32px);
+    padding: 16px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .gauge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+  .gauge-ring {
+    position: relative;
+    width: 100%;
+    max-width: 110px;
+    aspect-ratio: 1;
+  }
+  .gauge-ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+  .gauge-track {
+    fill: none;
+    stroke: var(--canvas-border, #2a2a3e);
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+  .gauge-fill {
+    fill: none;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 283;
+    stroke-dashoffset: 283;
+    will-change: stroke-dashoffset, stroke;
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+  .gauge-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(0);
+  }
+  .gauge-value {
+    font-size: clamp(18px, 4vw, 28px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--canvas-text, #e0e0e0);
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+  .gauge-unit {
+    font-size: clamp(9px, 1.5vw, 11px);
+    font-weight: 500;
+    color: var(--canvas-muted, #888);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .gauge-label {
+    font-size: clamp(10px, 2vw, 12px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--canvas-muted, #888);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* Glow ring under the SVG */
+  .gauge-glow {
+    position: absolute;
+    inset: 10%;
+    border-radius: 50%;
+    opacity: 0;
+    will-change: opacity;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+  }
+  .gauge.hot .gauge-glow {
+    background: radial-gradient(circle, rgba(239,68,68,0.15) 0%, transparent 70%);
+    opacity: 1;
+  }
+</style>
+
+<div class="gauges-container">
+  <div class="gauge" id="gaugeCpu">
+    <div class="gauge-ring">
+      <div class="gauge-glow"></div>
+      <svg viewBox="0 0 100 100">
+        <circle class="gauge-track" cx="50" cy="50" r="45"/>
+        <circle class="gauge-fill" id="cpuArc" cx="50" cy="50" r="45"/>
+      </svg>
+      <div class="gauge-center">
+        <span class="gauge-value" id="cpuVal">0</span>
+        <span class="gauge-unit">%</span>
+      </div>
+    </div>
+    <span class="gauge-label">CPU</span>
+  </div>
+
+  <div class="gauge" id="gaugeRam">
+    <div class="gauge-ring">
+      <div class="gauge-glow"></div>
+      <svg viewBox="0 0 100 100">
+        <circle class="gauge-track" cx="50" cy="50" r="45"/>
+        <circle class="gauge-fill" id="ramArc" cx="50" cy="50" r="45"/>
+      </svg>
+      <div class="gauge-center">
+        <span class="gauge-value" id="ramVal">0</span>
+        <span class="gauge-unit">%</span>
+      </div>
+    </div>
+    <span class="gauge-label">RAM</span>
+  </div>
+
+  <div class="gauge" id="gaugeThird">
+    <div class="gauge-ring">
+      <div class="gauge-glow"></div>
+      <svg viewBox="0 0 100 100">
+        <circle class="gauge-track" cx="50" cy="50" r="45"/>
+        <circle class="gauge-fill" id="thirdArc" cx="50" cy="50" r="45"/>
+      </svg>
+      <div class="gauge-center">
+        <span class="gauge-value" id="thirdVal">0</span>
+        <span class="gauge-unit" id="thirdUnit">°C</span>
+      </div>
+    </div>
+    <span class="gauge-label" id="thirdLabel">Temp</span>
+  </div>
+</div>
+
+<script>
+
+  var containerNode = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'default');
+  var shadowRoot = containerNode ? (containerNode.shadowRoot || containerNode) : document;
+  function $(sel) { return shadowRoot.querySelector(sel); }
+  function $(sel) { return shadowRoot.querySelectorAll(sel); }
+  var showDisk = widget.config.showDisk === true;
+  var animSpeed = widget.config.animationSpeed || 0.8;
+  var circumference = 2 * Math.PI * 45; // ~283
+
+  // Set transition speed
+  var arcs = $('.gauge-fill');
+  for (var i = 0; i < arcs.length; i++) {
+    arcs[i].style.transition = 'stroke-dashoffset ' + animSpeed + 's cubic-bezier(0.22, 1, 0.36, 1), stroke ' + animSpeed + 's ease';
+  }
+
+  // If showDisk, relabel third gauge
+  if (showDisk) {
+    $('#thirdLabel').textContent = 'Disk';
+    $('#thirdUnit').textContent = '%';
+  } else if (widget.config.showTemp === false) {
+    $('#gaugeThird').style.display = 'none';
+  }
+
+  function getColor(pct) {
+    if (pct >= 75) return '#ef4444';
+    if (pct >= 50) return '#f59e0b';
+    return '#22c55e';
+  }
+
+  function getTempColor(temp) {
+    if (temp >= 65) return '#ef4444';
+    if (temp >= 50) return '#f59e0b';
+    return '#22c55e';
+  }
+
+  function setArc(el, pct, color) {
+    var offset = circumference - (circumference * Math.min(pct, 100) / 100);
+    el.style.strokeDashoffset = offset;
+    el.style.stroke = color;
+  }
+
+  function onState(state) {
+    if (!state) return;
+
+    // CPU
+    var cpu = parseFloat(state.cpu_percent) || 0;
+    var cpuColor = getColor(cpu);
+    setArc($('#cpuArc'), cpu, cpuColor);
+    $('#cpuVal').textContent = Math.round(cpu);
+    $('#gaugeCpu').classList.toggle('hot', cpu >= 75);
+
+    // RAM
+    var ram = parseFloat(state.mem_percent) || 0;
+    var ramColor = getColor(ram);
+    setArc($('#ramArc'), ram, ramColor);
+    $('#ramVal').textContent = Math.round(ram);
+    $('#gaugeRam').classList.toggle('hot', ram >= 75);
+
+    // Third gauge: Temp or Disk
+    if (showDisk) {
+      var disk = parseFloat(state.disk_percent) || 0;
+      var diskColor = getColor(disk);
+      setArc($('#thirdArc'), disk, diskColor);
+      $('#thirdVal').textContent = Math.round(disk);
+      $('#gaugeThird').classList.toggle('hot', disk >= 75);
+    } else if (widget.config.showTemp !== false) {
+      var temp = parseFloat(state.temp_c) || 0;
+      var tempColor = getTempColor(temp);
+      // Normalize temp to 0-100 for the arc (0°C = 0%, 85°C = 100%)
+      var tempPct = Math.min(100, (temp / 85) * 100);
+      setArc($('#thirdArc'), tempPct, tempColor);
+      $('#thirdVal').textContent = Math.round(temp);
+      $('#gaugeThird').classList.toggle('hot', temp >= 65);
+    }
+  }
+
+  function onDestroy() {}
+
+</script>

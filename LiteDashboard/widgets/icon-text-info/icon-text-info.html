@@ -1,0 +1,93 @@
+<style>
+  .iti-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .iti-icon {
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .iti-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .iti-label,
+  .iti-value,
+  .iti-subtext {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+
+<div class="iti-root" id="iti-root">
+  <div class="iti-icon" id="iti-icon">ℹ️</div>
+  <div class="iti-copy" id="iti-copy">
+    <div class="iti-label" id="iti-label">Office</div>
+    <div class="iti-value" id="iti-value">Open 10:00 - 18:00</div>
+    <div class="iti-subtext" id="iti-subtext"></div>
+  </div>
+</div>
+
+<script>
+  var container = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'iti-root');
+  var shadowRoot = container ? (container.shadowRoot || container) : document;
+  var root = shadowRoot.querySelector("#iti-root");
+  var icon = shadowRoot.querySelector("#iti-icon");
+  var copy = shadowRoot.querySelector("#iti-copy");
+  var label = shadowRoot.querySelector("#iti-label");
+  var value = shadowRoot.querySelector("#iti-value");
+  var subtext = shadowRoot.querySelector("#iti-subtext");
+  if (!root || !icon || !copy || !label || !value || !subtext) return;
+
+  var cfg = (typeof widget !== "undefined" && widget.config) ? widget.config : ((typeof PiWidget !== "undefined" && PiWidget.config) || (typeof config !== "undefined" ? config : {}));
+  
+  var isColumn = cfg.orientation === "column";
+  var align = cfg.alignment || "left";
+  var gap = Number(cfg.gap || 12);
+
+  root.style.flexDirection = isColumn ? "column" : "row";
+  root.style.gap = String(gap) + "px";
+  root.style.alignItems = isColumn ? (align === "center" ? "center" : (align === "right" ? "flex-end" : "flex-start")) : "center";
+  root.style.justifyContent = isColumn ? "center" : "flex-start";
+  root.style.textAlign = align;
+  root.style.fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+
+  icon.textContent = cfg.icon || "ℹ️";
+  icon.style.width = String(Number(cfg.iconSize || 30) + 16) + "px";
+  icon.style.height = String(Number(cfg.iconSize || 30) + 16) + "px";
+  icon.style.display = "grid";
+  icon.style.placeItems = "center";
+  icon.style.borderRadius = "16px";
+  icon.style.background = "color-mix(in srgb, var(--canvas-accent, #60a5fa) 14%, transparent)";
+  icon.style.border = "1px solid color-mix(in srgb, var(--canvas-accent, #60a5fa) 24%, transparent)";
+  icon.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.08)";
+  icon.style.fontSize = String(Number(cfg.iconSize || 30)) + "px";
+  icon.style.color = PiTheme.getColor(cfg, cfg.iconColor, "--canvas-accent", "#60a5fa");
+
+  label.textContent = cfg.label || "Office";
+  label.style.fontSize = String(Number(cfg.labelSize || 13)) + "px";
+  label.style.color = PiTheme.getColor(cfg, cfg.mutedColor, "--canvas-muted", "rgba(255,255,255,0.68)");
+  label.style.textTransform = "uppercase";
+  label.style.letterSpacing = "0.08em";
+  label.style.fontWeight = "600";
+
+  value.textContent = cfg.valueText || "Open 10:00 - 18:00";
+  value.style.fontSize = String(Number(cfg.valueSize || 24)) + "px";
+  value.style.color = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+  value.style.fontWeight = "700";
+
+  if (cfg.showSubtext !== false && cfg.subtext) {
+    subtext.textContent = cfg.subtext;
+    subtext.style.display = "";
+    subtext.style.marginTop = "4px";
+    subtext.style.fontSize = String(Math.max(11, Math.round(Number(cfg.labelSize || 13) * 0.92))) + "px";
+    subtext.style.color = PiTheme.getColor(cfg, cfg.mutedColor, "--canvas-muted", "rgba(255,255,255,0.68)");
+  } else {
+    subtext.style.display = "none";
+  }
+</script>

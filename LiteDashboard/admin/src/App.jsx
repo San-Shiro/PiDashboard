@@ -14,7 +14,7 @@ import {
   Palette,
   Settings,
   ShoppingBag,
-  BookOpen,
+  Info,
   Menu,
   X,
   Server
@@ -26,9 +26,10 @@ import WidgetsTab from "@/components/dashboard/tabs/widgets-tab";
 import MediaTab from "@/components/dashboard/tabs/media-tab";
 import TemplatesTab from "@/components/dashboard/tabs/templates-tab";
 import ThemesTab from "@/components/dashboard/tabs/themes-tab";
-import DocsTab from "@/components/dashboard/tabs/docs-tab";
+import AboutTab from "@/components/dashboard/tabs/about-tab";
 import SystemControlTab from "@/components/dashboard/tabs/system-control-tab";
 import MarketplaceTab from "@/components/dashboard/tabs/marketplace-tab";
+import GpioTab from "@/components/dashboard/tabs/gpio-tab";
 import CanvasEditorPage from "@/components/dashboard/canvas-editor-page";
 import WidgetEditPanel from "@/components/dashboard/widget-edit-panel";
 import { Pill, StatusDot, Spinner } from "@/components/dashboard/ui-primitives";
@@ -43,8 +44,9 @@ const DASHBOARD_TABS = [
 const SETTINGS_TABS = [
   { id: "themes", label: "Themes", icon: Palette },
   { id: "system", label: "System", icon: Settings },
+  { id: "gpio", label: "GPIO", icon: Cpu },
   { id: "marketplace", label: "Marketplace", icon: ShoppingBag },
-  { id: "docs", label: "Docs", icon: BookOpen },
+  { id: "about", label: "About", icon: Info },
 ];
 
 function AdminShell() {
@@ -462,7 +464,8 @@ function AdminShell() {
           {activeTab === "themes" && <ThemesTab />}
           {activeTab === "system" && <SystemControlTab />}
           {activeTab === "marketplace" && <MarketplaceTab />}
-          {activeTab === "docs" && <DocsTab />}
+          {activeTab === "gpio" && <GpioTab />}
+          {activeTab === "about" && <AboutTab />}
         </main>
       </div>
     </div>

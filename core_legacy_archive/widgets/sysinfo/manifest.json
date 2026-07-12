@@ -1,0 +1,10 @@
+{
+  "id": "sysinfo",
+  "name": "System Monitor",
+  "version": "1.0.0",
+  "tier": "2",
+  "entrypoints": {
+    "fragment": "fragment/sysinfo.html"
+  },
+  "configSchema": []
+}

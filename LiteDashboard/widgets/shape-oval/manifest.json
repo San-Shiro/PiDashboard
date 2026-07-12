@@ -1,0 +1,74 @@
+{
+  "id": "shape-oval",
+  "name": "Oval / Circle",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "An elliptical or perfectly circular shape with gradients and borders.",
+  "category": "Design",
+  "icon": "circle",
+  "tier": "static",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "shape-oval.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "background",
+      "type": "background",
+      "label": "Background",
+      "default": {
+        "type": "classic",
+        "color": "#10B981",
+        "stops": [
+          { "color": "#6EE7B7", "position": 0 },
+          { "color": "#10B981", "position": 55 },
+          { "color": "#047857", "position": 100 }
+        ],
+        "gradientType": "radial",
+        "angle": 135,
+        "color2": "#047857"
+      }
+    },
+    {
+      "key": "borderPosition",
+      "type": "radio",
+      "label": "Border Position",
+      "options": [
+        "outside",
+        "center",
+        "inside"
+      ],
+      "default": "center"
+    },
+    {
+      "key": "border",
+      "type": "border",
+      "label": "Border",
+      "default": {
+        "type": "none",
+        "width": {
+          "top": 2,
+          "right": 2,
+          "bottom": 2,
+          "left": 2
+        },
+        "color": "#ffffff"
+      }
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 200,
+    "height": 200
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

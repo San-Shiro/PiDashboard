@@ -1,0 +1,120 @@
+{
+  "id": "test1",
+  "name": "Test1",
+  "description": "",
+  "canvas_config": {
+    "width": 1920,
+    "height": 1080,
+    "background": "#395b41",
+    "displayTarget": "all",
+    "pixelRatio": 1
+  },
+  "widgets": [
+    {
+      "id": "clock-analog_1780037948006",
+      "widget_id": "clock-analog",
+      "label": "Analog Clock",
+      "enabled": true,
+      "base_config": {
+        "x": 40,
+        "y": 60,
+        "width": 320,
+        "height": 240,
+        "zIndex": 10,
+        "opacity": 1,
+        "activeFrom": "00:00",
+        "activeTo": "23:59"
+      },
+      "widget_config": {
+        "timezone": "Africa/Asmera",
+        "showSeconds": false,
+        "useManualTime": false,
+        "manualTime": "12:00",
+        "theme": "light"
+      }
+    },
+    {
+      "id": "clock-digital_1780037999173",
+      "widget_id": "clock-digital",
+      "label": "Digital Clock",
+      "enabled": true,
+      "base_config": {
+        "x": 1040,
+        "y": 80,
+        "width": 320,
+        "height": 240,
+        "zIndex": 10,
+        "opacity": 1,
+        "activeFrom": "00:00",
+        "activeTo": "23:59"
+      },
+      "widget_config": {
+        "timezone": "Europe/London",
+        "format12h": true,
+        "useManualTime": false,
+        "manualTime": "12:00"
+      }
+    },
+    {
+      "id": "image_1780038017306",
+      "widget_id": "image",
+      "label": "Image Display",
+      "enabled": true,
+      "base_config": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "zIndex": 1,
+        "opacity": 0.5,
+        "activeFrom": "00:00",
+        "activeTo": "23:59"
+      },
+      "widget_config": {
+        "imageUrl": "/media/WhatsApp Image 2026-05-24 at 11.01.18.jpeg",
+        "objectFit": "fill",
+        "widthPercent": 0,
+        "lockAspectRatio": false
+      }
+    },
+    {
+      "id": "sysinfo_1780039598422",
+      "widget_id": "sysinfo",
+      "label": "System Monitor",
+      "enabled": true,
+      "base_config": {
+        "x": 1394,
+        "y": 353,
+        "width": 320,
+        "height": 240,
+        "zIndex": 1,
+        "opacity": 1,
+        "activeFrom": "00:00",
+        "activeTo": "23:59"
+      },
+      "widget_config": {}
+    },
+    {
+      "id": "weather_1780039613398",
+      "widget_id": "weather",
+      "label": "Live Weather",
+      "enabled": true,
+      "base_config": {
+        "x": 497,
+        "y": 581,
+        "width": 320,
+        "height": 240,
+        "zIndex": 1,
+        "opacity": 1,
+        "activeFrom": "00:00",
+        "activeTo": "23:59"
+      },
+      "widget_config": {
+        "locationName": "London, UK",
+        "units": "metric"
+      }
+    }
+  ],
+  "widget_count": 5,
+  "updated_at": "2026-05-29T07:27:02.776Z"
+}

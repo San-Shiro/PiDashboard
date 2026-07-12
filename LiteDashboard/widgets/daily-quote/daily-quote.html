@@ -1,0 +1,159 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .quote-card {
+    width: 100%;
+    height: 100%;
+    padding: 20px 28px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Decorative opening quote mark */
+  .quote-glyph-open {
+    position: absolute;
+    top: 8px;
+    left: 16px;
+    font-size: clamp(48px, 10vw, 72px);
+    font-family: Georgia, 'Times New Roman', 'Noto Serif', serif;
+    color: var(--canvas-accent, #6366f1);
+    opacity: 0.15;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+  .quote-glyph-close {
+    position: absolute;
+    bottom: 4px;
+    right: 20px;
+    font-size: clamp(48px, 10vw, 72px);
+    font-family: Georgia, 'Times New Roman', 'Noto Serif', serif;
+    color: var(--canvas-accent, #6366f1);
+    opacity: 0.1;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Quote text with crossfade */
+  .quote-text-wrap {
+    position: relative;
+    min-height: 40px;
+  }
+  .quote-text {
+    font-family: Georgia, 'Times New Roman', 'Noto Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--canvas-text, #e0e0e0);
+    opacity: 1;
+    transition: opacity 0.8s ease;
+    will-change: opacity;
+    letter-spacing: 0.2px;
+    position: relative;
+    z-index: 1;
+  }
+  .quote-text.fading {
+    opacity: 0;
+  }
+
+  /* Accent separator */
+  .quote-separator {
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--canvas-accent, #6366f1), transparent);
+    border-radius: 1px;
+    margin: 12px 0 10px 0;
+    opacity: 0.6;
+  }
+
+  /* Author */
+  .quote-author {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: clamp(11px, 2vw, 13px);
+    font-weight: 500;
+    color: var(--canvas-muted, #888);
+    letter-spacing: 0.8px;
+    opacity: 1;
+    transition: opacity 0.8s ease;
+    will-change: opacity;
+    position: relative;
+    z-index: 1;
+  }
+  .quote-author.fading {
+    opacity: 0;
+  }
+  .quote-author::before {
+    content: '— ';
+  }
+</style>
+
+<div class="quote-card">
+  <span class="quote-glyph-open">"</span>
+  <span class="quote-glyph-close">"</span>
+  <div class="quote-text-wrap">
+    <div class="quote-text" id="quoteText">The best way to predict the future is to invent it.</div>
+  </div>
+  <div class="quote-separator"></div>
+  <div class="quote-author" id="quoteAuthor" style="">Alan Kay</div>
+</div>
+
+<script>
+
+  var containerNode = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'default');
+  var shadowRoot = containerNode ? (containerNode.shadowRoot || containerNode) : document;
+  function $(sel) { return shadowRoot.querySelector(sel); }
+  function $(sel) { return shadowRoot.querySelectorAll(sel); }
+  var fontSize = widget.config.fontSize || 18;
+  var showAuthor = widget.config.showAuthor !== false;
+  var textColor = widget.config.textColor || '';
+
+  var textEl = $('#quoteText');
+  var authorEl = $('#quoteAuthor');
+
+  textEl.style.fontSize = fontSize + 'px';
+  if (!showAuthor) authorEl.style.display = 'none';
+  if (textColor) {
+    textEl.style.color = textColor;
+    authorEl.style.color = textColor;
+    authorEl.style.opacity = '0.7';
+  }
+
+  var lastIndex = -1;
+
+  function onState(state) {
+    if (!state || !state.text) return;
+
+    // If same quote, skip animation
+    if (state.index === lastIndex) return;
+    lastIndex = state.index;
+
+    // Crossfade out
+    textEl.classList.add('fading');
+    authorEl.classList.add('fading');
+
+    setTimeout(function() {
+      // Update content while invisible
+      textEl.textContent = state.text;
+      if (showAuthor && state.author) {
+        authorEl.textContent = state.author;
+        authorEl.style.display = '';
+      } else if (!state.author) {
+        authorEl.style.display = 'none';
+      }
+      // Crossfade in
+      textEl.classList.remove('fading');
+      authorEl.classList.remove('fading');
+    }, 400);
+  }
+
+  function onDestroy() {}
+
+</script>

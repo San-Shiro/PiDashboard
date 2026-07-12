@@ -1,0 +1,89 @@
+<style>
+  .kpi-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+  }
+  .kpi-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .kpi-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    z-index: 1;
+  }
+  .kpi-value {
+    line-height: 1;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 1;
+  }
+  .kpi-delta {
+    font-weight: 600;
+    z-index: 1;
+  }
+</style>
+
+<div class="kpi-root" id="kpi-root">
+  <div class="kpi-glow" id="kpi-glow"></div>
+  <div class="kpi-label" id="kpi-label">Revenue</div>
+  <div class="kpi-value" id="kpi-value">24.8K</div>
+  <div class="kpi-delta" id="kpi-delta">+12.4% vs last week</div>
+</div>
+
+<script>
+  var root = $('#kpi-root');
+  var glow = $('#kpi-glow');
+  var label = $('#kpi-label');
+  var val = $('#kpi-value');
+  var delta = $('#kpi-delta');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+  var mutedColor = PiTheme.getColor(cfg, cfg.mutedColor, "--canvas-muted", "rgba(255,255,255,0.7)");
+  var accentColor = PiTheme.getColor(cfg, cfg.accentColor, "--canvas-accent", "#38bdf8");
+  var deltaColor = cfg.trend === "down" ? "#f87171" : (cfg.trend === "neutral" ? mutedColor : accentColor);
+  var bg = PiTheme.getBackground(cfg, cfg.background, "#0f172a", "#1e293b", "linear-gradient(135deg, var(--canvas-surface, #1a1a2e), color-mix(in srgb, var(--canvas-surface, #1a1a2e) 60%, var(--canvas-bg, #0a0a0a)))");
+
+  // Apply root styles
+  root.style.padding = Number(cfg.padding || 18) + "px";
+  root.style.borderRadius = Number(cfg.radius || 20) + "px";
+  root.style.background = bg;
+  root.style.border = "1px solid color-mix(in srgb, var(--canvas-border, rgba(255,255,255,0.08)) 72%, transparent)";
+  root.style.boxShadow = "0 20px 36px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08)";
+  root.style.color = textColor;
+  root.style.fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+  root.style.textAlign = cfg.alignment || "left";
+
+  // Apply glow style
+  glow.style.background = "radial-gradient(circle at top right, color-mix(in srgb, " + accentColor + " 18%, transparent), transparent 38%)";
+
+  // Label, Value, Delta content & styles
+  label.textContent = cfg.label || "Revenue";
+  label.style.fontSize = Number(cfg.labelSize || 13) + "px";
+  label.style.color = mutedColor;
+
+  val.textContent = (cfg.valueText || "24.8K") + (cfg.suffix || "");
+  val.style.fontSize = Number(cfg.valueSize || 56) + "px";
+  val.style.fontWeight = "800";
+
+  if (cfg.showDelta !== false && cfg.deltaText) {
+    delta.textContent = cfg.deltaText;
+    delta.style.display = "block";
+    delta.style.fontSize = Math.max(11, Math.round(Number(cfg.labelSize || 13) * 0.92)) + "px";
+    delta.style.color = deltaColor;
+  } else {
+    delta.style.display = "none";
+  }
+</script>

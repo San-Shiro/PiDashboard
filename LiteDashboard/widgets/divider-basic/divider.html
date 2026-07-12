@@ -1,0 +1,60 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  
+  .divider-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .divider-line {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+</style>
+
+<div class="divider-container">
+  <div class="divider-line" id="divider"></div>
+</div>
+
+<script>
+
+  var container = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'divider');
+  var root = container ? (container.shadowRoot || container) : document;
+  var divider = root.querySelector('.divider-line');
+
+  if (divider) {
+    var cfg = (typeof widget !== "undefined" && widget.config) ? widget.config : ((typeof PiWidget !== "undefined" && PiWidget.config) || (typeof config !== "undefined" ? config : {}));
+
+    divider.style.borderTop = 'none';
+    divider.style.borderLeft = 'none';
+    
+    const thickness = (cfg.thickness || 2) + 'px';
+    const style = cfg.lineStyle || 'solid';
+    const color = cfg.color || '#4B5563';
+    const fill = PiTheme.getBackground(cfg, cfg.background, color, '#94A3B8');
+
+    if (cfg.orientation === 'vertical') {
+      divider.style.width = thickness;
+      divider.style.height = '100%';
+      divider.style.background = fill;
+      if (style === 'dashed') divider.style.background = 'repeating-linear-gradient(180deg, ' + color + ' 0 16px, transparent 16px 28px)';
+      if (style === 'dotted') divider.style.background = 'repeating-linear-gradient(180deg, ' + color + ' 0 ' + thickness + ', transparent ' + thickness + ' ' + (Number(cfg.thickness || 2) * 3) + 'px)';
+    } else {
+      divider.style.width = '100%';
+      divider.style.height = thickness;
+      divider.style.background = fill;
+      if (style === 'dashed') divider.style.background = 'repeating-linear-gradient(90deg, ' + color + ' 0 16px, transparent 16px 28px)';
+      if (style === 'dotted') divider.style.background = 'repeating-linear-gradient(90deg, ' + color + ' 0 ' + thickness + ', transparent ' + thickness + ' ' + (Number(cfg.thickness || 2) * 3) + 'px)';
+    }
+  }
+
+</script>

@@ -37,6 +37,11 @@
   <button class="btn-dynamic btn-pulse" id="btn-pulse">Pulsing</button>
 </div>
 <script>
+
+  var containerNode = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'default');
+  var shadowRoot = containerNode ? (containerNode.shadowRoot || containerNode) : document;
+  function $(sel) { return shadowRoot.querySelector(sel); }
+  function $(sel) { return shadowRoot.querySelectorAll(sel); }
   var hoverBtn = $('#btn-hover');
   var pulseBtn = $('#btn-pulse');
   var counter = $('#click-counter');
@@ -53,4 +58,5 @@
       counter.innerText = state.clicks;
     }
   }
+
 </script>

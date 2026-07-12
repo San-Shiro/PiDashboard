@@ -125,6 +125,7 @@ export interface WidgetManifest {
     externalFonts?: string[];
     externalScripts?: string[];
   };
+  runtimeTier?: "lite" | "standard" | "heavy";
   permissions?: {
     network?: string[];
     persistence?: boolean;
