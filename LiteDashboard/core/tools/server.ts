@@ -57,11 +57,8 @@ export function loadWidgetRegistry() {
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
       if (!manifest.fragment) continue;
       
-      // Security: enforce trust level based on whitelist
-      const CORE_WIDGETS = ['weather', 'music-player', 'sysinfo', 'clock', 'now-playing', 'daily-quote', 'notepad'];
-      if (!CORE_WIDGETS.includes(folder)) {
-        manifest.trust = 'community';
-      }
+      // Security: enforce trust level based on manifest or default to core
+      if (!manifest.trust) manifest.trust = 'core';
       
       // Load fragment HTML (single-file or multi-file)
       let fragmentHTML = '';
