@@ -457,6 +457,29 @@
         "title": "Network Load",
         "textColor": ""
       }
+    },
+    {
+      "id": "earthquakes-test-instance",
+      "widget_id": "community-earthquakes",
+      "label": "Earthquakes Map",
+      "enabled": true,
+      "layout": {
+        "x": 200,
+        "y": 200,
+        "width": 1000,
+        "height": 500,
+        "zIndex": 50,
+        "opacity": 1,
+        "overflow": "hidden",
+        "borderRadius": 8
+      },
+      "config": {
+        "minMagnitude": 3,
+        "dotColor": "#ff3333",
+        "mapColor": "#334155",
+        "backgroundColor": "#0f172a",
+        "pulseSpeed": 2
+      }
     }
   ],
   "widget_count": 12,

@@ -1,0 +1,53 @@
+{
+  "name": "Global Earthquakes Orbit",
+  "description": "Live, dynamic world map displaying the latest significant global earthquakes pulled from the USGS.",
+  "version": "1.0.0",
+  "author": "Community",
+  "category": "Science",
+  "type": "standard",
+  "dimensions": {
+    "minW": 4,
+    "minH": 3,
+    "defaultW": 6,
+    "defaultH": 4
+  },
+  "trust": "community",
+  "daemon": "earthquakes.ts",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "minMagnitude": {
+        "type": "number",
+        "title": "Minimum Magnitude",
+        "default": 3.0,
+        "minimum": 0.0,
+        "maximum": 10.0
+      },
+      "dotColor": {
+        "type": "string",
+        "title": "Pulse Color",
+        "format": "color",
+        "default": "#ff3333"
+      },
+      "mapColor": {
+        "type": "string",
+        "title": "Map Stroke Color",
+        "format": "color",
+        "default": "#334155"
+      },
+      "backgroundColor": {
+        "type": "string",
+        "title": "Background Color",
+        "format": "color",
+        "default": "#0f172a"
+      },
+      "pulseSpeed": {
+        "type": "number",
+        "title": "Pulse Animation Speed (s)",
+        "default": 2.0,
+        "minimum": 0.5,
+        "maximum": 10.0
+      }
+    }
+  }
+}
