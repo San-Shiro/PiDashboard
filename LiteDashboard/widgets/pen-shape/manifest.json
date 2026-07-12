@@ -1,0 +1,41 @@
+{
+  "id": "pen-shape",
+  "name": "Pen Shape",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "A lightweight SVG path widget for freeform strokes and custom complex shapes.",
+  "category": "Design",
+  "icon": "pen-tool",
+  "tier": "static",
+  "runtimeTier": "lite",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "pen-shape.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    { "key": "preset", "type": "radio", "label": "Preset", "options": [{ "value": "custom", "label": "Custom" }, { "value": "wave", "label": "Wave" }, { "value": "blob", "label": "Blob" }, { "value": "swoosh", "label": "Swoosh" }], "default": "wave" },
+    { "key": "pathData", "type": "textarea", "label": "SVG Path", "rows": 4, "hint": "Use normalized coordinates in a 0 0 100 100 viewBox.", "default": "M5 55 C20 15, 35 85, 50 50 S80 18, 95 55" },
+    { "key": "fillMode", "type": "radio", "label": "Fill", "options": ["none", "solid", "gradient"], "default": "none" },
+    { "key": "background", "type": "background", "label": "Fill / Stroke Color", "default": { "type": "gradient", "color": "#22D3EE", "color2": "#A78BFA", "stops": [{ "color": "#22D3EE", "position": 0 }, { "color": "#60A5FA", "position": 48 }, { "color": "#A78BFA", "position": 100 }], "gradientType": "linear", "angle": 135 } },
+    { "key": "strokeWidth", "type": "number", "label": "Stroke Width", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 6 },
+    { "key": "lineCap", "type": "radio", "label": "Cap", "options": ["butt", "round", "square"], "default": "round" },
+    { "key": "lineJoin", "type": "radio", "label": "Join", "options": ["miter", "round", "bevel"], "default": "round" },
+    { "key": "dashStyle", "type": "radio", "label": "Dash", "options": ["solid", "dashed", "dotted"], "default": "solid" },
+    { "key": "opacity", "type": "slider", "label": "Opacity", "min": 0.1, "max": 1, "step": 0.05, "default": 1 }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 320,
+    "height": 180
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

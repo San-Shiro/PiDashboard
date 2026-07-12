@@ -1,0 +1,83 @@
+<style>
+  .badge-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+  .badge-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+  }
+</style>
+
+<div class="badge-root" id="badge-root">
+  <div class="badge-pill" id="badge-pill">Featured</div>
+</div>
+
+<script>
+  var root = $('#badge-root');
+  var pill = $('#badge-pill');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  var padding = PiTheme.normalizeBoxValues(cfg.padding, { top: 8, right: 18, bottom: 8, left: 18 });
+  var radius = PiTheme.normalizeBoxValues(cfg.radius, { top: 999, right: 999, bottom: 999, left: 999 });
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+
+  var bg = PiTheme.usesCanvasTheme(cfg)
+    ? PiTheme.getBackground(
+        cfg,
+        cfg.background,
+        "color-mix(in srgb, var(--canvas-accent, #6366f1) 88%, white 10%)",
+        "color-mix(in srgb, var(--canvas-accent, #6366f1) 46%, var(--canvas-surface, #1a1a2e))"
+      )
+    : PiTheme.getBackground(
+        cfg,
+        cfg.background,
+        "#4338ca",
+        "#7c3aed",
+        "linear-gradient(135deg, var(--canvas-accent, #6366f1), color-mix(in srgb, var(--canvas-accent, #6366f1) 45%, var(--canvas-surface, #1a1a2e)))"
+      );
+
+  var borderStyle = PiTheme.usesCanvasTheme(cfg)
+    ? "1px solid color-mix(in srgb, var(--canvas-accent, #6366f1) 42%, transparent)"
+    : "1px solid rgba(255,255,255,0.08)";
+
+  var shadowBlur = Number(cfg.shadowBlur || 0);
+  var shadowStyle = shadowBlur > 0
+    ? "0 8px " + shadowBlur + "px " + (cfg.shadowColor || "rgba(0,0,0,0.25)")
+    : "0 12px 28px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18)";
+
+  // Root alignment
+  root.style.justifyContent = cfg.alignment === "center" ? "center" : (cfg.alignment === "right" ? "flex-end" : "flex-start");
+
+  // Pill styling
+  pill.textContent = cfg.textContent || "Featured";
+  pill.style.paddingTop = padding.top + "px";
+  pill.style.paddingRight = padding.right + "px";
+  pill.style.paddingBottom = padding.bottom + "px";
+  pill.style.paddingLeft = padding.left + "px";
+
+  pill.style.borderTopLeftRadius = radius.top + "px";
+  pill.style.borderTopRightRadius = radius.right + "px";
+  pill.style.borderBottomRightRadius = radius.bottom + "px";
+  pill.style.borderBottomLeftRadius = radius.left + "px";
+
+  pill.style.background = bg;
+  pill.style.border = borderStyle;
+  pill.style.color = textColor;
+  pill.style.fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+  pill.style.fontSize = Number(cfg.fontSize || 22) + "px";
+  pill.style.fontWeight = Number(cfg.fontWeight || 700);
+  pill.style.letterSpacing = Number(cfg.letterSpacing || 0) + "px";
+  pill.style.textTransform = cfg.uppercase ? "uppercase" : "none";
+  pill.style.boxShadow = shadowStyle;
+</script>

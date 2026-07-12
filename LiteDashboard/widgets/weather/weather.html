@@ -1,86 +1,80 @@
 <style>
-  :host {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
   .weather-card {
-    background: linear-gradient(135deg, rgba(30,136,229,0.8), rgba(21,101,192,0.9));
-    border-radius: 16px;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 24px;
-    box-sizing: border-box;
-    color: white;
-    font-family: 'Inter', sans-serif;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.2);
+    background: linear-gradient(135deg, rgba(14,165,233,0.18), rgba(37,99,235,0.16));
+    border-radius: 18px;
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    padding: 18px; box-sizing: border-box;
+    font-family: 'Inter', -apple-system, sans-serif;
+    position: relative; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.12);
     transition: background 1s ease;
   }
-  
-  .weather-card.sunny { background: linear-gradient(135deg, rgba(255,167,38,0.8), rgba(239,108,0,0.9)); }
-  .weather-card.rainy { background: linear-gradient(135deg, rgba(84,110,122,0.8), rgba(55,71,79,0.9)); }
-  .weather-card.cloudy { background: linear-gradient(135deg, rgba(144,164,174,0.8), rgba(84,110,122,0.9)); }
+  .weather-card.sunny { background: linear-gradient(135deg, rgba(251,191,36,0.20), rgba(249,115,22,0.18)); }
+  .weather-card.rainy { background: linear-gradient(135deg, rgba(71,85,105,0.22), rgba(30,41,59,0.22)); }
+  .weather-card.cloudy { background: linear-gradient(135deg, rgba(148,163,184,0.18), rgba(71,85,105,0.22)); }
+  .weather-card.night { background: linear-gradient(135deg, rgba(67,56,202,0.24), rgba(30,41,59,0.24)); }
+  .weather-card.thunder { background: linear-gradient(135deg, rgba(120,53,15,0.24), rgba(31,41,55,0.28)); }
 
-  .temp-display {
-    display: flex;
-    align-items: baseline;
-    margin-bottom: 8px;
-  }
-  .temp {
-    font-size: 72px;
-    font-weight: 800;
-    line-height: 1;
-    text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  }
-  .unit {
-    font-size: 32px;
-    margin-left: 4px;
-    opacity: 0.8;
-  }
-  
-  .condition {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: auto;
+  .w-location {
+    font-size: 11px; opacity: 0.72;
+    font-weight: 600; letter-spacing: 0.12em;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    margin-bottom: 4px;
   }
-  
+  .temp-display { display: flex; align-items: baseline; margin-bottom: 4px; }
+  .temp {
+    font-size: 54px; font-weight: 800;
+    line-height: 1; text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    color: var(--canvas-text);
+  }
+  .unit { font-size: 22px; margin-left: 4px; opacity: 0.8; color: var(--canvas-text); }
+  .condition {
+    font-size: 16px; font-weight: 600;
+    margin-bottom: auto;
+    letter-spacing: 0.04em; color: var(--canvas-text);
+  }
   .details {
-    display: flex;
-    gap: 24px;
-    font-size: 18px;
-    opacity: 0.9;
+    display: flex; flex-wrap: wrap;
+    gap: 12px; font-size: 12px;
+    opacity: 0.9; color: var(--canvas-text);
   }
-  
-  .icon {
-    position: absolute;
-    right: -20px;
-    top: -20px;
-    font-size: 150px;
-    opacity: 0.2;
-    filter: blur(2px);
+  .details span { white-space: nowrap; }
+  .w-icon {
+    position: absolute; right: 14px; top: 10px;
+    font-size: 42px; opacity: 0.92;
     transition: all 1s;
+    pointer-events: none;
   }
+  .weather-status {
+    margin-top: 8px;
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  /* Compact mode */
+  .weather-card.compact { flex-direction: row; align-items: center; gap: 12px; padding: 14px; }
+  .weather-card.compact .temp { font-size: 36px; }
+  .weather-card.compact .unit { font-size: 18px; }
+  .weather-card.compact .condition { font-size: 12px; margin-bottom: 0; }
+  .weather-card.compact .w-icon { font-size: 28px; right: 14px; top: 14px; transform: none; }
+  .weather-card.compact .details { font-size: 11px; gap: 10px; }
 </style>
 
-<div class="weather-card" id="wCard">
-  <div class="icon" id="wIcon">⛅</div>
-  <div class="temp-display">
-    <div class="temp" id="wTemp">--</div>
-    <div class="unit">°C</div>
-  </div>
-  <div style="font-size: 14px; opacity: 0.7; font-weight: 600; letter-spacing: 1px; margin-bottom: 2px;">KANPUR</div>
-  <div class="condition" id="wCond">Loading...</div>
-  
-  <div class="details">
-    <div id="wHumid">💧 --%</div>
-    <div id="wWind">💨 -- km/h</div>
+<div id="wStage" style="width:100%;height:100%;overflow:hidden;">
+  <div class="weather-card" id="wCard">
+    <div class="w-icon" id="wIcon">⛅</div>
+    <div class="w-location" id="wLoc">--</div>
+    <div class="temp-display">
+      <div class="temp" id="wTemp">--</div>
+      <div class="unit" id="wUnit">°</div>
+    </div>
+    <div class="condition" id="wCond">Loading...</div>
+    <div class="details" id="wDetails">
+      <span id="wHumid">💧 --%</span>
+      <span id="wWind">💨 -- km/h</span>
+      <span id="wFeel" style="display:none">🌡 Feels --°</span>
+    </div>
+    <div class="weather-status" id="wStatus"></div>
   </div>
 </div>
 
@@ -89,21 +83,25 @@
     if (state.temperature !== undefined) $('#wTemp').textContent = state.temperature;
     if (state.humidity !== undefined) $('#wHumid').textContent = '💧 ' + state.humidity + '%';
     if (state.wind !== undefined) $('#wWind').textContent = '💨 ' + state.wind + ' mph';
+    if (state.location !== undefined) $('#wLoc').textContent = state.location;
     
     if (state.condition) {
       $('#wCond').textContent = state.condition;
       
-      const c = state.condition.toLowerCase();
-      const card = $('#wCard');
-      const icon = $('#wIcon');
+      var c = state.condition.toLowerCase();
+      var card = $('#wCard');
+      var icon = $('#wIcon');
       
       card.className = 'weather-card';
-      if (c.includes('sun')) {
+      if (c.includes('sun') || c.includes('clear')) {
         card.classList.add('sunny');
         icon.textContent = '☀️';
       } else if (c.includes('rain') || c.includes('thunder')) {
         card.classList.add('rainy');
         icon.textContent = '🌧️';
+      } else if (c.includes('night')) {
+        card.classList.add('night');
+        icon.textContent = '🌙';
       } else {
         card.classList.add('cloudy');
         icon.textContent = '☁️';
@@ -111,7 +109,8 @@
     }
   }
 
-  if (widget.state && widget.state.temperature) {
-    onState(widget.state);
+  var initialState = (typeof widget !== 'undefined' && widget.state) || (window.PiWidget && window.PiWidget.state) || null;
+  if (initialState && (initialState.temperature !== undefined || initialState.condition)) {
+    onState(initialState);
   }
 </script>

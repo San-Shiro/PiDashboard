@@ -1,0 +1,243 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .net-card {
+    width: 100%;
+    height: 100%;
+    padding: 16px 20px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: var(--canvas-text, #e0e0e0);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  /* Header with WiFi icon */
+  .net-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .net-wifi-icon {
+    position: relative;
+    width: 28px;
+    height: 28px;
+  }
+  .net-wifi-icon svg {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: var(--canvas-accent, #6366f1);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .net-wifi-icon.connected::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: net-pulse 2s ease-in-out infinite;
+  }
+  .net-header-text {
+    font-size: clamp(11px, 2vw, 13px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--canvas-muted, #888);
+  }
+
+  /* Signal bars */
+  .net-signal {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    margin-left: auto;
+  }
+  .net-signal-bar {
+    width: 4px;
+    border-radius: 1px;
+    background: var(--canvas-border, #2a2a3e);
+    transition: background 0.4s ease, height 0.4s ease;
+  }
+  .net-signal-bar.active {
+    background: var(--canvas-accent, #6366f1);
+  }
+  .net-signal-bar:nth-child(1) { height: 6px; }
+  .net-signal-bar:nth-child(2) { height: 10px; }
+  .net-signal-bar:nth-child(3) { height: 14px; }
+  .net-signal-bar:nth-child(4) { height: 18px; }
+
+  /* Info rows */
+  .net-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .net-row + .net-row {
+    border-top: 1px solid color-mix(in srgb, var(--canvas-border, #2a2a3e) 50%, transparent);
+  }
+  .net-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+  .net-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: var(--canvas-muted, #888);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .net-label {
+    font-size: clamp(10px, 1.8vw, 12px);
+    font-weight: 500;
+    color: var(--canvas-muted, #888);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: 60px;
+  }
+  .net-value {
+    font-size: clamp(12px, 2.2vw, 14px);
+    font-weight: 600;
+    color: var(--canvas-text, #e0e0e0);
+    margin-left: auto;
+    text-align: right;
+  }
+  .net-value.mono {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  @keyframes net-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+</style>
+
+<div class="net-card" id="net-card">
+  <div class="net-header">
+    <div class="net-wifi-icon" id="netWifiIcon">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+        <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+        <circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <span class="net-header-text">Network</span>
+    <div class="net-signal" id="netSignal">
+      <div class="net-signal-bar"></div>
+      <div class="net-signal-bar"></div>
+      <div class="net-signal-bar"></div>
+      <div class="net-signal-bar"></div>
+    </div>
+  </div>
+
+  <div id="netRowHostname" class="net-row">
+    <div class="net-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+    <span class="net-label">Host</span>
+    <span class="net-value" id="netHostname">—</span>
+  </div>
+
+  <div class="net-row">
+    <div class="net-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <span class="net-label">SSID</span>
+    <span class="net-value" id="netSsid">—</span>
+  </div>
+
+  <div class="net-row">
+    <div class="net-icon"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></div>
+    <span class="net-label">IP</span>
+    <span class="net-value mono" id="netIp">—</span>
+  </div>
+
+  <div class="net-row">
+    <div class="net-icon"><svg viewBox="0 0 24 24"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/></svg></div>
+    <span class="net-label">Iface</span>
+    <span class="net-value" id="netIface">—</span>
+  </div>
+
+  <div id="netRowUptime" class="net-row">
+    <div class="net-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+    <span class="net-label">Uptime</span>
+    <span class="net-value" id="netUptime">—</span>
+  </div>
+</div>
+
+<script>
+
+  var cfg = (typeof widget !== "undefined" && widget.config) ? widget.config : ((typeof PiWidget !== "undefined" && PiWidget.config) || (typeof config !== "undefined" ? config : {}));
+  
+  var showHostname = cfg.showHostname !== false;
+  var showUptime = cfg.showUptime !== false;
+
+  var containerNode = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'net-card');
+  var shadowRoot = containerNode ? (containerNode.shadowRoot || containerNode) : document;
+
+  var elNetRowHostname = shadowRoot.querySelector('#netRowHostname');
+  var elNetRowUptime = shadowRoot.querySelector('#netRowUptime');
+  var elHostname = shadowRoot.querySelector('#netHostname');
+  var elSsid = shadowRoot.querySelector('#netSsid');
+  var elIp = shadowRoot.querySelector('#netIp');
+  var elIface = shadowRoot.querySelector('#netIface');
+  var elUptime = shadowRoot.querySelector('#netUptime');
+  var elWifiIcon = shadowRoot.querySelector('#netWifiIcon');
+  if (!elNetRowHostname || !elWifiIcon) return;
+
+  if (!showHostname) elNetRowHostname.style.display = 'none';
+  if (!showUptime && elNetRowUptime) elNetRowUptime.style.display = 'none';
+
+  function updateSignal(pct) {
+    var bars = shadowRoot.querySelectorAll('.net-signal-bar');
+    var level = pct >= 75 ? 4 : pct >= 50 ? 3 : pct >= 25 ? 2 : pct > 0 ? 1 : 0;
+    for (var i = 0; i < bars.length; i++) {
+      bars[i].classList.toggle('active', i < level);
+    }
+  }
+
+  function renderState(state) {
+    if (!state) return;
+
+    if (state.hostname) elHostname.textContent = state.hostname;
+    if (state.ssid) elSsid.textContent = state.ssid;
+    if (state.ip) elIp.textContent = state.ip;
+    if (state.interface) elIface.textContent = state.interface;
+    if (state.uptime && elUptime) elUptime.textContent = state.uptime;
+
+    var sig = parseInt(state.signal_percent) || 0;
+    updateSignal(sig);
+
+    if (state.ip && state.ip !== '—' && state.ip !== '') {
+      elWifiIcon.classList.add('connected');
+    } else {
+      elWifiIcon.classList.remove('connected');
+    }
+  }
+
+  // Handle initialization and PiWidget SDK binding
+  var st = typeof widget !== 'undefined' && widget.state ? widget.state : {};
+  if (typeof PiWidget !== 'undefined' && PiWidget.state) st = PiWidget.state;
+  
+  renderState(st);
+  window.onState = function(state) {
+    renderState(state || {});
+  };
+
+  window.onDestroy = function() {};
+
+</script>

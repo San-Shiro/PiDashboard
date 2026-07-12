@@ -1,0 +1,67 @@
+{
+  "id": "stat-kpi-card",
+  "name": "Stat / KPI Card",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Key number card with optional trend text and lightweight styling.",
+  "category": "Data",
+  "icon": "bar-chart-3",
+  "tier": "static",
+  "runtimeTier": "lite",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "resources": {
+    "externalFonts": [
+      "Inter",
+      "Outfit",
+      "Plus Jakarta Sans",
+      "Poppins",
+      "Montserrat",
+      "Manrope",
+      "DM Sans",
+      "Space Grotesk",
+      "Roboto",
+      "Noto Sans",
+      "Noto Sans Devanagari",
+      "Noto Serif Devanagari",
+      "Mukta",
+      "Hind",
+      "Anek Devanagari"
+    ]
+  },
+  "fragment": {
+    "file": "stat-kpi-card.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    { "key": "label", "type": "text", "label": "Label", "default": "Revenue" },
+    { "key": "valueText", "type": "text", "label": "Value", "default": "24.8K" },
+    { "key": "suffix", "type": "text", "label": "Suffix", "default": "" },
+    { "key": "deltaText", "type": "text", "label": "Delta", "default": "+12.4% vs last week" },
+    { "key": "showDelta", "type": "boolean", "label": "Show Delta", "default": true },
+    { "key": "trend", "type": "radio", "label": "Trend", "options": [{ "value": "up", "label": "Up" }, { "value": "down", "label": "Down" }, { "value": "neutral", "label": "Neutral" }], "default": "up" },
+    { "key": "fontFamily", "type": "select", "label": "Font Family", "options": ["Inter, system-ui, sans-serif", "Outfit, system-ui, sans-serif", "\"Plus Jakarta Sans\", system-ui, sans-serif", "Poppins, system-ui, sans-serif", "Montserrat, system-ui, sans-serif", "Manrope, system-ui, sans-serif", "\"DM Sans\", system-ui, sans-serif", "\"Space Grotesk\", system-ui, sans-serif", "Roboto, Arial, sans-serif", "\"Noto Sans\", system-ui, sans-serif", "\"Noto Sans Devanagari\", system-ui, sans-serif", "\"Noto Serif Devanagari\", Georgia, serif", "Mukta, system-ui, sans-serif", "Hind, system-ui, sans-serif", "\"Anek Devanagari\", system-ui, sans-serif", "system-ui, sans-serif"], "default": "Inter, system-ui, sans-serif" },
+    { "key": "valueSize", "type": "slider", "label": "Value Size", "min": 18, "max": 96, "step": 1, "unit": "px", "default": 56 },
+    { "key": "labelSize", "type": "slider", "label": "Label Size", "min": 10, "max": 26, "step": 1, "unit": "px", "default": 13 },
+    { "key": "padding", "type": "slider", "label": "Padding", "min": 10, "max": 40, "step": 1, "unit": "px", "default": 18 },
+    { "key": "radius", "type": "slider", "label": "Corner Radius", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 20 },
+    { "key": "alignment", "type": "radio", "label": "Align", "options": ["left", "center", "right"], "default": "left" },
+    { "key": "background", "type": "background", "label": "Background", "default": { "type": "gradient", "color": "#0f172a", "color2": "#1e293b", "stops": [{ "color": "#0f172a", "position": 0 }, { "color": "#172554", "position": 55 }, { "color": "#1e293b", "position": 100 }], "gradientType": "linear", "angle": 135, "mix": 48, "softness": 100 } },
+    { "key": "textColor", "type": "color", "label": "Text Color", "default": "#ffffff" },
+    { "key": "mutedColor", "type": "color", "label": "Muted Color", "default": "rgba(255,255,255,0.7)" },
+    { "key": "accentColor", "type": "color", "label": "Accent Color", "default": "#38bdf8" }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 320,
+    "height": 180
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

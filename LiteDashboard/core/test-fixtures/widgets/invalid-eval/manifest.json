@@ -1,1 +1,11 @@
-{"id":"invalid-eval","trust":"verified","fragment":{"file":"fragment/invalid-eval.html","format":"snippet"}}
+{
+  "id": "invalid-eval",
+  "trust": "verified",
+  "fragment": {
+    "file": "fragment/invalid-eval.html",
+    "format": "snippet"
+  },
+  "name": "test",
+  "version": "1.0",
+  "tier": "static"
+}

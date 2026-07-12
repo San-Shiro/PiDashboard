@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600&display=swap');
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .clock-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .time-wrapper {
+      display: flex;
+      align-items: baseline;
+      line-height: 1;
+    }
+
+    .time {
+      font-size: 6rem;
+      font-weight: 200;
+      letter-spacing: -2px;
+    }
+
+    .ampm {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+      opacity: 0.7;
+    }
+
+    .date {
+      font-size: 1.25rem;
+      font-weight: 400;
+      margin-top: 0.5rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* Container scaling for responsiveness */
+    #widget-root {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="widget-root">
+    <div class="clock-container">
+      <div class="time-wrapper">
+        <div class="time" id="time-display">00:00</div>
+        <div class="ampm" id="ampm-display"></div>
+      </div>
+      <div class="date" id="date-display">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    // Config defaults
+    let config = {
+      timezone: "",
+      format12h: true,
+      useManualTime: false,
+      manualTime: "12:00"
+    };
+
+    let localLoadTime = performance.now();
+    let manualBaseTime = new Date();
+
+    // Listen for config hydration from the compositor
+    window.addEventListener("message", (e) => {
+      if (e.data.type === "config_hydrate") {
+        config = { ...config, ...e.data.config };
+        
+        if (config.useManualTime && config.manualTime) {
+          const [h, m] = config.manualTime.split(":");
+          manualBaseTime = new Date();
+          manualBaseTime.setHours(parseInt(h, 10), parseInt(m, 10), 0, 0);
+          localLoadTime = performance.now();
+        }
+
+        updateClock();
+      }
+    });
+
+    function updateClock() {
+      let targetTime;
+      
+      if (config.useManualTime && config.manualTime) {
+        // Tick from the fixed manual base time
+        const elapsed = performance.now() - localLoadTime;
+        targetTime = new Date(manualBaseTime.getTime() + elapsed);
+      } else {
+        targetTime = new Date();
+      }
+
+      const timeOptions = {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: config.format12h
+      };
+
+      const dateOptions = {
+        weekday: "long",
+        month: "long",
+        day: "numeric"
+      };
+
+      if (config.timezone && config.timezone.trim() !== "") {
+        try {
+          timeOptions.timeZone = config.timezone.trim();
+          dateOptions.timeZone = config.timezone.trim();
+        } catch (err) {
+          console.warn("Invalid timezone configured:", config.timezone);
+        }
+      }
+
+      const timeFormatter = new Intl.DateTimeFormat("en-US", timeOptions);
+      const parts = timeFormatter.formatToParts(targetTime);
+      
+      let hours = "00";
+      let minutes = "00";
+      let ampm = "";
+
+      for (const part of parts) {
+        if (part.type === "hour") hours = part.value;
+        if (part.type === "minute") minutes = part.value;
+        if (part.type === "dayPeriod") ampm = part.value;
+      }
+
+      // If 24h format, pad hours
+      if (!config.format12h && hours.length === 1) {
+        hours = "0" + hours;
+      }
+
+      document.getElementById("time-display").textContent = `${hours}:${minutes}`;
+      document.getElementById("ampm-display").textContent = config.format12h ? ampm : "";
+
+      const dateFormatter = new Intl.DateTimeFormat("en-US", dateOptions);
+      document.getElementById("date-display").textContent = dateFormatter.format(targetTime);
+    }
+
+    // Update every second
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>

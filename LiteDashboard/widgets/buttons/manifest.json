@@ -19,10 +19,13 @@
   "description": "Interactive animated button controls",
   "category": "Interactive",
   "icon": "mouse-pointer",
-  "tier": "native",
+  "tier": "static",
   "estimatedRamMb": 1,
   "defaults": {
     "width": 200,
     "height": 100
+  },
+  "dataChannel": {
+    "type": "none"
   }
 }

@@ -56,6 +56,12 @@ import {
   Type,
   Grid3x3,
   ChevronsRight,
+  Tag,
+  BarChart3,
+  Quote,
+  PanelTop,
+  CloudSun,
+  AlignLeft,
 } from "lucide-react";
 
 const REGISTRY = {
@@ -116,6 +122,12 @@ const REGISTRY = {
   Type,
   Grid3x3,
   ChevronsRight,
+  Tag,
+  BarChart3,
+  Quote,
+  PanelTop,
+  CloudSun,
+  AlignLeft,
 };
 
 /**
@@ -123,6 +135,11 @@ const REGISTRY = {
  * Falls back to Layers if the icon name is unknown.
  */
 export default function Icon({ name, size = 16, className = "", style = {} }) {
-  const Cmp = REGISTRY[name] || Layers;
+  const normalized = String(name || "")
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
+  const Cmp = REGISTRY[name] || REGISTRY[normalized] || Layers;
   return <Cmp size={size} className={className} style={style} />;
 }

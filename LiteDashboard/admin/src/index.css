@@ -59,6 +59,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+iframe {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 /* Micro animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(5px); }

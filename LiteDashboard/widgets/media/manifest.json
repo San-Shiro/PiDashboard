@@ -19,10 +19,13 @@
   "description": "Music and media player controls with album art",
   "category": "Media",
   "icon": "music",
-  "tier": "native",
+  "tier": "static",
   "estimatedRamMb": 5,
   "defaults": {
     "width": 400,
     "height": 200
+  },
+  "dataChannel": {
+    "type": "none"
   }
 }

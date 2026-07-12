@@ -8,6 +8,7 @@ import { getWidgetVisuals } from "./widget-meta";
 import { WidgetRenderer } from "./widget-renderers";
 import useWidgetData from "./use-widget-data";
 import WidgetEditPanel from "./widget-edit-panel";
+import LogsViewer from "./logs-viewer";
 import Icon from "./icon";
 import {
   Card,
@@ -31,10 +32,18 @@ import {
   Settings,
   Palette,
   X,
-  Check
+  Check,
+  Terminal
 } from "lucide-react";
-import { CANVAS_THEMES, THEME_VAR_KEYS, DEFAULT_THEME } from "@/data/canvas-themes";
+import { CANVAS_THEMES, THEME_VAR_KEYS, DEFAULT_THEME, ensureThemeVars, CANVAS_TOKEN_GROUPS } from "@/data/canvas-themes";
 import { CompactColorSwatch } from "./controls";
+import {
+  normalizeRuntimeTier,
+  getWidgetRuntimeTier,
+  allowsTier,
+  loadSelectedRuntimeTier,
+  saveSelectedRuntimeTier,
+} from "./runtime-tier";
 
 function isWidgetActive(base) {
   const now = new Date();
@@ -65,14 +74,14 @@ function CanvasSettingsModal({ canvasData, onSave, onClose }) {
   // Theme state
   const currentTheme = cc.theme || DEFAULT_THEME;
   const [selectedThemeId, setSelectedThemeId] = useState(currentTheme.id || 'midnight');
-  const [customVars, setCustomVars] = useState(currentTheme.vars || DEFAULT_THEME.vars);
+  const [customVars, setCustomVars] = useState(ensureThemeVars(currentTheme.vars || DEFAULT_THEME.vars));
 
   const activePreset = CANVAS_THEMES.find(t => t.id === selectedThemeId);
-  const effectiveVars = themeTab === 'custom' ? customVars : (activePreset?.vars || DEFAULT_THEME.vars);
+  const effectiveVars = ensureThemeVars(themeTab === 'custom' ? customVars : (activePreset?.vars || DEFAULT_THEME.vars));
 
   function handleSave() {
     const theme = themeTab === 'custom'
-      ? { id: 'custom', name: 'Custom', vars: customVars }
+      ? { id: 'custom', name: 'Custom', vars: ensureThemeVars(customVars) }
       : activePreset || DEFAULT_THEME;
     onSave({
       name,
@@ -81,7 +90,7 @@ function CanvasSettingsModal({ canvasData, onSave, onClose }) {
         width: Number(width),
         height: Number(height),
         background: bg,
-        theme: { id: theme.id, name: theme.name, vars: themeTab === 'custom' ? customVars : theme.vars },
+        theme: { id: theme.id, name: theme.name, vars: ensureThemeVars(themeTab === 'custom' ? customVars : theme.vars) },
       },
     });
     onClose();
@@ -210,19 +219,26 @@ function CanvasSettingsModal({ canvasData, onSave, onClose }) {
             ) : (
               <div className="space-y-3">
                 <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>Define custom CSS variables for your canvas theme:</p>
-                {THEME_VAR_KEYS.map(varKey => (
-                  <div key={varKey} className="flex items-center gap-3">
-                    <CompactColorSwatch
-                      value={customVars[varKey] || '#000000'}
-                      onChange={c => setCustomVars(prev => ({ ...prev, [varKey]: c }))}
-                      varName={varKey}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <label className="text-[10px] font-mono" style={{ color: 'var(--color-text-secondary)' }}>{varKey}</label>
-                      <input type="text" value={customVars[varKey] || ''}
-                        onChange={e => setCustomVars(prev => ({ ...prev, [varKey]: e.target.value }))}
-                        className={inputCls + " font-mono text-xs"} style={inputStyle} />
+                {CANVAS_TOKEN_GROUPS.map(group => (
+                  <div key={group.id} className="space-y-2">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: 'var(--color-text-secondary)' }}>
+                      {group.label}
                     </div>
+                    {group.tokens.map(({ key, label }) => (
+                      <div key={key} className="flex items-center gap-3">
+                        <CompactColorSwatch
+                          value={customVars[key] || '#000000'}
+                          onChange={c => setCustomVars(prev => ({ ...prev, [key]: c }))}
+                          varName={key}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <label className="text-[10px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>{label}</label>
+                          <input type="text" value={customVars[key] || ''}
+                            onChange={e => setCustomVars(prev => ({ ...prev, [key]: e.target.value }))}
+                            className={inputCls + " font-mono text-xs"} style={inputStyle} />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ))}
                 {/* Copy from preset */}
@@ -243,9 +259,9 @@ function CanvasSettingsModal({ canvasData, onSave, onClose }) {
             <div className="mt-4 p-3 rounded-lg border" style={{ backgroundColor: effectiveVars['--canvas-bg'], borderColor: effectiveVars['--canvas-border'] }}>
               <p className="text-xs font-semibold mb-2" style={{ color: effectiveVars['--canvas-text'] }}>Theme Preview</p>
               <div className="flex gap-2">
-                {Object.entries(effectiveVars).map(([k, v]) => (
+                {THEME_VAR_KEYS.map((k) => (
                   <div key={k} className="flex flex-col items-center gap-1">
-                    <div className="w-6 h-6 rounded-md border" style={{ backgroundColor: v, borderColor: effectiveVars['--canvas-border'] }} />
+                    <div className="w-6 h-6 rounded-md border" style={{ backgroundColor: effectiveVars[k], borderColor: effectiveVars['--canvas-border'] }} />
                     <span className="text-[8px] font-mono" style={{ color: effectiveVars['--canvas-muted'] }}>{k.replace('--canvas-', '')}</span>
                   </div>
                 ))}
@@ -268,6 +284,16 @@ function CanvasSettingsModal({ canvasData, onSave, onClose }) {
 }
 
 function AddWidgetModal({ registry, onAdd, onClose }) {
+  const [selectedTier, setSelectedTier] = useState(() => loadSelectedRuntimeTier());
+  const filteredRegistry = useMemo(
+    () => registry.filter((w) => allowsTier(selectedTier, getWidgetRuntimeTier(w))),
+    [registry, selectedTier]
+  );
+
+  useEffect(() => {
+    saveSelectedRuntimeTier(selectedTier);
+  }, [selectedTier]);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
@@ -301,8 +327,28 @@ function AddWidgetModal({ registry, onAdd, onClose }) {
           </h3>
         </div>
         <div className="p-3">
-          {registry.map((w) => {
+          <div className="mb-3 flex items-center gap-1 p-1 rounded-lg border" style={{ borderColor: "var(--color-border)" }}>
+            {["lite", "standard", "heavy"].map((tier) => (
+              <button
+                key={tier}
+                onClick={() => setSelectedTier(normalizeRuntimeTier(tier))}
+                className="px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors capitalize"
+                style={{
+                  backgroundColor: selectedTier === tier ? "var(--color-accent-bg)" : "transparent",
+                  color: selectedTier === tier ? "var(--color-accent)" : "var(--color-text-secondary)",
+                }}
+              >
+                {tier}
+              </button>
+            ))}
+          </div>
+          {filteredRegistry.length === 0 ? (
+            <div className="px-3 py-6 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+              No widgets available in the selected runtime tier.
+            </div>
+          ) : filteredRegistry.map((w) => {
             const visuals = getWidgetVisuals(w);
+            const runtimeTier = getWidgetRuntimeTier(w);
             return (
               <button
                 key={w.id}
@@ -346,11 +392,60 @@ function AddWidgetModal({ registry, onAdd, onClose }) {
                   <div className="flex gap-1.5 mt-2">
                     <Pill>{w.category || 'General'}</Pill>
                     <Pill>{w.daemon ? 'Daemon' : 'Native'}</Pill>
+                    <Pill>{runtimeTier}</Pill>
                   </div>
                 </div>
               </button>
             );
           })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UnsavedChangesModal({ onStay, onLeave }) {
+  return (
+    <div
+      className="fixed inset-0 z-[80] flex items-center justify-center px-4"
+      style={{ pointerEvents: "none" }}
+    >
+      <div
+        className="absolute inset-0 bg-black/65 backdrop-blur-sm"
+        style={{ pointerEvents: "auto" }}
+        onClick={onStay}
+      />
+      <div
+        className="relative w-full max-w-md rounded-2xl border shadow-2xl"
+        style={{
+          pointerEvents: "auto",
+          backgroundColor: "var(--color-surface)",
+          borderColor: "var(--color-border)",
+        }}
+      >
+        <div
+          className="border-b px-6 py-5"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <h3
+            className="text-lg font-semibold"
+            style={{ color: "var(--color-text-primary)" }}
+          >
+            Leave canvas?
+          </h3>
+          <p
+            className="mt-2 text-sm leading-6"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            You have unsaved changes. Leaving now will discard them.
+          </p>
+        </div>
+        <div className="flex items-center justify-end gap-3 px-6 py-4">
+          <GhostButton onClick={onStay}>Stay here</GhostButton>
+          <PrimaryButton onClick={onLeave}>
+            <ArrowLeft size={12} />
+            Leave without saving
+          </PrimaryButton>
         </div>
       </div>
     </div>
@@ -368,10 +463,13 @@ function CanvasEditorShell() {
   const [showPreview, setShowPreview] = useState(true);
   const [showAddWidget, setShowAddWidget] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mediaSelectorOpen, setMediaSelectorOpen] = useState(false);
   const [editingInstanceId, setEditingInstanceId] = useState(null);
   const [now, setNow] = useState(() => new Date());
   const [dirty, setDirty] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const dragState = useRef(null);
   const wasDragged = useRef(false);
 
@@ -379,6 +477,14 @@ function CanvasEditorShell() {
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    function handleMediaSelectorToggle(event) {
+      setMediaSelectorOpen(Boolean(event?.detail?.open));
+    }
+    window.addEventListener("pi-media-selector-toggle", handleMediaSelectorToggle);
+    return () => window.removeEventListener("pi-media-selector-toggle", handleMediaSelectorToggle);
   }, []);
 
   // Fetch this canvas
@@ -420,7 +526,7 @@ function CanvasEditorShell() {
   const rawMedia = Array.isArray(mediaData?.files) ? mediaData.files : (Array.isArray(mediaData) ? mediaData : []);
   const mediaFiles = rawMedia.map((f) => {
     const ext = (f.filename || "").split(".").pop()?.toLowerCase() || "";
-    const mimeMap = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif", svg: "image/svg+xml", webp: "image/webp", mp4: "video/mp4", webm: "video/webm" };
+    const mimeMap = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif", svg: "image/svg+xml", webp: "image/webp", mp4: "video/mp4", webm: "video/webm", mp3: "audio/mpeg", wav: "audio/wav", ogg: "audio/ogg", flac: "audio/flac", aac: "audio/aac", m4a: "audio/mp4", wma: "audio/x-ms-wma", opus: "audio/opus" };
     return { ...f, id: f.filename, mime_type: mimeMap[ext] || "application/octet-stream" };
   });
 
@@ -476,13 +582,21 @@ function CanvasEditorShell() {
       localWidgets.filter((i) => i.enabled).map((i) => i.widget_id)
     )
   );
-  const widgetData = useWidgetData(showPreview ? activeIds : []);
+  
+  // Construct a live preview canvas object to send to the backend
+  const previewCanvas = useMemo(() => {
+    if (!canvasData) return null;
+    return { ...canvasData, widgets: localWidgets };
+  }, [canvasData, localWidgets]);
+  
+  const widgetData = useWidgetData(showPreview ? activeIds : [], showPreview ? previewCanvas : null);
 
   // Editing instance
   const editingInstance = useMemo(
     () => localWidgets.find((i) => i.id === editingInstanceId) || null,
     [localWidgets, editingInstanceId]
   );
+  const previewThemeVars = ensureThemeVars(canvasData?.canvas_config?.theme?.vars || DEFAULT_THEME.vars);
 
   // ─── Drag & Drop ─────────────────────────────────────────────
   const startDrag = useCallback((e, instance, mode) => {
@@ -576,16 +690,31 @@ function CanvasEditorShell() {
     mutationFn: async (widget_id) => {
       // Create local only instead of hitting an endpoint immediately
       const manifest = registry.find((w) => w.id === widget_id) || {};
+      const nextZIndex = localWidgets.reduce(
+        (max, widget) => Math.max(max, Number(widget?.layout?.zIndex || 0)),
+        0
+      ) + 1;
+      const defaultConfig = Object.fromEntries(
+        (manifest.configSchema || [])
+          .filter((field) => field?.key)
+          .map((field) => [field.key, field.default])
+      );
+      const defaultLayout = {
+        x: 20,
+        y: 20,
+        width: manifest.defaults?.width || 200,
+        height: manifest.defaults?.height || 200,
+        zIndex: nextZIndex,
+        opacity: 1,
+        overflow: "hidden",
+      };
       const newInst = {
-        id: crypto.randomUUID(),
+        id: (window.crypto && crypto.randomUUID && crypto.randomUUID()) || ('w_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9)),
         widget_id,
         label: manifest.name || "New Widget",
         enabled: true,
-        layout: {
-          x: 20, y: 20, width: manifest.defaults?.width || 200, height: manifest.defaults?.height || 200,
-          zIndex: localWidgets.length + 1, opacity: 1, overflow: "hidden"
-        },
-        config: {},
+        layout: defaultLayout,
+        config: defaultConfig,
         manifest
       };
       return newInst;
@@ -617,6 +746,37 @@ function CanvasEditorShell() {
     onSuccess: () => {
       setDirty(false);
       queryClient.invalidateQueries({ queryKey: ["canvas", canvasId] });
+    },
+  });
+
+  const publishCanvas = useMutation({
+    mutationFn: async () => {
+      const cleanWidgets = localWidgets.map(({ manifest, ...rest }) => rest);
+      const payload = {
+        ...canvasData,
+        widgets: cleanWidgets,
+        widget_count: cleanWidgets.length,
+      };
+      delete payload.id;
+
+      const saveResponse = await fetch(`/api/templates/${canvasId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!saveResponse.ok) throw new Error("save");
+
+      const publishResponse = await fetch(`/api/templates/${canvasId}/publish`, {
+        method: "POST",
+      });
+      if (!publishResponse.ok) throw new Error("publish");
+
+      return publishResponse.json();
+    },
+    onSuccess: () => {
+      setDirty(false);
+      queryClient.invalidateQueries({ queryKey: ["canvas", canvasId] });
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
     },
   });
 
@@ -702,9 +862,17 @@ function CanvasEditorShell() {
     );
   }
 
+  function handleNavigateBack() {
+    if (dirty) {
+      setShowLeaveConfirm(true);
+      return;
+    }
+    navigate("/");
+  }
+
   return (
     <div
-      className="min-h-screen flex flex-col font-inter"
+      className="h-screen overflow-hidden flex flex-col font-inter"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
       <style>{`
@@ -727,10 +895,7 @@ function CanvasEditorShell() {
       >
         <div className="flex items-center gap-3 min-w-0">
           <button
-            onClick={() => {
-              if (dirty && !window.confirm("You have unsaved changes. Leave anyway?")) return;
-              navigate("/");
-            }}
+            onClick={handleNavigateBack}
             className="p-2 rounded-lg transition-colors hover:bg-white/5"
             style={{ color: "var(--color-text-secondary)" }}
           >
@@ -815,6 +980,18 @@ function CanvasEditorShell() {
             <Settings size={12} />
             Settings
           </button>
+          <button
+            onClick={() => setShowLogs(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors"
+            style={{
+              borderColor: "var(--color-border)",
+              color: "var(--color-text-secondary)",
+            }}
+            title="System logs"
+          >
+            <Terminal size={12} />
+            Logs
+          </button>
           <GhostButton onClick={snapAll}>
             <Grid3x3 size={10} />
             Snap all
@@ -824,7 +1001,14 @@ function CanvasEditorShell() {
             disabled={saveCanvas.isPending || !dirty}
           >
             {saveCanvas.isPending ? <Spinner size={12} /> : <Save size={12} />}
-            Save canvas
+            Save draft
+          </PrimaryButton>
+          <PrimaryButton
+            onClick={() => publishCanvas.mutate()}
+            disabled={publishCanvas.isPending}
+          >
+            {publishCanvas.isPending ? <Spinner size={12} /> : <Check size={12} />}
+            Publish
           </PrimaryButton>
         </div>
       </header>
@@ -836,8 +1020,9 @@ function CanvasEditorShell() {
           ref={containerRef}
         >
         <div
-          className="relative rounded-xl overflow-hidden select-none border shadow-2xl"
+          className="relative overflow-hidden select-none border shadow-2xl"
           style={{
+            ...previewThemeVars,
             width: canvasPixelW,
             height: canvasPixelH,
             backgroundColor:
@@ -908,7 +1093,6 @@ function CanvasEditorShell() {
                       width: "100%",
                       height: "100%",
                       overflow: "hidden",
-                      padding: 4,
                     }}
                   >
                     <div
@@ -923,6 +1107,7 @@ function CanvasEditorShell() {
                         instance={inst}
                         widgetData={widgetData}
                         now={now}
+                        themeVars={previewThemeVars}
                       />
                     </div>
                   </div>
@@ -945,7 +1130,6 @@ function CanvasEditorShell() {
                   </div>
                 )}
 
-                {/* Resize handle */}
                 <div
                   onMouseDown={(e) => startDrag(e, inst, "resize")}
                   className="absolute right-0 bottom-0 cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity"
@@ -977,6 +1161,7 @@ function CanvasEditorShell() {
         onClick={() => setSidebarOpen((v) => !v)}
         className="absolute z-30 top-1/2 -translate-y-1/2 flex items-center justify-center shadow-md transition-all hover:brightness-110"
         style={{ 
+          display: mediaSelectorOpen ? "none" : "flex",
           right: sidebarOpen ? "20rem" : "0", 
           width: 24, 
           height: 48, 
@@ -1012,6 +1197,7 @@ function CanvasEditorShell() {
               instance={editingInstance}
               canvasW={CANVAS_W}
               canvasH={CANVAS_H}
+              themeVars={previewThemeVars}
               mediaFiles={mediaFiles}
               onUpdateInstance={updateWidgetLocal}
               onDeleteInstance={() => deleteWidget(editingInstanceId)}
@@ -1045,6 +1231,17 @@ function CanvasEditorShell() {
           canvasData={canvasData}
           onSave={updateCanvasSettings}
           onClose={() => setShowSettings(false)}
+        />
+      )}
+
+      {showLogs && (
+        <LogsViewer onClose={() => setShowLogs(false)} />
+      )}
+
+      {showLeaveConfirm && (
+        <UnsavedChangesModal
+          onStay={() => setShowLeaveConfirm(false)}
+          onLeave={() => navigate("/")}
         />
       )}
     </div>

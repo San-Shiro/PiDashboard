@@ -1,0 +1,86 @@
+<style>
+  .community-demo-container {
+    padding: 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: var(--canvas-surface, #1a1a2e);
+    border: 1px solid var(--canvas-border, #2a2a3e);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .community-demo-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--widget-accent-color);
+  }
+
+  .community-demo-desc {
+    font-size: 14px;
+    color: var(--canvas-text, #e0e0e0);
+    opacity: 0.8;
+  }
+</style>
+
+<div class="community-demo-container" id="demo-root">
+  <div class="community-demo-title" data-bind="textContent: greetingText">Hello!</div>
+  <div class="community-demo-desc">
+    This widget is loaded from an external folder. It runs safely in a sandboxed iframe, but automatically inherits the dashboard's themes!
+  </div>
+  
+  <div style="margin-top: 16px;">
+    <button id="demo-btn" style="padding: 8px 16px; background: var(--widget-accent-color); color: #fff; border: none; border-radius: 6px; cursor: pointer;">
+      Click Me
+    </button>
+  </div>
+  <div id="click-status" style="margin-top: 8px; font-size: 12px; color: var(--canvas-muted);">
+    Clicks: <span data-bind="textContent: clickCount">0</span>
+  </div>
+</div>
+
+<script>
+  // 1. You have access to your config via window.widget.config
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+  
+  // Apply specific config colors using PiTheme helper!
+  // This automatically handles if the user wants to follow the canvas theme OR use custom colors!
+  var demoRoot = document.getElementById('demo-root');
+  
+  var accentColor = PiTheme.getColor(cfg, cfg.accentColor, "--canvas-accent", "#ff0055");
+  demoRoot.style.setProperty('--widget-accent-color', accentColor);
+  
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#e0e0e0");
+  demoRoot.style.color = textColor;
+  
+  var bg = PiTheme.getBackground(cfg, cfg.background, "var(--canvas-surface)", "var(--canvas-surface)");
+  demoRoot.style.background = bg;
+
+  // 2. You can define PiBind handlers to process declarative UI binding
+  function onData(data) {
+    // Return an object that maps to the data-bind attributes in the HTML
+    return {
+      greetingText: cfg.greetingText,
+      clickCount: data.clicks || 0
+    };
+  }
+
+  // 3. You can optionally hook into the frame loop if you need animations
+  function onFrame(time) {
+    // Called at 60fps by the PiWidget SDK
+  }
+
+  // 4. You can send data up to the parent using patchState!
+  var clicks = 0;
+  document.getElementById('demo-btn').addEventListener('click', function() {
+    clicks++;
+    // This tells the backend to save this new state, which will instantly reflect back down!
+    if (window.widget && window.widget.patchState) {
+      window.widget.patchState({ clicks: clicks });
+    }
+  });
+</script>

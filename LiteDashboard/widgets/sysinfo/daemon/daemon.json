@@ -1,0 +1,37 @@
+{
+  "id": "sysinfo",
+  "name": "System Info Collector",
+  "version": "1.0.0",
+
+  "runtime": {
+    "command": "./sysinfo.sh",
+    "shell": true,
+    "cwd": "daemon"
+  },
+
+  "communication": {
+    "mode": "ipc_file",
+    "ipcFilename": "sysinfo.json"
+  },
+
+  "health": {
+    "strategy": "file_mtime",
+    "maxStaleSec": 30,
+    "startupGraceSec": 10
+  },
+
+  "restart": {
+    "policy": "on-failure",
+    "maxRestarts": 5,
+    "backoffBaseSec": 2,
+    "backoffMaxSec": 120
+  },
+
+  "resources": {
+    "maxMemoryMB": 10
+  },
+
+  "dependencies": {
+    "system": ["bash"]
+  }
+}

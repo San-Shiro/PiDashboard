@@ -1,12 +1,12 @@
 {
   "id": "greeting",
   "name": "Greeting Banner",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "PiDashboard",
   "description": "A classy time-aware greeting widget with elegant typography and personalized messages.",
   "category": "Info",
   "icon": "sun",
-  "tier": "native",
+  "tier": "static",
   "estimatedRamMb": 1,
   "trust": "verified",
   "permissions": {
@@ -22,6 +22,7 @@
       "key": "name",
       "type": "text",
       "label": "Your Name",
+      "hint": "Shown in the greeting message",
       "default": ""
     },
     {
@@ -29,6 +30,41 @@
       "type": "boolean",
       "label": "Show Date",
       "default": true
+    },
+    {
+      "key": "showEmoji",
+      "type": "boolean",
+      "label": "Show Time Emoji",
+      "hint": "☀️ 🌙 etc. based on time of day",
+      "default": true
+    },
+    {
+      "key": "fontSize",
+      "type": "slider",
+      "label": "Greeting Font Size",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "key": "textColor",
+      "type": "color",
+      "label": "Text Color",
+      "hint": "Leave blank to use canvas theme",
+      "default": ""
+    },
+    {
+      "key": "alignment",
+      "type": "radio",
+      "label": "Text Alignment",
+      "options": [
+        "left",
+        "center",
+        "right"
+      ],
+      "default": "left"
     }
   ],
   "stateMode": "instance",
@@ -36,5 +72,8 @@
   "defaults": {
     "width": 400,
     "height": 120
+  },
+  "dataChannel": {
+    "type": "none"
   }
 }

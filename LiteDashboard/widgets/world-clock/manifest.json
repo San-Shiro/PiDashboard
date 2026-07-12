@@ -1,0 +1,73 @@
+{
+  "id": "world-clock",
+  "name": "World Clock",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Multi-timezone digital clocks with elegant minimal typography",
+  "category": "Time",
+  "icon": "globe",
+  "tier": "static",
+  "trust": "verified",
+  "estimatedRamMb": 1,
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "world-clock.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    {
+      "key": "timezone1",
+      "type": "text",
+      "default": "America/New_York",
+      "label": "Timezone 1"
+    },
+    {
+      "key": "label1",
+      "type": "text",
+      "default": "New York",
+      "label": "Label 1"
+    },
+    {
+      "key": "timezone2",
+      "type": "text",
+      "default": "Europe/London",
+      "label": "Timezone 2"
+    },
+    {
+      "key": "label2",
+      "type": "text",
+      "default": "London",
+      "label": "Label 2"
+    },
+    {
+      "key": "timezone3",
+      "type": "text",
+      "default": "Asia/Tokyo",
+      "label": "Timezone 3"
+    },
+    {
+      "key": "label3",
+      "type": "text",
+      "default": "Tokyo",
+      "label": "Label 3"
+    },
+    {
+      "key": "use24h",
+      "type": "boolean",
+      "default": false,
+      "label": "24-Hour Format"
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 600,
+    "height": 120
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

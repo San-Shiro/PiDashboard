@@ -1,0 +1,88 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .text-paragraph-root {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .text-paragraph-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: hidden;
+  }
+</style>
+
+<div class="text-paragraph-root" id="text-paragraph-root">
+  <div class="text-paragraph-content" id="text-paragraph-content">Add paragraph content here.</div>
+</div>
+
+<script>
+  var root = $('#text-paragraph-root');
+  var content = $('#text-paragraph-content');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#f3f4f6");
+
+  // Flow & layout styles
+  root.style.justifyContent = cfg.verticalAlign || "flex-start";
+  root.style.textAlign = cfg.alignment || "left";
+
+  // Content typography
+  content.textContent = cfg.textContent || "Add paragraph content here.";
+  content.style.fontFamily = cfg.fontFamily || "system-ui, sans-serif";
+  content.style.fontSize = Number(cfg.fontSize || 24) + "px";
+  content.style.fontWeight = cfg.fontWeight || "400";
+  content.style.lineHeight = cfg.lineHeight || 1.5;
+  content.style.letterSpacing = Number(cfg.letterSpacing || 0) + "px";
+  content.style.color = textColor;
+  content.style.textTransform = cfg.transform || "none";
+  content.style.fontStyle = cfg.italic ? "italic" : "normal";
+  content.style.opacity = Math.max(0.2, Math.min(1, Number(cfg.opacity !== undefined ? cfg.opacity : 1)));
+
+  // Width limits
+  var textWidth = Number(cfg.textWidth || 700);
+  if (textWidth > 0) {
+    content.style.width = textWidth + "px";
+    content.style.maxWidth = textWidth + "px";
+    if (cfg.alignment === "center") {
+      content.style.margin = "0 auto";
+    } else if (cfg.alignment === "right") {
+      content.style.marginLeft = "auto";
+      content.style.marginRight = "0";
+    } else {
+      content.style.marginLeft = "0";
+      content.style.marginRight = "auto";
+    }
+  }
+
+  // Max lines clamping
+  var maxLines = Number(cfg.maxLines || 0);
+  if (maxLines > 0) {
+    content.style.display = "-webkit-box";
+    content.style.webkitLineClamp = String(maxLines);
+    content.style.webkitBoxOrient = "vertical";
+  } else {
+    content.style.display = "block";
+    content.style.webkitLineClamp = "unset";
+  }
+
+  // Shadow effects
+  var shadowBlur = Number(cfg.shadowBlur || 0);
+  if (shadowBlur > 0) {
+    var shadowColor = cfg.shadowColor || "rgba(0,0,0,0.3)";
+    content.style.textShadow = "0 " + Math.round(shadowBlur / 2) + "px " + shadowBlur + "px " + shadowColor;
+  } else {
+    content.style.textShadow = "none";
+  }
+</script>

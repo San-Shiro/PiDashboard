@@ -5,19 +5,25 @@ import { composeHTML } from '../engine/compositor';
 import { CanvasConfig } from '../engine/schema';
 import { websocketHandler } from '../server/ws/display';
 import { stateStore } from '../server/state/state-store';
+import { startIpcWatcher } from '../server/ipc/tmpfs-watcher';
 import { Router, json, error } from '../server/router';
 import { registerAuthRoutes } from '../server/api/auth';
 import { registerTemplateRoutes } from '../server/api/templates';
 import { registerWidgetRoutes } from '../server/api/widgets';
 import { registerSystemRoutes } from '../server/api/system';
 import { registerMediaRoutes } from '../server/api/media';
+import { registerGpioRoutes } from '../server/api/gpio';
 import { requireAuth } from '../server/middleware/auth-gate';
+import { hijackConsole } from '../server/logger';
+
+hijackConsole();
 
 const PORT = parseInt(process.env.PORT || '3000');
 const ROOT = process.cwd();
 const ADMIN_DIST = join(ROOT, 'admin', 'dist');
 const MEDIA_DIR = join(ROOT, 'media');
 const SDK_DIR = join(ROOT, 'core', 'sdk');
+import { daemonManager } from '../server/daemon/daemon-manager';
 
 // ── MIME types for static serving ──────────────────────────────────────────────
 const MIME: Record<string, string> = {
@@ -34,8 +40,8 @@ function getMime(filepath: string): string {
 }
 
 // ── Shutdown handlers ──────────────────────────────────────────────────────────
-process.on('SIGINT', () => { console.log('\n[Server] Shutting down...'); stateStore.flushAll(); process.exit(0); });
-process.on('SIGTERM', () => { console.log('\n[Server] Shutting down...'); stateStore.flushAll(); process.exit(0); });
+process.on('SIGINT', () => { console.log('\n[Server] Shutting down...'); daemonManager.shutdownAll(); stateStore.flushAll(); process.exit(0); });
+process.on('SIGTERM', () => { console.log('\n[Server] Shutting down...'); daemonManager.shutdownAll(); stateStore.flushAll(); process.exit(0); });
 
 // ── Widget registry (shared across routes) ─────────────────────────────────────
 export function loadWidgetRegistry() {
@@ -50,6 +56,12 @@ export function loadWidgetRegistry() {
     try {
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
       if (!manifest.fragment) continue;
+      
+      // Security: enforce trust level based on whitelist
+      const CORE_WIDGETS = ['weather', 'music-player', 'sysinfo', 'clock', 'now-playing', 'daily-quote', 'notepad'];
+      if (!CORE_WIDGETS.includes(folder)) {
+        manifest.trust = 'community';
+      }
       
       // Load fragment HTML (single-file or multi-file)
       let fragmentHTML = '';
@@ -184,6 +196,24 @@ registerTemplateRoutes(router);
 registerWidgetRoutes(router);
 registerSystemRoutes(router);
 registerMediaRoutes(router);
+registerGpioRoutes(router);
+
+// Logging endpoint for widgets and Kiosk
+router.post('/api/logs', async (req) => {
+  try {
+    const body = await req.json();
+    const { level, source, message, data } = body;
+    const prefix = `[Frontend ${level?.toUpperCase()}] (${source})`;
+    if (level === 'error') {
+      console.error(prefix, message, data || '');
+    } else {
+      console.log(prefix, message, data || '');
+    }
+    return json({ success: true });
+  } catch(e: any) {
+    return error(e.message, 500);
+  }
+});
 
 // ── Bun.serve ──────────────────────────────────────────────────────────────────
 Bun.serve({
@@ -230,3 +260,16 @@ Bun.serve({
 console.log(`[PiDashboard] Server running on http://localhost:${PORT}`);
 console.log(`[PiDashboard] Kiosk display: http://localhost:${PORT}/`);
 console.log(`[PiDashboard] Admin panel:   http://localhost:${PORT}/admin/`);
+
+const activePath = join(ROOT, 'canvases', 'active.json');
+if (existsSync(activePath)) {
+  try {
+    const canvas = JSON.parse(readFileSync(activePath, 'utf8'));
+    daemonManager.reconcile(canvas);
+  } catch (e) {
+    console.error('[PiDashboard] Failed to initialize daemons:', e);
+  }
+}
+
+// Start watching for daemon IPC file updates
+startIpcWatcher(join(ROOT, 'state', 'ipc'));

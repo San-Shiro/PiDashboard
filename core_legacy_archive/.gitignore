@@ -1,0 +1,9 @@
+/src-anything
+node_modules/
+dist/
+admin/dist/
+state/logs/
+state/cache/
+.DS_Store
+secrets/
+config/

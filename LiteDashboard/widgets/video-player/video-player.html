@@ -1,0 +1,78 @@
+<style>
+  .vp-wrap {
+    width: 100%; height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+  }
+  .vp-video {
+    width: 100%; height: 100%;
+    display: block;
+    object-position: center;
+  }
+  .vp-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: -apple-system, sans-serif;
+    font-size: 13px;
+    background: #111;
+  }
+  .vp-empty-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+</style>
+
+<div class="vp-wrap" id="vp-container">
+  <div class="vp-empty" id="vp-empty">
+    <div class="vp-empty-icon">🎥</div>
+    <div>No Video URL</div>
+  </div>
+</div>
+
+<script>
+  var cfg = (typeof widget !== "undefined" && widget.config) ? widget.config : ((typeof PiWidget !== "undefined" && PiWidget.config) || (typeof config !== "undefined" ? config : {}));
+  var container = $('#vp-container');
+  var emptyEl = $('#vp-empty');
+
+  if (container && cfg.videoUrl) {
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    var video = document.createElement('video');
+    video.className = 'vp-video';
+    
+    // Normalize URL
+    var url = cfg.videoUrl;
+    if (url && !/^(https?:)?\/\//.test(url) && !url.startsWith('/')) {
+      url = '/media/' + url;
+    }
+    
+    video.src = url;
+    video.style.objectFit = cfg.objectFit || 'cover';
+    
+    if (cfg.loop !== false) video.loop = true;
+    if (cfg.muted !== false) video.muted = true;
+    if (cfg.autoplay !== false) {
+      video.autoplay = true;
+      video.playsInline = true;
+      video.play().catch(function(err) {
+        console.warn("[VideoPlayer] Autoplay failed:", err);
+      });
+    }
+
+    container.appendChild(video);
+
+    function onDestroy() {
+      if (video) {
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+      }
+    };
+  }
+</script>

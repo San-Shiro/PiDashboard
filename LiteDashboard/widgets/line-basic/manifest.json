@@ -1,0 +1,38 @@
+{
+  "id": "line-basic",
+  "name": "Line",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "A lightweight line and divider widget with angle, caps, dash styles, and gradient stroke support.",
+  "category": "Design",
+  "icon": "slash",
+  "tier": "static",
+  "runtimeTier": "lite",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "line-basic.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    { "key": "angle", "type": "slider", "label": "Angle", "min": 0, "max": 360, "step": 1, "unit": "deg", "default": 0 },
+    { "key": "thickness", "type": "number", "label": "Thickness", "min": 1, "max": 80, "step": 1, "unit": "px", "default": 4 },
+    { "key": "lineCap", "type": "radio", "label": "Cap", "options": ["butt", "round", "square"], "default": "round" },
+    { "key": "lineStyle", "type": "radio", "label": "Style", "options": ["solid", "dashed", "dotted"], "default": "solid" },
+    { "key": "background", "type": "background", "label": "Stroke", "default": { "type": "classic", "color": "#60A5FA", "color2": "#A78BFA", "stops": [{ "color": "#60A5FA", "position": 0 }, { "color": "#A78BFA", "position": 100 }], "gradientType": "linear", "angle": 90 } },
+    { "key": "opacity", "type": "slider", "label": "Opacity", "min": 0.1, "max": 1, "step": 0.05, "default": 1 }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 320,
+    "height": 80
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

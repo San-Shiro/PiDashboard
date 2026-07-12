@@ -91,10 +91,14 @@
 </div>
 
 <script>
-(function () {
-  var config = (typeof PiWidget !== 'undefined' && PiWidget.config) || {};
-  var name = config.name || '';
-  var showDate = config.showDate !== false;
+
+  var containerNode = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'default');
+  var shadowRoot = containerNode ? (containerNode.shadowRoot || containerNode) : document;
+  function $(sel) { return shadowRoot.querySelector(sel); }
+  function $(sel) { return shadowRoot.querySelectorAll(sel); }
+  var cfg = (typeof PiWidget !== 'undefined' && PiWidget.config) || (typeof config !== 'undefined' ? config : {});
+  var name = cfg.name || '';
+  var showDate = cfg.showDate !== false;
 
   var greetingText = document.getElementById('greetingText');
   var greetingEmoji = document.getElementById('greetingEmoji');
@@ -135,6 +139,10 @@
   update();
 
   // Refresh every 60 seconds to catch greeting period changes
-  setInterval(update, 60000);
-})();
+  var timer = setInterval(update, 60000);
+
+  var onDestroy = function() {
+    clearInterval(timer);
+  };
+
 </script>

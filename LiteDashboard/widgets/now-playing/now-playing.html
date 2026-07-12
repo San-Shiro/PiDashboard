@@ -1,0 +1,329 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .np-card {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: var(--canvas-text, #e0e0e0);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── Album Art ── */
+  .np-art-wrap {
+    flex-shrink: 0;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .np-art {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--canvas-surface, #1a1a2e), var(--canvas-border, #2a2a3e));
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    will-change: box-shadow;
+    transition: box-shadow 0.6s ease;
+  }
+  .np-art.playing {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 40px color-mix(in srgb, var(--canvas-accent, #6366f1) 30%, transparent);
+  }
+  .np-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .np-art-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    opacity: 0.2;
+  }
+  /* Reflection below art */
+  .np-reflection {
+    width: 100px;
+    height: 30px;
+    margin-top: 2px;
+    border-radius: 0 0 8px 8px;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--canvas-accent, #6366f1) 10%, transparent), transparent);
+    opacity: 0;
+    transform: scaleY(-1);
+    filter: blur(6px);
+    transition: opacity 0.6s ease;
+  }
+  .np-reflection.visible {
+    opacity: 0.5;
+  }
+
+  /* ── Track Info ── */
+  .np-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding-top: 4px;
+  }
+
+  /* Status indicator */
+  .np-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+  .np-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--canvas-muted, #888);
+    transition: background 0.3s ease;
+  }
+  .np-dot.playing {
+    background: #22c55e;
+    animation: np-pulse 1.8s ease-in-out infinite;
+  }
+  .np-state-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--canvas-muted, #888);
+  }
+
+  /* Marquee title */
+  .np-title-wrap {
+    overflow: hidden;
+    position: relative;
+    height: 28px;
+  }
+  .np-title {
+    font-size: clamp(16px, 4vw, 22px);
+    font-weight: 700;
+    white-space: nowrap;
+    line-height: 28px;
+    letter-spacing: -0.3px;
+    display: inline-block;
+    will-change: transform;
+  }
+  .np-title.scrolling {
+    animation: np-marquee var(--marquee-duration, 12s) linear infinite;
+  }
+  .np-title-wrap::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to right, transparent, var(--canvas-bg, #0a0a0a));
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .np-title.scrolling ~ .np-title-fade,
+  .np-title-wrap:has(.scrolling)::after {
+    opacity: 1;
+  }
+
+  .np-artist {
+    font-size: clamp(12px, 2.5vw, 14px);
+    color: var(--canvas-muted, #888);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+
+  /* ── Progress ── */
+  .np-progress-wrap {
+    margin-top: auto;
+    padding-top: 8px;
+  }
+  .np-bar-bg {
+    width: 100%;
+    height: 3px;
+    background: var(--canvas-border, #2a2a3e);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .np-bar-fg {
+    height: 100%;
+    width: 0%;
+    background: var(--canvas-accent, #6366f1);
+    border-radius: 2px;
+    transition: width 1s linear;
+    position: relative;
+    will-change: width;
+  }
+  .np-bar-fg::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -2px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--canvas-accent, #6366f1);
+    box-shadow: 0 0 6px var(--canvas-accent, #6366f1);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .np-bar-bg:hover .np-bar-fg::after {
+    opacity: 1;
+  }
+  .np-times {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    color: var(--canvas-muted, #888);
+    letter-spacing: 0.5px;
+  }
+
+  @keyframes np-pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+    50% { opacity: 0.6; box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+  }
+  @keyframes np-marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(calc(-50% - 20px)); }
+  }
+</style>
+
+<div class="np-card">
+  <div class="np-art-wrap" id="npArtWrap">
+    <div class="np-art" id="npArt">
+      <div class="np-art-placeholder" id="npPlaceholder">♪</div>
+      <img id="npArtImg" style="display:none" alt="">
+    </div>
+    <div class="np-reflection" id="npReflection"></div>
+  </div>
+  <div class="np-info">
+    <div class="np-status">
+      <div class="np-dot" id="npDot"></div>
+      <span class="np-state-label" id="npStateLabel">Stopped</span>
+    </div>
+    <div class="np-title-wrap">
+      <span class="np-title" id="npTitle">Waiting for media…</span>
+    </div>
+    <div class="np-artist" id="npArtist">—</div>
+    <div class="np-progress-wrap" id="npProgressWrap">
+      <div class="np-bar-bg">
+        <div class="np-bar-fg" id="npBar"></div>
+      </div>
+      <div class="np-times">
+        <span id="npElapsed">0:00</span>
+        <span id="npDuration">0:00</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  var containerNode = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'default');
+  var shadowRoot = containerNode ? (containerNode.shadowRoot || containerNode) : document;
+  function $(sel) { return shadowRoot.querySelector(sel); }
+  function $(sel) { return shadowRoot.querySelectorAll(sel); }
+  var showArt = widget.config.showAlbumArt !== false;
+  var showProgress = widget.config.showProgress !== false;
+  var speed = widget.config.marqueeSpeed || 3;
+
+  if (!showArt) $('#npArtWrap').style.display = 'none';
+  if (!showProgress) $('#npProgressWrap').style.display = 'none';
+
+  var titleEl = $('#npTitle');
+  var lastTitle = '';
+
+  function formatTime(sec) {
+    if (!sec || isNaN(sec)) return '0:00';
+    var m = Math.floor(sec / 60);
+    var s = Math.floor(sec % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function checkMarquee() {
+    var wrap = titleEl.parentElement;
+    if (!wrap) return;
+    var overflow = titleEl.scrollWidth > wrap.clientWidth;
+    if (overflow) {
+      var dur = Math.max(4, (titleEl.scrollWidth / 50) * (11 - speed));
+      titleEl.style.setProperty('--marquee-duration', dur + 's');
+      titleEl.textContent = titleEl.textContent.split('     ')[0] + '     ' + titleEl.textContent.split('     ')[0];
+      titleEl.classList.add('scrolling');
+    } else {
+      titleEl.classList.remove('scrolling');
+    }
+  }
+
+  function onState(state) {
+    if (!state) return;
+
+    // Title
+    var title = state.title || 'Unknown';
+    if (title !== lastTitle) {
+      lastTitle = title;
+      titleEl.classList.remove('scrolling');
+      titleEl.textContent = title;
+      setTimeout(checkMarquee, 50);
+    }
+
+    // Artist + Album
+    var parts = [];
+    if (state.artist) parts.push(state.artist);
+    if (state.album) parts.push(state.album);
+    $('#npArtist').textContent = parts.join(' · ') || '—';
+
+    // Play state
+    var isPlaying = state.state === 'playing' || state.state === 'play';
+    var dot = $('#npDot');
+    var label = $('#npStateLabel');
+    if (isPlaying) {
+      dot.classList.add('playing');
+      label.textContent = 'Playing';
+    } else {
+      dot.classList.remove('playing');
+      label.textContent = state.state === 'paused' ? 'Paused' : 'Stopped';
+    }
+
+    // Album art
+    if (showArt && state.albumArt) {
+      var img = $('#npArtImg');
+      img.src = state.albumArt;
+      img.style.display = 'block';
+      $('#npPlaceholder').style.display = 'none';
+      $('#npArt').classList.toggle('playing', isPlaying);
+      $('#npReflection').classList.toggle('visible', isPlaying);
+    }
+
+    // Progress
+    if (showProgress && state.duration > 0) {
+      var pct = Math.min(100, (state.elapsed / state.duration) * 100);
+      $('#npBar').style.width = pct + '%';
+      $('#npElapsed').textContent = formatTime(state.elapsed);
+      $('#npDuration').textContent = formatTime(state.duration);
+    }
+  }
+
+  function onDestroy() {}
+
+</script>

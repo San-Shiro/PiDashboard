@@ -66,7 +66,7 @@ describe('Full Pipeline Integration', () => {
     websocketHandler.open(ws2);
 
     expect(ws2.send).toHaveBeenCalledWith(
-      JSON.stringify({ type: 'data', widget: 'sysinfo', data: { cpu: 42 } })
+      JSON.stringify({ type: 'state', widget: 'sysinfo', instance: 'global', data: { cpu: 42 } })
     );
 
     websocketHandler.close(ws);

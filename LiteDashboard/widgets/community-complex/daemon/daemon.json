@@ -1,0 +1,10 @@
+{
+  "communication": {
+    "mode": "ipc_file",
+    "ipcFilename": "community-complex.json"
+  },
+  "runtime": {
+    "command": "bash ./daemon.sh",
+    "cwd": "daemon"
+  }
+}

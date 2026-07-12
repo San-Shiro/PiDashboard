@@ -1,23 +1,182 @@
-
-<div id="clock-display" style="font-family: monospace; font-size: 48px; color: #00ffcc; text-shadow: 0 0 10px #00ffcc; display: flex; align-items: center; justify-content: center; height: 100%; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid #333;">
-  00:00:00
-</div>
-<script>
-  var el = $('#clock-display');
-  var showSeconds = widget.config.showSeconds !== false;
-  
-  function update() {
-    var d = new Date();
-    var hh = String(d.getHours()).padStart(2, '0');
-    var mm = String(d.getMinutes()).padStart(2, '0');
-    var ss = String(d.getSeconds()).padStart(2, '0');
-    el.textContent = hh + ':' + mm + (showSeconds ? ':' + ss : '');
+<style>
+  .dclock {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    position: relative;
+    overflow: hidden;
   }
+
+  .dclock-time {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+  .dclock-hm {
+    font-variant-numeric: tabular-nums;
+    color: var(--canvas-text, #e0e0e0);
+  }
+  .dclock-sep {
+    opacity: 0.35;
+    transition: opacity 0.4s ease;
+    margin: 0 1px;
+  }
+  .dclock-sep.blink { animation: sepBlink 1s steps(1) infinite; }
+  @keyframes sepBlink {
+    0%, 49% { opacity: 0.4; }
+    50%, 100% { opacity: 0.08; }
+  }
+
+  .dclock-sec {
+    font-size: 0.4em;
+    opacity: 0.35;
+    margin-left: 4px;
+    font-weight: 300;
+    letter-spacing: 0;
+    vertical-align: super;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dclock-ampm {
+    font-size: 0.2em;
+    opacity: 0.3;
+    margin-left: 6px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    vertical-align: super;
+  }
+
+  .dclock-date {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.3;
+    margin-top: 8px;
+    font-variant-numeric: tabular-nums;
+    color: var(--canvas-text, #e0e0e0);
+  }
+
+  /* Subtle glow line under time */
+  .dclock-glow {
+    width: 60px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--canvas-accent, #6366f1), transparent);
+    opacity: 0.2;
+    margin-top: 10px;
+    border-radius: 1px;
+  }
+</style>
+
+<div class="dclock" id="dclock">
+  <div class="dclock-time" id="dtime">
+    <span class="dclock-hm" id="dhm">00:00</span>
+  </div>
+  <div class="dclock-glow"></div>
+  <div class="dclock-date" id="ddate"></div>
+</div>
+
+<script>
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+  var showSec = cfg.showSeconds !== false;
+  var use24 = cfg.use24h === true;
+  var showDate = cfg.showDate === true;
+  var blink = cfg.separatorBlink !== false;
   
-  setInterval(update, 1000);
-  update();
+  function isValidTimezone(timezone) {
+    if (!timezone || typeof timezone !== "string") return false;
+    try {
+      Intl.DateTimeFormat("en-US", { timeZone: timezone }).format(new Date());
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+  var tz = isValidTimezone(cfg.timezone) ? cfg.timezone : undefined;
   
-  function onDestroy() { 
-    console.log("Clock destroyed"); 
+  var fontSize = cfg.fontSize || 48;
+  var fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+  var weight = String(cfg.fontWeight || '300');
+  
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#e0e0e0");
+  var glowColor = PiTheme.getColor(cfg, cfg.glowColor, "--canvas-accent", "#6366f1");
+
+  var rootEl = $('#dclock');
+  var hmEl = $('#dhm');
+  var dateEl = $('#ddate');
+
+  if (rootEl) rootEl.style.fontFamily = fontFamily;
+  if (hmEl) {
+    hmEl.style.fontSize = fontSize + 'px';
+    hmEl.style.fontWeight = weight;
+    hmEl.style.color = textColor;
+  }
+  if (dateEl) {
+    dateEl.style.color = textColor;
+    if (!showDate) dateEl.style.display = 'none';
+  }
+
+  var glow = $('.dclock-glow');
+  if (glow) {
+    glow.style.background = 'linear-gradient(90deg, transparent, ' + glowColor + ', transparent)';
+  }
+
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+
+  function tick() {
+    var now = new Date();
+    var h, m, s, ampm = '';
+
+    if (tz) {
+      var parts = {};
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: tz,
+        hour: 'numeric', minute: 'numeric', second: 'numeric',
+        hour12: !use24
+      }).formatToParts(now).forEach(function(p) { parts[p.type] = p.value; });
+      h = parseInt(parts.hour) || 0;
+      m = parseInt(parts.minute) || 0;
+      s = parseInt(parts.second) || 0;
+      ampm = parts.dayPeriod || '';
+      if (use24) h = pad(h);
+    } else {
+      h = now.getHours();
+      m = now.getMinutes();
+      s = now.getSeconds();
+
+      if (!use24) {
+        ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+      }
+      h = pad(h);
+    }
+
+    var sep = '<span class="dclock-sep' + (blink ? ' blink' : '') + '">:</span>';
+    var html = h + sep + pad(m);
+
+    if (showSec) {
+      html += '<span class="dclock-sec">' + pad(s) + '</span>';
+    }
+    if (!use24 && ampm) {
+      html += '<span class="dclock-ampm">' + ampm + '</span>';
+    }
+
+    if (hmEl) hmEl.innerHTML = html;
+
+    if (showDate && dateEl) {
+      var dateOpts = { weekday: 'short', month: 'short', day: 'numeric' };
+      if (tz) dateOpts.timeZone = tz;
+      dateEl.textContent = now.toLocaleDateString('en-US', dateOpts);
+    }
+  }
+
+  var timer = setInterval(tick, 1000);
+  tick();
+
+  function onDestroy() {
+    clearInterval(timer);
   }
 </script>

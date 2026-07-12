@@ -64,7 +64,7 @@ export function validateCanvas(raw: any, registryIds: string[]): ValidationResul
     }
     
     if (!registryIds.includes(w.widget_id)) {
-      warnings.push(`Unknown widget '${w.widget_id}' skipped`);
+      errors.push(`Unknown widget '${w.widget_id}'`);
       return false;
     }
     

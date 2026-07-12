@@ -1,44 +1,68 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 
-// Polls each known widget data source at its own cadence and exposes
-// the latest payloads as a {widget_id: data} dictionary.
-// Used by both the display page and the layout preview canvas.
-
-const POLL_INTERVALS = {
-  weather: 60000,
-  lyrics: 2000,
-  sysinfo: 5000,
-  automation: 10000,
-};
-
-export default function useWidgetData(activeWidgetIds = []) {
+// Maintains a single WebSocket connection to the backend to receive live widget state.
+// Mirrors the exact same data payload the Kiosk display uses.
+export default function useWidgetData(activeWidgetIds = [], activeCanvas = null) {
   const [data, setData] = useState({});
-  const refs = useRef({});
-
-  const fetchOne = useCallback(async (name) => {
-    try {
-      const res = await fetch(`/api/widget-data/${name}`);
-      if (!res.ok) return;
-      const payload = await res.json();
-      setData((prev) => ({ ...prev, [name]: payload }));
-    } catch (e) {
-      // Stale data is preserved — never wipe last-known-good on error.
+  const wsRef = useRef(null);
+  
+  // Track the current active canvas as a ref so the websocket closure always has the latest
+  const canvasRef = useRef(activeCanvas);
+  useEffect(() => {
+    canvasRef.current = activeCanvas;
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      // Send the latest draft canvas to trigger dynamic daemon preview
+      wsRef.current.send(JSON.stringify({ type: 'preview', canvas: activeCanvas }));
     }
-  }, []);
+  }, [activeCanvas]);
 
   useEffect(() => {
-    // Reset polling timers when active widget set changes
-    Object.values(refs.current).forEach(clearInterval);
-    refs.current = {};
+    // Determine WebSocket URL from current host
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
+    const ws = new WebSocket(`${protocol}//${host}/ws/display`);
+    wsRef.current = ws;
 
-    for (const name of activeWidgetIds) {
-      const interval = POLL_INTERVALS[name];
-      if (!interval) continue;
-      fetchOne(name);
-      refs.current[name] = setInterval(() => fetchOne(name), interval);
-    }
-    return () => Object.values(refs.current).forEach(clearInterval);
-  }, [activeWidgetIds.join("|"), fetchOne]);
+    ws.onopen = () => {
+      // Identify as admin to receive all state updates without showing up as a kiosk display
+      ws.send(JSON.stringify({ type: "hello", role: "admin", canvasId: "admin-preview" }));
+      
+      // If we already have a canvas, send it as a preview
+      if (canvasRef.current) {
+        ws.send(JSON.stringify({ type: 'preview', canvas: canvasRef.current }));
+      }
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "state" && msg.widget) {
+          setData((prev) => {
+            const next = { ...prev };
+            // Initialize widget object if missing
+            if (!next[msg.widget]) next[msg.widget] = {};
+            
+            // Set instance or global data
+            if (msg.instance === "global") {
+              // If global, we replace the entire object (handling multiple instances inside if needed)
+              next[msg.widget] = msg.data;
+            } else {
+              // Individual instance update
+              next[msg.widget] = { ...next[msg.widget], [msg.instance]: msg.data };
+            }
+            return next;
+          });
+        }
+      } catch (e) {
+        console.error("Widget WebSocket parse error:", e);
+      }
+    };
+
+    return () => {
+      ws.close();
+      wsRef.current = null;
+    };
+  }, []);
 
   return data;
 }

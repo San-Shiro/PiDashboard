@@ -1,0 +1,236 @@
+<div class="sysinfo-widget-root">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    
+    .sysinfo-widget-root {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.3);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #f8fafc;
+      overflow: hidden;
+    }
+
+    .sysinfo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .sysinfo-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.01em;
+    }
+
+    .sysinfo-uptime {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .sysinfo-body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-grow: 1;
+      justify-content: center;
+    }
+
+    .sysinfo-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sysinfo-label-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .sysinfo-val {
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+
+    .sysinfo-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .sysinfo-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .bar-cpu {
+      background: linear-gradient(90deg, #10b981, #059669);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+    }
+
+    .bar-mem {
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    }
+
+    .bar-temp {
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+    }
+  </style>
+
+  <div class="sysinfo-header">
+    <div class="sysinfo-title">System Monitor</div>
+    <div class="sysinfo-uptime">Uptime: 0h 0m</div>
+  </div>
+
+  <div class="sysinfo-body">
+    <div class="sysinfo-row">
+      <div class="sysinfo-label-container">
+        <span>CPU</span>
+        <span class="sysinfo-val val-cpu">0%</span>
+      </div>
+      <div class="sysinfo-track">
+        <div class="sysinfo-bar bar-cpu"></div>
+      </div>
+    </div>
+
+    <div class="sysinfo-row">
+      <div class="sysinfo-label-container">
+        <span>Memory</span>
+        <span class="sysinfo-val val-mem">0%</span>
+      </div>
+      <div class="sysinfo-track">
+        <div class="sysinfo-bar bar-mem"></div>
+      </div>
+    </div>
+
+    <div class="sysinfo-row">
+      <div class="sysinfo-label-container">
+        <span>Core Temp</span>
+        <span class="sysinfo-val val-temp">0°C</span>
+      </div>
+      <div class="sysinfo-track">
+        <div class="sysinfo-bar bar-temp"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const script = document.currentScript;
+    const root = script.parentElement;
+    const wrapper = root.parentElement;
+
+    const cpuBar = root.querySelector('.bar-cpu');
+    const memBar = root.querySelector('.bar-mem');
+    const tempBar = root.querySelector('.bar-temp');
+
+    const cpuVal = root.querySelector('.val-cpu');
+    const memVal = root.querySelector('.val-mem');
+    const tempVal = root.querySelector('.val-temp');
+    const uptimeVal = root.querySelector('.sysinfo-uptime');
+
+    function updateBarColor(bar, value) {
+      // Dynamic warning coloring for extreme stress levels
+      if (value > 85) {
+        bar.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+        bar.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.4)';
+      } else if (value > 70) {
+        bar.style.background = 'linear-gradient(90deg, #f97316, #ea580c)';
+        bar.style.boxShadow = '0 0 10px rgba(249, 115, 22, 0.3)';
+      } else {
+        // Restore default colors
+        if (bar.classList.contains('bar-cpu')) {
+          bar.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+          bar.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.3)';
+        } else if (bar.classList.contains('bar-mem')) {
+          bar.style.background = 'linear-gradient(90deg, #3b82f6, #2563eb)';
+          bar.style.boxShadow = '0 0 10px rgba(59, 130, 246, 0.3)';
+        } else if (bar.classList.contains('bar-temp')) {
+          bar.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+          bar.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.3)';
+        }
+      }
+    }
+
+    function renderSysinfo(data) {
+      if (!data) return;
+
+      // Update CPU
+      if (data.cpu !== undefined) {
+        const cpu = Math.round(data.cpu);
+        cpuBar.style.width = cpu + '%';
+        cpuVal.textContent = cpu + '%';
+        updateBarColor(cpuBar, cpu);
+      }
+
+      // Update Memory
+      if (data.memory !== undefined) {
+        const mem = Math.round(data.memory);
+        memBar.style.width = mem + '%';
+        memVal.textContent = mem + '%';
+        updateBarColor(memBar, mem);
+      }
+
+      // Update Core Temp
+      if (data.temp !== undefined) {
+        const temp = Math.round(data.temp);
+        // Map 30°C-90°C range to 0%-100% width for visual clarity
+        const tempPercent = Math.min(Math.max((temp - 30) / (90 - 30) * 100, 5), 100);
+        tempBar.style.width = tempPercent + '%';
+        tempVal.textContent = temp + '°C';
+        updateBarColor(tempBar, temp);
+      }
+
+      // Update Uptime
+      if (data.uptime) {
+        uptimeVal.textContent = 'Uptime: ' + data.uptime;
+      }
+    }
+
+    // Scaffold Mock Data for beautiful instant rendering
+    const defaultMock = {
+      cpu: 18,
+      memory: 42,
+      temp: 45,
+      uptime: '2h 15m'
+    };
+    renderSysinfo(defaultMock);
+
+    // Register widget-scoped updater inside global updates
+    if (!window.__widgetUpdaters) {
+      window.__widgetUpdaters = {};
+    }
+    
+    // Save previous hook to allow multiple instances
+    const prevHook = window.__widgetUpdaters["sysinfo"];
+    window.__widgetUpdaters["sysinfo"] = function(data) {
+      if (prevHook) prevHook(data);
+      renderSysinfo(data);
+    };
+  })();
+</script>

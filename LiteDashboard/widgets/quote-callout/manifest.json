@@ -1,0 +1,77 @@
+{
+  "id": "quote-callout",
+  "name": "Quote / Callout",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Elegant quote or callout block with author line and accent styling.",
+  "category": "Typography",
+  "icon": "quote",
+  "tier": "pull",
+  "runtimeTier": "lite",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": true,
+    "disk": false
+  },
+  "resources": {
+    "externalFonts": [
+      "Inter",
+      "Outfit",
+      "Plus Jakarta Sans",
+      "Poppins",
+      "Montserrat",
+      "Manrope",
+      "DM Sans",
+      "Space Grotesk",
+      "Roboto",
+      "Merriweather",
+      "Playfair Display",
+      "Noto Serif",
+      "Noto Sans Devanagari",
+      "Noto Serif Devanagari",
+      "Mukta",
+      "Hind",
+      "Anek Devanagari"
+    ]
+  },
+  "fragment": {
+    "file": "quote-callout.html",
+    "format": "snippet"
+  },
+  "dataChannel": {
+    "type": "ipc_file",
+    "ipcFilename": "quote-callout.json",
+    "fetchModule": "fetch/quote-callout.ts"
+  },
+  "configSchema": [
+    { "key": "quoteText", "type": "textarea", "label": "Quote", "rows": 5, "default": "Small moments of clarity compound into better work." },
+    { "key": "author", "type": "text", "label": "Author", "default": "PiDashboard" },
+    { "key": "source", "type": "text", "label": "Source", "default": "" },
+    { "key": "sourceMode", "type": "radio", "label": "Source Mode", "options": [{ "value": "manual", "label": "Manual" }, { "value": "remote", "label": "Remote Fetch" }], "default": "remote" },
+    { "key": "sourceUrl", "type": "text", "label": "Source URL", "hint": "HTTP/HTTPS endpoint that returns JSON or plain text. The server fetches it and writes trusted widget state for the watcher.", "default": "https://dummyjson.com/quotes/random", "showIf": { "key": "sourceMode", "value": "remote" } },
+    { "key": "quotePath", "type": "text", "label": "Quote Path", "hint": "Dot path(s) for the quote text. Separate fallbacks with |, for example content|quote|text.", "default": "content|quote|text|body", "showIf": { "key": "sourceMode", "value": "remote" } },
+    { "key": "authorPath", "type": "text", "label": "Author Path", "hint": "Dot path(s) for the author. Separate fallbacks with |, for example author|name.", "default": "author|name|by", "showIf": { "key": "sourceMode", "value": "remote" } },
+    { "key": "refreshMinutes", "type": "number", "label": "Refresh Minutes", "min": 1, "max": 1440, "step": 1, "unit": "m", "default": 60, "panel": "performance", "hint": "Lower values make the background daemon fetch more often and increase server load. Use higher values for lighter Pi Zero operation.", "hintDisplay": "icon", "showIf": { "key": "sourceMode", "value": "remote" } },
+    { "key": "fontFamily", "type": "select", "label": "Font Family", "options": ["Inter, system-ui, sans-serif", "Outfit, system-ui, sans-serif", "\"Plus Jakarta Sans\", system-ui, sans-serif", "Poppins, system-ui, sans-serif", "Montserrat, system-ui, sans-serif", "Manrope, system-ui, sans-serif", "\"DM Sans\", system-ui, sans-serif", "\"Space Grotesk\", system-ui, sans-serif", "\"Merriweather\", Georgia, serif", "\"Playfair Display\", Georgia, serif", "\"Noto Serif\", Georgia, serif", "\"Noto Serif Devanagari\", Georgia, serif", "\"Noto Sans Devanagari\", system-ui, sans-serif", "Mukta, system-ui, sans-serif", "Hind, system-ui, sans-serif", "\"Anek Devanagari\", system-ui, sans-serif", "system-ui, sans-serif"], "default": "\"Merriweather\", Georgia, serif" },
+    { "key": "fontSize", "type": "slider", "label": "Quote Size", "min": 14, "max": 64, "step": 1, "unit": "px", "default": 28 },
+    { "key": "lineHeight", "type": "slider", "label": "Line Height", "min": 1, "max": 2, "step": 0.05, "unit": "", "default": 1.35 },
+    { "key": "alignment", "type": "radio", "label": "Align", "options": ["left", "center", "right"], "default": "left" },
+    { "key": "showQuoteMark", "type": "boolean", "label": "Show Quote Mark", "default": true },
+    { "key": "accentPosition", "type": "radio", "label": "Accent", "options": [{ "value": "left", "label": "Left Bar" }, { "value": "top", "label": "Top Bar" }], "default": "left" },
+    { "key": "background", "type": "background", "label": "Background", "default": { "type": "gradient", "color": "color-mix(in srgb, var(--canvas-surface, #1a1a2e) 82%, transparent)", "color2": "color-mix(in srgb, var(--canvas-accent, #6366f1) 12%, var(--canvas-surface, #1a1a2e))", "stops": [{ "color": "color-mix(in srgb, var(--canvas-surface, #1a1a2e) 88%, transparent)", "position": 0 }, { "color": "color-mix(in srgb, var(--canvas-accent, #6366f1) 10%, var(--canvas-surface, #1a1a2e))", "position": 62 }, { "color": "color-mix(in srgb, var(--canvas-accent, #6366f1) 18%, var(--canvas-surface, #1a1a2e))", "position": 100 }], "gradientType": "linear", "angle": 135, "mix": 48, "softness": 100 } },
+    { "key": "accentColor", "type": "color", "label": "Accent Color", "default": "#a78bfa" },
+    { "key": "textColor", "type": "color", "label": "Text Color", "default": "#ffffff" },
+    { "key": "metaColor", "type": "color", "label": "Meta Color", "default": "rgba(255,255,255,0.72)" }
+  ],
+  "stateMode": "global",
+  "persist": false,
+  "defaults": {
+    "width": 460,
+    "height": 240
+  },
+  "polling": {
+    "intervalSec": 3600,
+    "jitterSec": 0
+  }
+}

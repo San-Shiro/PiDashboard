@@ -1,0 +1,45 @@
+{
+  "id": "network-info",
+  "name": "Network Info",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Network status card with WiFi signal, IP address, and system uptime",
+  "category": "System",
+  "icon": "wifi",
+  "tier": "push",
+  "trust": "verified",
+  "estimatedRamMb": 1,
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "network-info.html",
+    "format": "snippet"
+  },
+  "daemon": "network",
+  "configSchema": [
+    {
+      "key": "showHostname",
+      "type": "boolean",
+      "default": true,
+      "label": "Show Hostname"
+    },
+    {
+      "key": "showUptime",
+      "type": "boolean",
+      "default": true,
+      "label": "Show Uptime"
+    }
+  ],
+  "stateMode": "global",
+  "persist": false,
+  "defaults": {
+    "width": 320,
+    "height": 200
+  },
+  "dataChannel": {
+    "type": "ipc_file",
+    "ipcFilename": "network-info.json"
+  }
+}

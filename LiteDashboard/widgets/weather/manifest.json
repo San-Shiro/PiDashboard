@@ -1,28 +1,161 @@
 {
   "id": "weather",
   "name": "Live Weather",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "author": "PiDashboard",
+  "description": "Live weather widget with searchable locations and lightweight fetch updates.",
+  "runtimeTier": "standard",
   "trust": "core",
   "permissions": {
-    "network": false,
+    "network": true,
     "disk": false
+  },
+  "resources": {
+    "externalFonts": [
+      "Inter",
+      "Outfit",
+      "Plus Jakarta Sans",
+      "Poppins",
+      "Montserrat",
+      "Manrope",
+      "DM Sans",
+      "Space Grotesk",
+      "Roboto",
+      "Noto Sans",
+      "Noto Sans Devanagari",
+      "Noto Serif Devanagari",
+      "Mukta",
+      "Hind",
+      "Anek Devanagari"
+    ]
   },
   "fragment": {
     "file": "weather.html",
     "format": "snippet"
   },
-  "configSchema": [],
-  "stateMode": "global",
-  "daemon": "weather",
+  "configSchema": [
+    {
+      "key": "locationData",
+      "type": "location-search",
+      "label": "Location",
+      "hint": "Search and select a place. The widget stores coordinates automatically.",
+      "default": null,
+      "placeholder": "Start typing a city..."
+    },
+    {
+      "key": "units",
+      "type": "radio",
+      "label": "Temperature Units",
+      "options": [
+        "celsius",
+        "fahrenheit"
+      ],
+      "default": "celsius"
+    },
+    {
+      "key": "showHumidity",
+      "type": "boolean",
+      "label": "Show Humidity",
+      "default": true
+    },
+    {
+      "key": "showWind",
+      "type": "boolean",
+      "label": "Show Wind Speed",
+      "default": true
+    },
+    {
+      "key": "showFeelsLike",
+      "type": "boolean",
+      "label": "Show Feels Like",
+      "default": false
+    },
+    {
+      "key": "showIcon",
+      "type": "boolean",
+      "label": "Show Weather Icon",
+      "default": true
+    },
+    {
+      "key": "fontFamily",
+      "type": "select",
+      "label": "Font Family",
+      "options": [
+        "Inter, system-ui, sans-serif",
+        "Outfit, system-ui, sans-serif",
+        "\"Plus Jakarta Sans\", system-ui, sans-serif",
+        "Poppins, system-ui, sans-serif",
+        "Montserrat, system-ui, sans-serif",
+        "Manrope, system-ui, sans-serif",
+        "\"DM Sans\", system-ui, sans-serif",
+        "\"Space Grotesk\", system-ui, sans-serif",
+        "Roboto, Arial, sans-serif",
+        "\"Noto Sans\", system-ui, sans-serif",
+        "\"Noto Sans Devanagari\", system-ui, sans-serif",
+        "\"Noto Serif Devanagari\", Georgia, serif",
+        "Mukta, system-ui, sans-serif",
+        "Hind, system-ui, sans-serif",
+        "\"Anek Devanagari\", system-ui, sans-serif",
+        "system-ui, sans-serif"
+      ],
+      "default": "Inter, system-ui, sans-serif"
+    },
+    {
+      "key": "compactMode",
+      "type": "boolean",
+      "label": "Compact Layout",
+      "hint": "Single line display for smaller widget sizes",
+      "default": false
+    },
+    {
+      "key": "scale",
+      "type": "slider",
+      "label": "Overall Scale",
+      "min": 0.6,
+      "max": 2,
+      "step": 0.05,
+      "default": 1
+    },
+    {
+      "key": "refreshMinutes",
+      "type": "slider",
+      "label": "Refresh",
+      "min": 5,
+      "max": 60,
+      "step": 5,
+      "unit": "min",
+      "default": 10,
+      "panel": "performance",
+      "hint": "Longer refresh intervals reduce network work and background load.",
+      "hintDisplay": "icon"
+    },
+    {
+      "key": "textColor",
+      "type": "color",
+      "label": "Text Color",
+      "hint": "Leave blank to use canvas theme",
+      "default": ""
+    },
+    {
+      "key": "accentColor",
+      "type": "color",
+      "label": "Accent Color",
+      "default": "#7dd3fc"
+    }
+  ],
+  "stateMode": "instance",
   "persist": false,
-  "author": "PiDashboard",
-  "description": "Live weather conditions and temperature display",
   "category": "Weather",
   "icon": "cloud-sun",
-  "tier": "native",
+  "daemon": "weather",
+  "tier": "push",
   "estimatedRamMb": 2,
   "defaults": {
     "width": 300,
     "height": 200
+  },
+  "dataChannel": {
+    "type": "ipc_file",
+    "ipcFilename": "weather.json"
   }
 }

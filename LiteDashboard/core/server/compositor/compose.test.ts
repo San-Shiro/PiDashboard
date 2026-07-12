@@ -101,7 +101,8 @@ describe('Compositor', () => {
 
   it('injects PiWidget SDK script in head', () => {
     const html = composeHTML(mockCanvas, mockRegistry);
-    expect(html).toContain('<script src="/media/libs/pi-widget-sdk.js"></script>');
+    expect(html).toContain('<script src="/media/libs/pi-widget.js');
+    expect(html).toContain('<script src="/media/libs/pi-theme.js');
   });
 
   it('injects Google Fonts for widgets that declare them', () => {

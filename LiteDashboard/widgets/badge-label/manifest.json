@@ -1,0 +1,67 @@
+{
+  "id": "badge-label",
+  "name": "Badge / Label",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Compact text chip for tags, status labels, and short markers.",
+  "category": "Typography",
+  "icon": "tag",
+  "tier": "static",
+  "runtimeTier": "lite",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "resources": {
+    "externalFonts": [
+      "Inter",
+      "Outfit",
+      "Plus Jakarta Sans",
+      "Poppins",
+      "Montserrat",
+      "Manrope",
+      "DM Sans",
+      "Space Grotesk",
+      "Roboto",
+      "Merriweather",
+      "Playfair Display",
+      "Bebas Neue",
+      "Noto Sans",
+      "Noto Sans Devanagari",
+      "Noto Serif Devanagari",
+      "Mukta",
+      "Hind",
+      "Anek Devanagari"
+    ]
+  },
+  "fragment": {
+    "file": "badge-label.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    { "key": "textContent", "type": "text", "label": "Label", "default": "Featured" },
+    { "key": "fontFamily", "type": "select", "label": "Font Family", "options": ["Inter, system-ui, sans-serif", "Outfit, system-ui, sans-serif", "\"Plus Jakarta Sans\", system-ui, sans-serif", "Poppins, system-ui, sans-serif", "Montserrat, system-ui, sans-serif", "Manrope, system-ui, sans-serif", "\"DM Sans\", system-ui, sans-serif", "\"Space Grotesk\", system-ui, sans-serif", "\"Segoe UI\", system-ui, sans-serif", "Roboto, Arial, sans-serif", "\"Noto Sans\", system-ui, sans-serif", "\"Noto Sans Devanagari\", system-ui, sans-serif", "\"Noto Serif Devanagari\", Georgia, serif", "Mukta, system-ui, sans-serif", "Hind, system-ui, sans-serif", "\"Anek Devanagari\", system-ui, sans-serif", "\"Bebas Neue\", system-ui, sans-serif", "\"Merriweather\", Georgia, serif", "\"Playfair Display\", Georgia, serif", "system-ui, sans-serif"], "default": "Inter, system-ui, sans-serif" },
+    { "key": "fontSize", "type": "slider", "label": "Size", "min": 10, "max": 48, "step": 1, "unit": "px", "default": 22 },
+    { "key": "fontWeight", "type": "select", "label": "Weight", "options": ["400", "500", "600", "700", "800"], "default": "700" },
+    { "key": "textColor", "type": "color", "label": "Text Color", "default": "#ffffff" },
+    { "key": "background", "type": "background", "label": "Background", "default": { "type": "classic", "color": "#4338ca", "color2": "#7c3aed", "stops": [{ "color": "#4338ca", "position": 0 }, { "color": "#6366f1", "position": 52 }, { "color": "#7c3aed", "position": 100 }], "gradientType": "linear", "angle": 135, "mix": 50, "softness": 100 } },
+    { "key": "padding", "type": "box", "label": "Padding", "default": { "top": 8, "right": 18, "bottom": 8, "left": 18 } },
+    { "key": "radius", "type": "radius", "label": "Corner Radius", "default": { "top": 999, "right": 999, "bottom": 999, "left": 999 } },
+    { "key": "alignment", "type": "radio", "label": "Align", "options": ["left", "center", "right"], "default": "left" },
+    { "key": "uppercase", "type": "boolean", "label": "Uppercase", "default": false },
+    { "key": "letterSpacing", "type": "slider", "label": "Letter Spacing", "min": -1, "max": 6, "step": 0.25, "unit": "px", "default": 0 },
+    { "key": "shadowBlur", "type": "slider", "label": "Shadow Blur", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 0 },
+    { "key": "shadowColor", "type": "color", "label": "Shadow Color", "default": "rgba(0,0,0,0.25)" }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 240,
+    "height": 72
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

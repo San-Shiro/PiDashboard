@@ -6,7 +6,7 @@
   "description": "An elegant photo display widget with smooth crossfade transitions and configurable framing.",
   "category": "Media",
   "icon": "image",
-  "tier": "native",
+  "tier": "static",
   "estimatedRamMb": 2,
   "trust": "verified",
   "permissions": {
@@ -37,7 +37,11 @@
       "key": "objectFit",
       "type": "select",
       "label": "Image Fit",
-      "options": ["cover", "contain", "fill"],
+      "options": [
+        "cover",
+        "contain",
+        "fill"
+      ],
       "default": "cover"
     }
   ],
@@ -46,5 +50,8 @@
   "defaults": {
     "width": 400,
     "height": 300
+  },
+  "dataChannel": {
+    "type": "none"
   }
 }

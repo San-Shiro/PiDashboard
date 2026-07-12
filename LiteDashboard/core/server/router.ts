@@ -46,7 +46,7 @@ export class Router {
 
         if (seg === '*') {
           // Wildcard: capture the rest as 'path'
-          params['*'] = '/' + reqSegments.slice(i).join('/');
+          params['*'] = reqSegments.slice(i).join('/');
           return { handler: route.handler, params };
         }
 

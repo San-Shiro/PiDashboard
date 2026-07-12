@@ -9,6 +9,11 @@
   <textarea id="note-input" placeholder="Type something..."></textarea>
 </div>
 <script>
+
+  var containerNode = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'default');
+  var shadowRoot = containerNode ? (containerNode.shadowRoot || containerNode) : document;
+  function $(sel) { return shadowRoot.querySelector(sel); }
+  function $(sel) { return shadowRoot.querySelectorAll(sel); }
   var ta = $('#note-input');
   
   function onState(state) {
@@ -22,4 +27,5 @@
   ta.addEventListener('input', function() {
     widget.patchState({ text: ta.value });
   });
+
 </script>

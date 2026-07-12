@@ -1,4 +1,4 @@
-import { readdirSync, existsSync, mkdirSync, unlinkSync, statSync, writeFileSync } from 'fs';
+import { readdirSync, existsSync, mkdirSync, unlinkSync, statSync, writeFileSync, renameSync } from 'fs';
 import { join, extname } from 'path';
 import { Router, json, error } from '../router';
 
@@ -74,5 +74,23 @@ export function registerMediaRoutes(router: Router) {
 
     unlinkSync(filePath);
     return json({ success: true });
+  });
+
+  // PATCH /api/media/:filename — rename uploaded file
+  router.patch('/api/media/:filename', async (req, params) => {
+    const oldName = sanitizeFilename(params.filename);
+    const oldPath = join(UPLOADS_DIR, oldName);
+    if (!existsSync(oldPath)) return error('File not found', 404);
+
+    const body = await req.json() as any;
+    const nextRaw = String(body?.filename || '').trim();
+    const nextName = sanitizeFilename(nextRaw);
+    if (!nextName) return error('Invalid new filename', 400);
+
+    const nextPath = join(UPLOADS_DIR, nextName);
+    if (existsSync(nextPath)) return error('Target filename already exists', 409);
+
+    renameSync(oldPath, nextPath);
+    return json({ success: true, filename: nextName, url: `/media/${nextName}` });
   });
 }

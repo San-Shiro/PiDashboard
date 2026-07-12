@@ -1,0 +1,47 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  svg {
+    width: 100%;
+    height: 100%;
+    transition: all 0.2s ease;
+  }
+</style>
+
+<div id="icon-container" data-bind-style="width:{{iconSize}}px; height:{{iconSize}}px;" style="display:flex; justify-content:center; align-items:center; width: 100%; height: 100%;">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" id="icon-svg" data-bind-style="color:{{iconColor}};">
+    <g id="icon-content"></g>
+  </svg>
+</div>
+
+<script>
+
+  var container = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'icon-container');
+  var root = container ? (container.shadowRoot || container) : document;
+  var iconSvg = root.querySelector('#icon-svg');
+  var iconContent = root.querySelector('#icon-content');
+
+  if (iconSvg && iconContent) {
+    var cfg = (typeof widget !== "undefined" && widget.config) ? widget.config : ((typeof PiWidget !== "undefined" && PiWidget.config) || (typeof config !== "undefined" ? config : {}));
+    
+    const icons = {
+      'star': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>',
+      'heart': '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>',
+      'circle': '<circle cx="12" cy="12" r="10"></circle>',
+      'triangle': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>',
+      'square': '<rect width="18" height="18" x="3" y="3" rx="2"></rect>'
+    };
+
+    iconContent.innerHTML = icons[cfg.iconName || 'star'] || icons['star'];
+    iconSvg.setAttribute('stroke-width', cfg.strokeWidth || '2');
+  }
+
+</script>

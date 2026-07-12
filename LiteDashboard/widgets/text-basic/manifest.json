@@ -1,0 +1,148 @@
+{
+  "id": "text-basic",
+  "name": "Basic Text",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "A simple static text block for titles or labels.",
+  "category": "Design",
+  "icon": "type",
+  "tier": "static",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "text-basic.html",
+    "format": "snippet"
+  },
+  "resources": {
+    "externalFonts": [
+      "Inter",
+      "Roboto",
+      "Poppins",
+      "Montserrat",
+      "Playfair Display",
+      "Oswald",
+      "Lora",
+      "Outfit",
+      "Pacifico",
+      "Josefin Sans",
+      "Quicksand",
+      "DM Serif Display",
+      "Noto Sans Devanagari",
+      "Noto Serif Devanagari",
+      "Mukta",
+      "Hind",
+      "Anek Devanagari"
+    ]
+  },
+  "configSchema": [
+    {
+      "key": "textContent",
+      "type": "text",
+      "label": "Text Content",
+      "default": "Your Text Here"
+    },
+    {
+      "key": "fontFamily",
+      "type": "select",
+      "label": "Font Family",
+      "options": [
+        "sans-serif",
+        "serif",
+        "monospace",
+        "Inter",
+        "Roboto",
+        "Poppins",
+        "Montserrat",
+        "Playfair Display",
+        "Oswald",
+        "Lora",
+        "Outfit",
+        "Pacifico",
+        "Josefin Sans",
+        "Quicksand",
+        "DM Serif Display",
+        "Noto Sans Devanagari",
+        "Noto Serif Devanagari",
+        "Mukta",
+        "Hind",
+        "Anek Devanagari"
+      ],
+      "default": "sans-serif"
+    },
+    {
+      "key": "fontSize",
+      "type": "slider",
+      "label": "Font Size",
+      "min": 10,
+      "max": 200,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "key": "fontWeight",
+      "type": "select",
+      "label": "Font Weight",
+      "options": [
+        "100",
+        "300",
+        "400",
+        "500",
+        "700",
+        "900"
+      ],
+      "default": "400"
+    },
+    {
+      "key": "fontStyle",
+      "type": "radio",
+      "label": "Font Style",
+      "options": [
+        "normal",
+        "italic"
+      ],
+      "default": "normal"
+    },
+    {
+      "key": "textColor",
+      "type": "color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "key": "alignment",
+      "type": "radio",
+      "label": "Alignment",
+      "options": [
+        "left",
+        "center",
+        "right",
+        "justify"
+      ],
+      "default": "center"
+    },
+    {
+      "key": "letterSpacing",
+      "type": "slider",
+      "label": "Letter Spacing",
+      "min": -5,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 300,
+    "height": 100
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}

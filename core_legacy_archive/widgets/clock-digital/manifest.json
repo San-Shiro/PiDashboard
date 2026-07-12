@@ -1,0 +1,36 @@
+{
+  "id": "clock-digital",
+  "name": "Digital Clock",
+  "version": "1.0.0",
+  "tier": "client",
+  "entrypoints": {
+    "fragment": "fragment/clock-digital.html"
+  },
+  "configSchema": [
+    {
+      "key": "timezone",
+      "type": "timezone",
+      "default": "",
+      "label": "Timezone"
+    },
+    {
+      "key": "format12h",
+      "type": "toggle",
+      "default": true,
+      "label": "Use 12-hour format (AM/PM)"
+    },
+    {
+      "key": "useManualTime",
+      "type": "toggle",
+      "default": false,
+      "label": "Set time completely manually"
+    },
+    {
+      "key": "manualTime",
+      "type": "time",
+      "default": "12:00",
+      "label": "Manual Time",
+      "showIf": { "key": "useManualTime", "value": true }
+    }
+  ]
+}

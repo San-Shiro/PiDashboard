@@ -1,12 +1,12 @@
 {
   "id": "analog-clock",
   "name": "Analog Clock",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "PiDashboard",
   "description": "A stunning SVG-based analog clock with smooth second hand animation and minimalist design.",
   "category": "Time",
   "icon": "clock",
-  "tier": "native",
+  "tier": "static",
   "estimatedRamMb": 1,
   "trust": "verified",
   "permissions": {
@@ -28,8 +28,51 @@
       "key": "style",
       "type": "radio",
       "label": "Clock Style",
-      "options": ["minimal", "classic"],
+      "options": [
+        "minimal",
+        "classic"
+      ],
       "default": "minimal"
+    },
+    {
+      "key": "showNumbers",
+      "type": "boolean",
+      "label": "Show Hour Numbers",
+      "default": false
+    },
+    {
+      "key": "showTicks",
+      "type": "boolean",
+      "label": "Show Minute Ticks",
+      "default": true
+    },
+    {
+      "key": "smoothSeconds",
+      "type": "boolean",
+      "label": "Smooth Seconds Hand",
+      "hint": "Continuous sweep vs tick movement",
+      "default": true
+    },
+    {
+      "key": "handColor",
+      "type": "color",
+      "label": "Hand Color",
+      "hint": "Leave blank to use canvas accent",
+      "default": ""
+    },
+    {
+      "key": "faceColor",
+      "type": "color",
+      "label": "Face Background",
+      "hint": "Leave blank for transparent",
+      "default": ""
+    },
+    {
+      "key": "timezone",
+      "type": "timezone",
+      "label": "Timezone",
+      "hint": "Leave blank for system default",
+      "default": ""
     }
   ],
   "stateMode": "instance",
@@ -37,5 +80,8 @@
   "defaults": {
     "width": 200,
     "height": 200
+  },
+  "dataChannel": {
+    "type": "none"
   }
 }

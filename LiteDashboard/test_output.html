@@ -1,0 +1,2393 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PiDashboard</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto&family=Outfit&family=Plus+Jakarta+Sans&family=Poppins&family=Montserrat&family=Manrope&family=DM+Sans&family=Space+Grotesk&family=Merriweather&family=Playfair+Display&family=Oswald&family=Bebas+Neue&family=Noto+Sans&family=Noto+Serif&family=Noto+Sans+Devanagari&family=Noto+Serif+Devanagari&family=Mukta&family=Hind&family=Anek+Devanagari&display=swap" rel="stylesheet">
+  <script src="/media/libs/pi-theme.js?v=1783770220520?v=1783770220520"></script>
+  <script src="/media/libs/pi-widget.js?v=1783770220520?v=1783770220520"></script>
+  <script src="/media/libs/pi-bind.js?v=1783770220520?v=1783770220520"></script>
+  
+  <style>
+    :root {
+      --canvas-bg: #0d1f0d;
+      --canvas-text: #c8e6c9;
+      --canvas-accent: #4caf50;
+      --canvas-surface: #1b3a1b;
+      --canvas-border: #2e5a2e;
+      --canvas-muted: #81a784;
+      --canvas-bg-2: #163316;
+      --canvas-bg-3: #214a21;
+      --canvas-text-2: #a5d6a7;
+      --canvas-text-3: #81c784;
+      --canvas-accent-2: #2e7d32;
+      --canvas-accent-3: #66bb6a;
+      --canvas-surface-2: #254825;
+      --canvas-surface-3: #2f5630;
+      --canvas-border-2: #437a43;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body { background: #0d1f0d; }
+    #kiosk-viewport { 
+      position: relative; 
+      width: 1920px; 
+      height: 1080px; 
+      overflow: hidden; 
+    }
+  </style>
+</head>
+<body>
+  <div id="kiosk-viewport" data-canvas-id="bingo-1780147342871">
+    
+    <div data-widget="image-slideshow" data-instance="97c387ee-7cb4-4b0a-b76c-43eae6efa0be" data-config='{&quot;images&quot;:&quot;/media/from_the_decorated_a4_cardboard_202605241426_(1).webp, /media/from_the_decorated_a4_cardboard_202605241426_(2).webp, /media/from_the_decorated_a4_cardboard_202605241426_(3).webp, /media/from_the_decorated_a4_cardboard_202605241426_(4).webp, /media/from_the_decorated_a4_cardboard_202605241426.webp, /media/from_the_decorated_a4_cardboard_202605241427.webp, /media/landscape.webp&quot;,&quot;fit&quot;:&quot;cover&quot;,&quot;renderMode&quot;:&quot;pingpong&quot;,&quot;showIndicators&quot;:false,&quot;transition&quot;:&quot;crossfade&quot;}' data-trust="core" style="position: absolute; left: 0px; top: 0px; width: 1920px; height: 1080px; z-index: 4; opacity: 0.26; overflow: hidden" id="97c387ee-7cb4-4b0a-b76c-43eae6efa0be">
+      <style>
+  .ss-wrap {
+    width: 100%; height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .ss-buf {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    will-change: opacity, transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    pointer-events: none;
+    z-index: 1;
+    transition: none; /* Default no transition for instant snap */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: var(--ss-fit-size, cover);
+  }
+  
+  /* Buffer States */
+  .ss-buf.active {
+    opacity: 1;
+    z-index: 2;
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: var(--ss-speed, 800ms);
+  }
+  .ss-buf.solid {
+    opacity: 1;
+    z-index: 1;
+    transition: none !important; /* Solid background underneath fade */
+  }
+
+  /* Effects */
+  /* Crossfade: Default (just opacity) */
+
+  /* Slide */
+  .ss-slide-fx .ss-buf { transform: translateX(100%) translateZ(0); opacity: 1; }
+  .ss-slide-fx .ss-buf.active { transform: translateX(0) translateZ(0); opacity: 1; }
+  .ss-slide-fx .ss-buf.solid { transform: translateX(0) translateZ(0); opacity: 1; }
+
+  /* Zoom */
+  .ss-zoom .ss-buf { transform: scale(1.1) translateZ(0); }
+  .ss-zoom .ss-buf.active { transform: scale(1) translateZ(0); }
+  .ss-zoom .ss-buf.solid { transform: scale(1) translateZ(0); }
+
+  /* Indicators */
+  .ss-indicators {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 10;
+  }
+  .ss-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    transition: all 0.3s ease;
+    border: none; cursor: pointer; padding: 0;
+  }
+  .ss-dot.active {
+    background: #fff;
+    transform: scale(1.3);
+    box-shadow: 0 0 6px rgba(255,255,255,0.5);
+  }
+  .ss-empty {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--canvas-muted, #666);
+    font-size: 12px;
+    text-align: center;
+    gap: 6px;
+  }
+  .ss-empty-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--canvas-surface, rgba(255,255,255,0.05));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; opacity: 0.4;
+  }
+</style>
+
+<div class="ss-wrap" id="ss-container">
+  <div class="ss-empty" id="ss-empty">
+    <div class="ss-empty-icon">🖼</div>
+    <span>No images configured</span>
+    <span style="font-size:10px;opacity:0.5">Add image URLs in widget config</span>
+  </div>
+</div>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = '97c387ee-7cb4-4b0a-b76c-43eae6efa0be';
+        var widgetType = 'image-slideshow';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: '', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+  var cfg = (typeof widget !== "undefined" && widget.config) ? widget.config : ((typeof PiWidget !== "undefined" && PiWidget.config) || (typeof config !== "undefined" ? config : {}));
+  var container = $('#ss-container');
+  var emptyEl = $('#ss-empty');
+
+  if (!container) return;
+
+  // Configuration
+  var raw = (cfg.images || '').trim();
+  
+  if (raw) {
+    var urls = raw.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    if (urls.length) {
+      // Shuffle
+      if (cfg.shuffle) {
+        for (var i = urls.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = urls[i]; urls[i] = urls[j]; urls[j] = t;
+        }
+      }
+
+      var interval = (cfg.interval || 6) * 1000;
+      var speed = cfg.transitionSpeed || 800;
+      var effect = cfg.transition || 'crossfade';
+      var fit = cfg.fit || 'cover';
+      var fitSize = fit === 'fill' ? '100% 100%' : fit;
+      var radius = cfg.borderRadius || 0;
+      var showDots = cfg.showIndicators !== false;
+
+      if (emptyEl) emptyEl.style.display = 'none';
+      container.className = 'ss-wrap ss-' + (effect === 'slide' ? 'slide-fx' : effect);
+      container.style.setProperty('--ss-speed', speed + 'ms');
+      container.style.setProperty('--ss-fit', fit);
+      container.style.setProperty('--ss-fit-size', fitSize);
+      container.style.borderRadius = radius + 'px';
+
+      initPingPong();
+
+      function initPingPong() {
+        // Exactly 2 buffers
+        var bufA = document.createElement('div');
+        var bufB = document.createElement('div');
+        bufA.className = 'ss-buf solid';
+        bufB.className = 'ss-buf';
+        container.appendChild(bufA);
+        container.appendChild(bufB);
+
+        var buffers = [bufA, bufB];
+
+        function normalizeUrl(url) {
+          if (!url) return '';
+          if (/^(https?:)?\/\//.test(url) || url.startsWith('/')) return url;
+          return '/media/' + url.replace(/^\/+/, '');
+        }
+
+        function setBufferImage(buffer, url) {
+          buffer.style.backgroundImage = url ? 'url("' + normalizeUrl(url).replace(/"/g, '\\"') + '")' : 'none';
+        }
+
+        // Indicators
+        var dots = [];
+        if (showDots && urls.length > 1) {
+          var dotWrap = document.createElement('div');
+          dotWrap.className = 'ss-indicators';
+          urls.forEach(function(_, i) {
+            var btn = document.createElement('button');
+            btn.className = 'ss-dot';
+            dotWrap.appendChild(btn);
+            dots.push(btn);
+          });
+          container.appendChild(dotWrap);
+        }
+
+        // State
+        var currentIdx = 0;
+        var activeBuf = 0;
+        var timer = null;
+        var paused = false;
+
+        // Init frame 0
+        setBufferImage(buffers[0], urls[0]);
+        if (urls.length > 1) {
+          setBufferImage(buffers[1], urls[1]);
+        }
+        updateDots(0);
+
+        function updateDots(idx) {
+          dots.forEach(function(d, i) {
+            d.classList.toggle('active', i === idx);
+          });
+        }
+
+        function advance() {
+          if (paused) return;
+          var nextIdx = (currentIdx + 1) % urls.length;
+          var nextBuf = 1 - activeBuf;
+
+          // Force reflow before transition
+          void buffers[nextBuf].offsetWidth;
+
+          // Start fade in
+          buffers[nextBuf].classList.add('active');
+
+          // When fade in finishes...
+          var onFadeComplete = function() {
+            buffers[nextBuf].removeEventListener('transitionend', onFadeComplete);
+            
+            // Swap roles
+            buffers[activeBuf].classList.remove('solid'); // Snap back to opacity:0
+            buffers[nextBuf].classList.remove('active');
+            buffers[nextBuf].classList.add('solid');
+            
+            activeBuf = nextBuf;
+            currentIdx = nextIdx;
+            updateDots(currentIdx);
+
+            // Preload the next-next image in the background buffer
+            var preloadIdx = (currentIdx + 1) % urls.length;
+            setBufferImage(buffers[1 - activeBuf], urls[preloadIdx]);
+          };
+
+          if (speed > 0) {
+            buffers[nextBuf].addEventListener('transitionend', onFadeComplete);
+            // Fallback just in case transitionend drops
+            setTimeout(function() {
+              if (buffers[nextBuf].classList.contains('active')) {
+                onFadeComplete();
+              }
+            }, speed + 50);
+          } else {
+            onFadeComplete();
+          }
+        }
+
+        if (urls.length > 1) {
+          timer = setInterval(advance, interval);
+        }
+
+        if (cfg.pauseOnHover) {
+          container.addEventListener('mouseenter', function() { paused = true; });
+          container.addEventListener('mouseleave', function() { paused = false; });
+        }
+
+        function onDestroy() {
+          if (timer) clearInterval(timer);
+        };
+      }
+    }
+  }
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+
+    <div data-widget="text-paragraph" data-instance="991f502e-6831-4054-a339-4c54d3361a81" data-config='{&quot;textContent&quot;:&quot;Add paragraph content here.&quot;,&quot;fontFamily&quot;:&quot;\&quot;Merriweather\&quot;, Georgia, serif&quot;,&quot;fontSize&quot;:24,&quot;fontWeight&quot;:&quot;400&quot;,&quot;lineHeight&quot;:1.5,&quot;letterSpacing&quot;:0,&quot;textWidth&quot;:700,&quot;textColor&quot;:&quot;#f3f4f6&quot;,&quot;alignment&quot;:&quot;left&quot;,&quot;verticalAlign&quot;:&quot;flex-start&quot;,&quot;transform&quot;:&quot;none&quot;,&quot;italic&quot;:false,&quot;maxLines&quot;:0,&quot;shadowBlur&quot;:0,&quot;shadowColor&quot;:&quot;rgba(0,0,0,0.3)&quot;,&quot;opacity&quot;:1}' data-trust="verified" data-fonts="Inter,Roboto,Outfit,Plus Jakarta Sans,Poppins,Montserrat,Manrope,DM Sans,Space Grotesk,Merriweather,Playfair Display,Oswald,Bebas Neue,Noto Sans,Noto Serif,Noto Sans Devanagari,Noto Serif Devanagari,Mukta,Hind,Anek Devanagari" style="position: absolute; left: 1500px; top: 140px; width: 400px; height: 60px; z-index: 5; opacity: 1; overflow: hidden" id="991f502e-6831-4054-a339-4c54d3361a81">
+      <style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .text-paragraph-root {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .text-paragraph-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: hidden;
+  }
+</style>
+
+<div class="text-paragraph-root" id="text-paragraph-root">
+  <div class="text-paragraph-content" id="text-paragraph-content">Add paragraph content here.</div>
+</div>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = '991f502e-6831-4054-a339-4c54d3361a81';
+        var widgetType = 'text-paragraph';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: '', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+  var root = $('#text-paragraph-root');
+  var content = $('#text-paragraph-content');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#f3f4f6");
+
+  // Flow & layout styles
+  root.style.justifyContent = cfg.verticalAlign || "flex-start";
+  root.style.textAlign = cfg.alignment || "left";
+
+  // Content typography
+  content.textContent = cfg.textContent || "Add paragraph content here.";
+  content.style.fontFamily = cfg.fontFamily || "system-ui, sans-serif";
+  content.style.fontSize = Number(cfg.fontSize || 24) + "px";
+  content.style.fontWeight = cfg.fontWeight || "400";
+  content.style.lineHeight = cfg.lineHeight || 1.5;
+  content.style.letterSpacing = Number(cfg.letterSpacing || 0) + "px";
+  content.style.color = textColor;
+  content.style.textTransform = cfg.transform || "none";
+  content.style.fontStyle = cfg.italic ? "italic" : "normal";
+  content.style.opacity = Math.max(0.2, Math.min(1, Number(cfg.opacity !== undefined ? cfg.opacity : 1)));
+
+  // Width limits
+  var textWidth = Number(cfg.textWidth || 700);
+  if (textWidth > 0) {
+    content.style.width = textWidth + "px";
+    content.style.maxWidth = textWidth + "px";
+    if (cfg.alignment === "center") {
+      content.style.margin = "0 auto";
+    } else if (cfg.alignment === "right") {
+      content.style.marginLeft = "auto";
+      content.style.marginRight = "0";
+    } else {
+      content.style.marginLeft = "0";
+      content.style.marginRight = "auto";
+    }
+  }
+
+  // Max lines clamping
+  var maxLines = Number(cfg.maxLines || 0);
+  if (maxLines > 0) {
+    content.style.display = "-webkit-box";
+    content.style.webkitLineClamp = String(maxLines);
+    content.style.webkitBoxOrient = "vertical";
+  } else {
+    content.style.display = "block";
+    content.style.webkitLineClamp = "unset";
+  }
+
+  // Shadow effects
+  var shadowBlur = Number(cfg.shadowBlur || 0);
+  if (shadowBlur > 0) {
+    var shadowColor = cfg.shadowColor || "rgba(0,0,0,0.3)";
+    content.style.textShadow = "0 " + Math.round(shadowBlur / 2) + "px " + shadowBlur + "px " + shadowColor;
+  } else {
+    content.style.textShadow = "none";
+  }
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+
+    <div data-widget="text-title" data-instance="73b3a762-394f-43f6-96d6-e20019ded921" data-config='{&quot;textContent&quot;:&quot;Your Title&quot;,&quot;fontFamily&quot;:&quot;Poppins, system-ui, sans-serif&quot;,&quot;fontSize&quot;:44,&quot;fontWeight&quot;:&quot;800&quot;,&quot;lineHeight&quot;:1.1,&quot;letterSpacing&quot;:0,&quot;textWidth&quot;:0,&quot;textColor&quot;:&quot;#ffffff&quot;,&quot;alignment&quot;:&quot;left&quot;,&quot;verticalAlign&quot;:&quot;center&quot;,&quot;transform&quot;:&quot;none&quot;,&quot;wrap&quot;:true,&quot;italic&quot;:false,&quot;strokeWidth&quot;:0,&quot;strokeColor&quot;:&quot;#000000&quot;,&quot;shadowBlur&quot;:0,&quot;shadowColor&quot;:&quot;rgba(0,0,0,0.35)&quot;,&quot;opacity&quot;:1}' data-trust="verified" data-fonts="Inter,Roboto,Outfit,Plus Jakarta Sans,Poppins,Montserrat,Manrope,DM Sans,Space Grotesk,Merriweather,Playfair Display,Oswald,Bebas Neue,Noto Sans,Noto Serif,Noto Sans Devanagari,Noto Serif Devanagari,Mukta,Hind,Anek Devanagari" style="position: absolute; left: 1640px; top: 340px; width: 240px; height: 60px; z-index: 6; opacity: 1; overflow: hidden" id="73b3a762-394f-43f6-96d6-e20019ded921">
+      <style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .text-title-root {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .text-title-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: hidden;
+  }
+</style>
+
+<div class="text-title-root" id="text-title-root">
+  <div class="text-title-content" id="text-title-content">Your Title</div>
+</div>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = '73b3a762-394f-43f6-96d6-e20019ded921';
+        var widgetType = 'text-title';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: '', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+  var root = $('#text-title-root');
+  var content = $('#text-title-content');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+
+  // Layout & Alignment
+  root.style.justifyContent = cfg.verticalAlign || "center";
+  root.style.textAlign = cfg.alignment || "left";
+
+  // Content typography
+  content.textContent = cfg.textContent || "Your Title";
+  content.style.fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+  content.style.fontSize = Number(cfg.fontSize || 64) + "px";
+  content.style.fontWeight = cfg.fontWeight || "800";
+  content.style.lineHeight = cfg.lineHeight || 1.1;
+  content.style.letterSpacing = Number(cfg.letterSpacing || 0) + "px";
+  content.style.color = textColor;
+  content.style.textTransform = cfg.transform || "none";
+  content.style.fontStyle = cfg.italic ? "italic" : "normal";
+  content.style.opacity = Math.max(0.2, Math.min(1, Number(cfg.opacity !== undefined ? cfg.opacity : 1)));
+
+  // Wrap limit
+  if (cfg.wrap === false) {
+    content.style.whiteSpace = "nowrap";
+    content.style.textOverflow = "ellipsis";
+  } else {
+    content.style.whiteSpace = "pre-wrap";
+    content.style.textOverflow = "clip";
+  }
+
+  // Width limits
+  var textWidth = Number(cfg.textWidth || 0);
+  if (textWidth > 0) {
+    content.style.width = textWidth + "px";
+    content.style.maxWidth = textWidth + "px";
+    if (cfg.alignment === "center") {
+      content.style.margin = "0 auto";
+    } else if (cfg.alignment === "right") {
+      content.style.marginLeft = "auto";
+      content.style.marginRight = "0";
+    } else {
+      content.style.marginLeft = "0";
+      content.style.marginRight = "auto";
+    }
+  }
+
+  // Stroke / Outline
+  var strokeWidth = Number(cfg.strokeWidth || 0);
+  if (strokeWidth > 0) {
+    var strokeColor = cfg.strokeColor || "#000000";
+    content.style.webkitTextStroke = strokeWidth + "px " + strokeColor;
+  } else {
+    content.style.webkitTextStroke = "unset";
+  }
+
+  // Shadow effects
+  var shadowBlur = Number(cfg.shadowBlur || 0);
+  if (shadowBlur > 0) {
+    var shadowColor = cfg.shadowColor || "rgba(0,0,0,0.35)";
+    content.style.textShadow = "0 " + Math.round(shadowBlur / 2) + "px " + shadowBlur + "px " + shadowColor;
+  } else {
+    content.style.textShadow = "none";
+  }
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+
+    <div data-widget="badge-label" data-instance="20e48efd-232f-446e-b8b6-4b4f533a4526" data-config='{&quot;textContent&quot;:&quot;Featured&quot;,&quot;fontFamily&quot;:&quot;\&quot;Bebas Neue\&quot;, system-ui, sans-serif&quot;,&quot;fontSize&quot;:39,&quot;fontWeight&quot;:&quot;700&quot;,&quot;textColor&quot;:&quot;#ffffff&quot;,&quot;background&quot;:{&quot;type&quot;:&quot;classic&quot;,&quot;color&quot;:&quot;#ffffff&quot;,&quot;color2&quot;:&quot;&quot;,&quot;stops&quot;:null,&quot;gradientType&quot;:&quot;linear&quot;,&quot;angle&quot;:135,&quot;mix&quot;:50,&quot;softness&quot;:100},&quot;paddingX&quot;:36,&quot;paddingY&quot;:6,&quot;radius&quot;:14,&quot;alignment&quot;:&quot;left&quot;,&quot;uppercase&quot;:false,&quot;letterSpacing&quot;:5.5,&quot;shadowBlur&quot;:0,&quot;shadowColor&quot;:&quot;rgba(0,0,0,0.25)&quot;}' data-trust="verified" data-fonts="Inter,Outfit,Plus Jakarta Sans,Poppins,Montserrat,Manrope,DM Sans,Space Grotesk,Roboto,Merriweather,Playfair Display,Bebas Neue,Noto Sans,Noto Sans Devanagari,Noto Serif Devanagari,Mukta,Hind,Anek Devanagari" style="position: absolute; left: 1457px; top: 914px; width: 311px; height: 89px; z-index: 7; opacity: 1; overflow: hidden" id="20e48efd-232f-446e-b8b6-4b4f533a4526">
+      <style>
+  .badge-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+  .badge-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+  }
+</style>
+
+<div class="badge-root" id="badge-root">
+  <div class="badge-pill" id="badge-pill">Featured</div>
+</div>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = '20e48efd-232f-446e-b8b6-4b4f533a4526';
+        var widgetType = 'badge-label';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: '', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+  var root = $('#badge-root');
+  var pill = $('#badge-pill');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  var padding = PiTheme.normalizeBoxValues(cfg.padding, { top: 8, right: 18, bottom: 8, left: 18 });
+  var radius = PiTheme.normalizeBoxValues(cfg.radius, { top: 999, right: 999, bottom: 999, left: 999 });
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+
+  var bg = PiTheme.usesCanvasTheme(cfg)
+    ? PiTheme.getBackground(
+        cfg,
+        cfg.background,
+        "color-mix(in srgb, var(--canvas-accent, #6366f1) 88%, white 10%)",
+        "color-mix(in srgb, var(--canvas-accent, #6366f1) 46%, var(--canvas-surface, #1a1a2e))"
+      )
+    : PiTheme.getBackground(
+        cfg,
+        cfg.background,
+        "#4338ca",
+        "#7c3aed",
+        "linear-gradient(135deg, var(--canvas-accent, #6366f1), color-mix(in srgb, var(--canvas-accent, #6366f1) 45%, var(--canvas-surface, #1a1a2e)))"
+      );
+
+  var borderStyle = PiTheme.usesCanvasTheme(cfg)
+    ? "1px solid color-mix(in srgb, var(--canvas-accent, #6366f1) 42%, transparent)"
+    : "1px solid rgba(255,255,255,0.08)";
+
+  var shadowBlur = Number(cfg.shadowBlur || 0);
+  var shadowStyle = shadowBlur > 0
+    ? "0 8px " + shadowBlur + "px " + (cfg.shadowColor || "rgba(0,0,0,0.25)")
+    : "0 12px 28px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18)";
+
+  // Root alignment
+  root.style.justifyContent = cfg.alignment === "center" ? "center" : (cfg.alignment === "right" ? "flex-end" : "flex-start");
+
+  // Pill styling
+  pill.textContent = cfg.textContent || "Featured";
+  pill.style.paddingTop = padding.top + "px";
+  pill.style.paddingRight = padding.right + "px";
+  pill.style.paddingBottom = padding.bottom + "px";
+  pill.style.paddingLeft = padding.left + "px";
+
+  pill.style.borderTopLeftRadius = radius.top + "px";
+  pill.style.borderTopRightRadius = radius.right + "px";
+  pill.style.borderBottomRightRadius = radius.bottom + "px";
+  pill.style.borderBottomLeftRadius = radius.left + "px";
+
+  pill.style.background = bg;
+  pill.style.border = borderStyle;
+  pill.style.color = textColor;
+  pill.style.fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+  pill.style.fontSize = Number(cfg.fontSize || 22) + "px";
+  pill.style.fontWeight = Number(cfg.fontWeight || 700);
+  pill.style.letterSpacing = Number(cfg.letterSpacing || 0) + "px";
+  pill.style.textTransform = cfg.uppercase ? "uppercase" : "none";
+  pill.style.boxShadow = shadowStyle;
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+
+    <div data-widget="icon-text-info" data-instance="4678baf3-901f-4173-8bc8-832d6c7f31c0" data-config='{&quot;icon&quot;:&quot;✅&quot;,&quot;label&quot;:&quot;Office&quot;,&quot;valueText&quot;:&quot;Open 10:00 - 18:00&quot;,&quot;subtext&quot;:&quot;&quot;,&quot;fontFamily&quot;:&quot;Poppins, system-ui, sans-serif&quot;,&quot;orientation&quot;:&quot;row&quot;,&quot;alignment&quot;:&quot;left&quot;,&quot;iconSize&quot;:46,&quot;labelSize&quot;:13,&quot;valueSize&quot;:16,&quot;gap&quot;:4,&quot;iconColor&quot;:&quot;#60a5fa&quot;,&quot;textColor&quot;:&quot;#ffffff&quot;,&quot;mutedColor&quot;:&quot;#420000&quot;,&quot;showSubtext&quot;:true}' data-trust="verified" data-fonts="Inter,Outfit,Plus Jakarta Sans,Poppins,Montserrat,Manrope,DM Sans,Space Grotesk,Roboto,Noto Sans,Noto Sans Devanagari,Noto Serif Devanagari,Mukta,Hind,Anek Devanagari" style="position: absolute; left: 1600px; top: 420px; width: 280px; height: 120px; z-index: 8; opacity: 1; overflow: hidden" id="4678baf3-901f-4173-8bc8-832d6c7f31c0">
+      <style>
+  .iti-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .iti-icon {
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .iti-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .iti-label,
+  .iti-value,
+  .iti-subtext {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+
+<div class="iti-root" id="iti-root">
+  <div class="iti-icon" id="iti-icon">ℹ️</div>
+  <div class="iti-copy" id="iti-copy">
+    <div class="iti-label" id="iti-label">Office</div>
+    <div class="iti-value" id="iti-value">Open 10:00 - 18:00</div>
+    <div class="iti-subtext" id="iti-subtext"></div>
+  </div>
+</div>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = '4678baf3-901f-4173-8bc8-832d6c7f31c0';
+        var widgetType = 'icon-text-info';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: '', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+  var container = document.getElementById(typeof instanceId !== 'undefined' ? instanceId : 'iti-root');
+  var shadowRoot = container ? (container.shadowRoot || container) : document;
+  var root = shadowRoot.querySelector("#iti-root");
+  var icon = shadowRoot.querySelector("#iti-icon");
+  var copy = shadowRoot.querySelector("#iti-copy");
+  var label = shadowRoot.querySelector("#iti-label");
+  var value = shadowRoot.querySelector("#iti-value");
+  var subtext = shadowRoot.querySelector("#iti-subtext");
+  if (!root || !icon || !copy || !label || !value || !subtext) return;
+
+  var cfg = (typeof widget !== "undefined" && widget.config) ? widget.config : ((typeof PiWidget !== "undefined" && PiWidget.config) || (typeof config !== "undefined" ? config : {}));
+  
+  var isColumn = cfg.orientation === "column";
+  var align = cfg.alignment || "left";
+  var gap = Number(cfg.gap || 12);
+
+  root.style.flexDirection = isColumn ? "column" : "row";
+  root.style.gap = String(gap) + "px";
+  root.style.alignItems = isColumn ? (align === "center" ? "center" : (align === "right" ? "flex-end" : "flex-start")) : "center";
+  root.style.justifyContent = isColumn ? "center" : "flex-start";
+  root.style.textAlign = align;
+  root.style.fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+
+  icon.textContent = cfg.icon || "ℹ️";
+  icon.style.width = String(Number(cfg.iconSize || 30) + 16) + "px";
+  icon.style.height = String(Number(cfg.iconSize || 30) + 16) + "px";
+  icon.style.display = "grid";
+  icon.style.placeItems = "center";
+  icon.style.borderRadius = "16px";
+  icon.style.background = "color-mix(in srgb, var(--canvas-accent, #60a5fa) 14%, transparent)";
+  icon.style.border = "1px solid color-mix(in srgb, var(--canvas-accent, #60a5fa) 24%, transparent)";
+  icon.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.08)";
+  icon.style.fontSize = String(Number(cfg.iconSize || 30)) + "px";
+  icon.style.color = PiTheme.getColor(cfg, cfg.iconColor, "--canvas-accent", "#60a5fa");
+
+  label.textContent = cfg.label || "Office";
+  label.style.fontSize = String(Number(cfg.labelSize || 13)) + "px";
+  label.style.color = PiTheme.getColor(cfg, cfg.mutedColor, "--canvas-muted", "rgba(255,255,255,0.68)");
+  label.style.textTransform = "uppercase";
+  label.style.letterSpacing = "0.08em";
+  label.style.fontWeight = "600";
+
+  value.textContent = cfg.valueText || "Open 10:00 - 18:00";
+  value.style.fontSize = String(Number(cfg.valueSize || 24)) + "px";
+  value.style.color = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+  value.style.fontWeight = "700";
+
+  if (cfg.showSubtext !== false && cfg.subtext) {
+    subtext.textContent = cfg.subtext;
+    subtext.style.display = "";
+    subtext.style.marginTop = "4px";
+    subtext.style.fontSize = String(Math.max(11, Math.round(Number(cfg.labelSize || 13) * 0.92))) + "px";
+    subtext.style.color = PiTheme.getColor(cfg, cfg.mutedColor, "--canvas-muted", "rgba(255,255,255,0.68)");
+  } else {
+    subtext.style.display = "none";
+  }
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+
+    <div data-widget="quote-callout" data-instance="360ca4aa-c298-474f-af6a-6400bb6cc711" data-config='{&quot;quoteText&quot;:&quot;Small moments of clarity compound into better work.&quot;,&quot;author&quot;:&quot;PiDashboard&quot;,&quot;source&quot;:&quot;&quot;,&quot;fontFamily&quot;:&quot;\&quot;Merriweather\&quot;, Georgia, serif&quot;,&quot;fontSize&quot;:28,&quot;lineHeight&quot;:1.35,&quot;alignment&quot;:&quot;left&quot;,&quot;showQuoteMark&quot;:true,&quot;accentPosition&quot;:&quot;left&quot;,&quot;accentColor&quot;:&quot;#ffffff&quot;,&quot;textColor&quot;:&quot;#ffffff&quot;,&quot;metaColor&quot;:&quot;rgba(255,255,255,0.72)&quot;,&quot;sourceMode&quot;:&quot;manual&quot;,&quot;__themeMode&quot;:&quot;canvas&quot;,&quot;background&quot;:{&quot;type&quot;:&quot;gradient&quot;,&quot;color&quot;:&quot;color-mix(in srgb, var(--canvas-surface, #1a1a2e) 82%, transparent)&quot;,&quot;color2&quot;:&quot;color-mix(in srgb, var(--canvas-accent, #6366f1) 12%, var(--canvas-surface, #1a1a2e))&quot;,&quot;stops&quot;:[{&quot;color&quot;:&quot;color-mix(in srgb, var(--canvas-surface, #1a1a2e) 88%, transparent)&quot;,&quot;position&quot;:0},{&quot;color&quot;:&quot;color-mix(in srgb, var(--canvas-accent, #6366f1) 10%, var(--canvas-surface, #1a1a2e))&quot;,&quot;position&quot;:62},{&quot;color&quot;:&quot;color-mix(in srgb, var(--canvas-accent, #6366f1) 18%, var(--canvas-surface, #1a1a2e))&quot;,&quot;position&quot;:100}],&quot;gradientType&quot;:&quot;linear&quot;,&quot;angle&quot;:135,&quot;mix&quot;:48,&quot;softness&quot;:100}}' data-trust="verified" data-fonts="Inter,Outfit,Plus Jakarta Sans,Poppins,Montserrat,Manrope,DM Sans,Space Grotesk,Roboto,Merriweather,Playfair Display,Noto Serif,Noto Sans Devanagari,Noto Serif Devanagari,Mukta,Hind,Anek Devanagari" style="position: absolute; left: 1420px; top: 720px; width: 480px; height: 140px; z-index: 9; opacity: 1; overflow: hidden" id="360ca4aa-c298-474f-af6a-6400bb6cc711">
+      <style>
+  .quote-root {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    overflow: hidden;
+  }
+  .quote-accent {
+    flex-shrink: 0;
+    border-radius: 999px;
+  }
+  .quote-body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    flex-grow: 1;
+  }
+  .quote-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .quote-status {
+    margin-top: 4px;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+</style>
+
+<div class="quote-root" id="quote-root">
+  <div class="quote-accent" id="quote-accent"></div>
+  <div class="quote-body" id="quote-body">
+    <div class="quote-text" id="quote-text">Small moments of clarity compound into better work.</div>
+    <div class="quote-meta" id="quote-meta">PiDashboard</div>
+    <div class="quote-status" id="quote-status" style="display:none"></div>
+  </div>
+</div>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = '360ca4aa-c298-474f-af6a-6400bb6cc711';
+        var widgetType = 'quote-callout';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: '', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+  var root = $('#quote-root');
+  var accent = $('#quote-accent');
+  var body = $('#quote-body');
+  var quoteTextEl = $('#quote-text');
+  var quoteMetaEl = $('#quote-meta');
+  var statusEl = $('#quote-status');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  function resolveQuotePath(source, pathSpec) {
+    if (source == null) return undefined;
+    var paths = String(pathSpec || "").split("|").map(function(part) { return part.trim(); }).filter(Boolean);
+    if (!paths.length) return undefined;
+    for (var i = 0; i < paths.length; i++) {
+      var path = paths[i];
+      var cursor = source;
+      var parts = path.split(".").map(function(part) { return part.trim(); }).filter(Boolean);
+      for (var j = 0; j < parts.length; j++) {
+        var part = parts[j];
+        if (cursor == null) break;
+        cursor = cursor[part];
+      }
+      if (cursor !== undefined && cursor !== null && String(cursor).trim() !== "") return cursor;
+    }
+    return undefined;
+  }
+
+  function normalizeQuotePayload(payload) {
+    if (Array.isArray(payload)) {
+      if (!payload.length) return {};
+      return payload[Math.floor(Math.random() * payload.length)] || {};
+    }
+    if (payload && Array.isArray(payload.results) && payload.results.length) {
+      return payload.results[Math.floor(Math.random() * payload.results.length)] || payload;
+    }
+    if (typeof payload === "string") return { quote: payload };
+    return payload || {};
+  }
+
+  function render(state) {
+    // Determine quote text & author
+    var quoteVal = cfg.quoteText || "Small moments of clarity compound into better work.";
+    var authorVal = cfg.author || "PiDashboard";
+    
+    if (cfg.sourceMode === 'remote' && state) {
+      var normalized = normalizeQuotePayload(state);
+      var resolvedQuote = resolveQuotePath(normalized, cfg.quotePath || "content|quote|text|body");
+      var resolvedAuthor = resolveQuotePath(normalized, cfg.authorPath || "author|name|by");
+      
+      if (resolvedQuote) quoteVal = resolvedQuote;
+      if (resolvedAuthor) authorVal = resolvedAuthor;
+      
+      if (cfg.source) {
+        authorVal = authorVal + " (" + cfg.source + ")";
+      }
+    } else if (cfg.source) {
+      authorVal = authorVal + " (" + cfg.source + ")";
+    }
+
+    // Styles
+    var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+    var metaColor = PiTheme.getColor(cfg, cfg.metaColor, "--canvas-muted", "rgba(255,255,255,0.72)");
+    var accentColor = PiTheme.getColor(cfg, cfg.accentColor, "--canvas-accent", "#a78bfa");
+    
+    var bg = PiTheme.getBackground(cfg, cfg.background, "rgba(25,25,46,0.8)", "rgba(99,102,241,0.18)", "linear-gradient(135deg, var(--canvas-surface, #1a1a2e) 88%, transparent)");
+
+    root.style.background = bg;
+    root.style.border = "1px solid color-mix(in srgb, var(--canvas-border, rgba(255,255,255,0.08)) 42%, transparent)";
+    root.style.boxShadow = "0 16px 36px rgba(0,0,0,0.16)";
+    root.style.fontFamily = cfg.fontFamily || "Merriweather, Georgia, serif";
+    root.style.borderRadius = "16px";
+    root.style.padding = "24px";
+    
+    var isLeft = cfg.accentPosition !== 'top';
+    root.style.flexDirection = isLeft ? "row" : "column";
+    root.style.gap = isLeft ? "20px" : "12px";
+
+    accent.style.background = accentColor;
+    accent.style.width = isLeft ? "4px" : "100%";
+    accent.style.height = isLeft ? "100%" : "4px";
+    accent.style.boxShadow = "0 0 12px " + accentColor;
+
+    quoteTextEl.style.fontSize = Number(cfg.fontSize || 28) + "px";
+    quoteTextEl.style.lineHeight = Number(cfg.lineHeight || 1.35);
+    quoteTextEl.style.color = textColor;
+    quoteTextEl.style.textAlign = cfg.alignment || "left";
+    
+    var quoteMark = cfg.showQuoteMark !== false ? "“" : "";
+    quoteTextEl.textContent = quoteMark + quoteVal;
+
+    quoteMetaEl.style.fontSize = "13px";
+    quoteMetaEl.style.color = metaColor;
+    quoteMetaEl.style.textAlign = cfg.alignment || "left";
+    quoteMetaEl.style.fontFamily = "Inter, system-ui, sans-serif";
+    quoteMetaEl.textContent = "— " + authorVal;
+  }
+
+  function onState(state) {
+    render(state);
+  }
+
+  // Initial render
+  var initialState = (typeof widget !== 'undefined' && widget.state) || (window.PiWidget && window.PiWidget.state) || null;
+  render(initialState);
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+
+    <div data-widget="stat-kpi-card" data-instance="05d35b1e-5c84-4766-9041-1d119855b2a8" data-config='{&quot;label&quot;:&quot;Revenue&quot;,&quot;valueText&quot;:&quot;24.8K&quot;,&quot;suffix&quot;:&quot;&quot;,&quot;deltaText&quot;:&quot;+12.4% vs last week&quot;,&quot;showDelta&quot;:true,&quot;trend&quot;:&quot;up&quot;,&quot;fontFamily&quot;:&quot;Inter, system-ui, sans-serif&quot;,&quot;valueSize&quot;:56,&quot;labelSize&quot;:13,&quot;padding&quot;:18,&quot;radius&quot;:20,&quot;alignment&quot;:&quot;left&quot;,&quot;background&quot;:{&quot;type&quot;:&quot;classic&quot;,&quot;color&quot;:&quot;#0f172a&quot;,&quot;color2&quot;:&quot;#1e293b&quot;,&quot;gradientType&quot;:&quot;linear&quot;,&quot;angle&quot;:135,&quot;mix&quot;:48,&quot;softness&quot;:100},&quot;textColor&quot;:&quot;#ffffff&quot;,&quot;mutedColor&quot;:&quot;rgba(255,255,255,0.7)&quot;,&quot;accentColor&quot;:&quot;#38bdf8&quot;}' data-trust="verified" data-fonts="Inter,Outfit,Plus Jakarta Sans,Poppins,Montserrat,Manrope,DM Sans,Space Grotesk,Roboto,Noto Sans,Noto Sans Devanagari,Noto Serif Devanagari,Mukta,Hind,Anek Devanagari" style="position: absolute; left: 1500px; top: 540px; width: 360px; height: 140px; z-index: 10; opacity: 1; overflow: hidden" id="05d35b1e-5c84-4766-9041-1d119855b2a8">
+      <style>
+  .kpi-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+  }
+  .kpi-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .kpi-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    z-index: 1;
+  }
+  .kpi-value {
+    line-height: 1;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 1;
+  }
+  .kpi-delta {
+    font-weight: 600;
+    z-index: 1;
+  }
+</style>
+
+<div class="kpi-root" id="kpi-root">
+  <div class="kpi-glow" id="kpi-glow"></div>
+  <div class="kpi-label" id="kpi-label">Revenue</div>
+  <div class="kpi-value" id="kpi-value">24.8K</div>
+  <div class="kpi-delta" id="kpi-delta">+12.4% vs last week</div>
+</div>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = '05d35b1e-5c84-4766-9041-1d119855b2a8';
+        var widgetType = 'stat-kpi-card';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: '', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+  var root = $('#kpi-root');
+  var glow = $('#kpi-glow');
+  var label = $('#kpi-label');
+  var val = $('#kpi-value');
+  var delta = $('#kpi-delta');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+  var mutedColor = PiTheme.getColor(cfg, cfg.mutedColor, "--canvas-muted", "rgba(255,255,255,0.7)");
+  var accentColor = PiTheme.getColor(cfg, cfg.accentColor, "--canvas-accent", "#38bdf8");
+  var deltaColor = cfg.trend === "down" ? "#f87171" : (cfg.trend === "neutral" ? mutedColor : accentColor);
+  var bg = PiTheme.getBackground(cfg, cfg.background, "#0f172a", "#1e293b", "linear-gradient(135deg, var(--canvas-surface, #1a1a2e), color-mix(in srgb, var(--canvas-surface, #1a1a2e) 60%, var(--canvas-bg, #0a0a0a)))");
+
+  // Apply root styles
+  root.style.padding = Number(cfg.padding || 18) + "px";
+  root.style.borderRadius = Number(cfg.radius || 20) + "px";
+  root.style.background = bg;
+  root.style.border = "1px solid color-mix(in srgb, var(--canvas-border, rgba(255,255,255,0.08)) 72%, transparent)";
+  root.style.boxShadow = "0 20px 36px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08)";
+  root.style.color = textColor;
+  root.style.fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+  root.style.textAlign = cfg.alignment || "left";
+
+  // Apply glow style
+  glow.style.background = "radial-gradient(circle at top right, color-mix(in srgb, " + accentColor + " 18%, transparent), transparent 38%)";
+
+  // Label, Value, Delta content & styles
+  label.textContent = cfg.label || "Revenue";
+  label.style.fontSize = Number(cfg.labelSize || 13) + "px";
+  label.style.color = mutedColor;
+
+  val.textContent = (cfg.valueText || "24.8K") + (cfg.suffix || "");
+  val.style.fontSize = Number(cfg.valueSize || 56) + "px";
+  val.style.fontWeight = "800";
+
+  if (cfg.showDelta !== false && cfg.deltaText) {
+    delta.textContent = cfg.deltaText;
+    delta.style.display = "block";
+    delta.style.fontSize = Math.max(11, Math.round(Number(cfg.labelSize || 13) * 0.92)) + "px";
+    delta.style.color = deltaColor;
+  } else {
+    delta.style.display = "none";
+  }
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+
+    <div data-widget="ticker-marquee-text" data-instance="8cab9eea-5209-4528-80bd-d45f96906883" data-config='{&quot;items&quot;:&quot;Welcome to PiDashboard\nTeam standup at 10:30\nScreening room opens at 18:00&quot;,&quot;separator&quot;:&quot;•&quot;,&quot;direction&quot;:&quot;right&quot;,&quot;speed&quot;:70,&quot;gap&quot;:48,&quot;fontFamily&quot;:&quot;Inter, system-ui, sans-serif&quot;,&quot;fontSize&quot;:24,&quot;fontWeight&quot;:&quot;700&quot;,&quot;uppercase&quot;:false,&quot;pauseOnHover&quot;:false,&quot;textColor&quot;:&quot;#ffffff&quot;,&quot;accentColor&quot;:&quot;#001632&quot;,&quot;background&quot;:{&quot;type&quot;:&quot;classic&quot;,&quot;color&quot;:&quot;rgba(255,255,255,0.05)&quot;,&quot;color2&quot;:&quot;#111827&quot;,&quot;gradientType&quot;:&quot;linear&quot;,&quot;angle&quot;:135,&quot;mix&quot;:50,&quot;softness&quot;:100},&quot;__themeMode&quot;:&quot;canvas&quot;,&quot;fpsLimit&quot;:30}' data-trust="verified" data-fonts="Inter,Outfit,Plus Jakarta Sans,Poppins,Montserrat,Manrope,DM Sans,Space Grotesk,Roboto,Bebas Neue,Noto Sans,Noto Sans Devanagari,Noto Serif Devanagari,Mukta,Hind,Anek Devanagari" style="position: absolute; left: 0px; top: 48px; width: 1920px; height: 80px; z-index: 11; opacity: 1; overflow: hidden" id="8cab9eea-5209-4528-80bd-d45f96906883">
+      <style>
+  .ticker-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 0 20px;
+    position: relative;
+  }
+  .ticker-track {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    will-change: transform;
+    animation-name: tickerScroll;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  .ticker-separator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 var(--ticker-gap, 48px);
+  }
+  @keyframes tickerScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+</style>
+
+<div class="ticker-root" id="ticker-root">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = '8cab9eea-5209-4528-80bd-d45f96906883';
+        var widgetType = 'ticker-marquee-text';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: '', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+  var root = $('#ticker-root');
+  var track = $('#ticker-track');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#ffffff");
+  var accentColor = PiTheme.getColor(cfg, cfg.accentColor, "--canvas-accent", "#60a5fa");
+  var bg = PiTheme.getBackground(cfg, cfg.background, "rgba(255,255,255,0.05)", "#111827", "transparent");
+
+  // Apply root styles
+  root.style.background = bg;
+  root.style.fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+  root.style.fontSize = Number(cfg.fontSize || 24) + "px";
+  root.style.fontWeight = cfg.fontWeight || "700";
+  root.style.textTransform = cfg.uppercase ? "uppercase" : "none";
+  root.style.border = "1px solid color-mix(in srgb, var(--canvas-border, rgba(255,255,255,0.08)) 42%, transparent)";
+  root.style.boxShadow = "0 10px 30px rgba(0,0,0,0.15)";
+  root.style.borderRadius = "12px";
+
+  // Build items list
+  var itemsRaw = cfg.items || "Welcome to PiDashboard\nTeam standup at 10:30\nScreening room opens at 18:00";
+  var items = itemsRaw.split('\n').map(function(item) { return item.trim(); }).filter(Boolean);
+  if (!items.length) items = ["Welcome to PiDashboard"];
+
+  var sep = cfg.separator || "•";
+  
+  // Set gap CSS variable
+  track.style.setProperty('--ticker-gap', Number(cfg.gap || 48) + 'px');
+
+  // We populate track with 2 sets of items for seamless infinite scroll
+  function buildTrackHTML() {
+    var content = "";
+    for (var i = 0; i < items.length; i++) {
+      content += '<span style="color: ' + textColor + '">' + items[i] + '</span>';
+      content += '<span class="ticker-separator" style="color: ' + accentColor + '">' + sep + '</span>';
+    }
+    return content + content; // duplicate for wrapping
+  }
+
+  track.innerHTML = buildTrackHTML();
+
+  // Calculate animation speed
+  var speedVal = Number(cfg.speed || 70);
+  
+  function adjustSpeed() {
+    var halfWidth = track.offsetWidth / 2;
+    var duration = halfWidth > 0 ? (halfWidth / speedVal) : 20;
+    track.style.animationDuration = duration + "s";
+  }
+
+  track.style.animationDirection = cfg.direction === "right" ? "reverse" : "normal";
+
+  if (cfg.pauseOnHover) {
+    track.addEventListener('mouseenter', function() {
+      track.style.animationPlayState = 'paused';
+    });
+    track.addEventListener('mouseleave', function() {
+      track.style.animationPlayState = 'running';
+    });
+  }
+
+  setTimeout(adjustSpeed, 100);
+  window.addEventListener('load', adjustSpeed);
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+
+    <div data-widget="weather" data-instance="3e07370c-0a3a-42f2-8e0e-ea7a4595caa9" data-config='{&quot;locationData&quot;:{&quot;name&quot;:&quot;Rājgarh&quot;,&quot;country&quot;:&quot;India&quot;,&quot;admin1&quot;:&quot;Madhya Pradesh&quot;,&quot;latitude&quot;:22.67821,&quot;longitude&quot;:74.94483,&quot;timezone&quot;:&quot;Asia/Kolkata&quot;,&quot;label&quot;:&quot;Rājgarh, Madhya Pradesh, India&quot;},&quot;units&quot;:&quot;celsius&quot;,&quot;showHumidity&quot;:true,&quot;showWind&quot;:true,&quot;showFeelsLike&quot;:false,&quot;showIcon&quot;:true,&quot;fontFamily&quot;:&quot;Inter, system-ui, sans-serif&quot;,&quot;compactMode&quot;:false,&quot;refreshMinutes&quot;:10,&quot;textColor&quot;:&quot;&quot;,&quot;accentColor&quot;:&quot;&quot;}' data-trust="core" data-fonts="Inter,Outfit,Plus Jakarta Sans,Poppins,Montserrat,Manrope,DM Sans,Space Grotesk,Roboto,Noto Sans,Noto Sans Devanagari,Noto Serif Devanagari,Mukta,Hind,Anek Devanagari" style="position: absolute; left: 157px; top: 343px; width: 380px; height: 180px; z-index: 12; opacity: 1; overflow: hidden" id="3e07370c-0a3a-42f2-8e0e-ea7a4595caa9">
+      <style>
+  .weather-card {
+    background: linear-gradient(135deg, rgba(14,165,233,0.18), rgba(37,99,235,0.16));
+    border-radius: 18px;
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    padding: 18px; box-sizing: border-box;
+    font-family: 'Inter', -apple-system, sans-serif;
+    position: relative; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: background 1s ease;
+  }
+  .weather-card.sunny { background: linear-gradient(135deg, rgba(251,191,36,0.20), rgba(249,115,22,0.18)); }
+  .weather-card.rainy { background: linear-gradient(135deg, rgba(71,85,105,0.22), rgba(30,41,59,0.22)); }
+  .weather-card.cloudy { background: linear-gradient(135deg, rgba(148,163,184,0.18), rgba(71,85,105,0.22)); }
+  .weather-card.night { background: linear-gradient(135deg, rgba(67,56,202,0.24), rgba(30,41,59,0.24)); }
+  .weather-card.thunder { background: linear-gradient(135deg, rgba(120,53,15,0.24), rgba(31,41,55,0.28)); }
+
+  .w-location {
+    font-size: 11px; opacity: 0.72;
+    font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .temp-display { display: flex; align-items: baseline; margin-bottom: 4px; }
+  .temp {
+    font-size: 54px; font-weight: 800;
+    line-height: 1; text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    color: var(--canvas-text);
+  }
+  .unit { font-size: 22px; margin-left: 4px; opacity: 0.8; color: var(--canvas-text); }
+  .condition {
+    font-size: 16px; font-weight: 600;
+    margin-bottom: auto;
+    letter-spacing: 0.04em; color: var(--canvas-text);
+  }
+  .details {
+    display: flex; flex-wrap: wrap;
+    gap: 12px; font-size: 12px;
+    opacity: 0.9; color: var(--canvas-text);
+  }
+  .details span { white-space: nowrap; }
+  .w-icon {
+    position: absolute; right: 14px; top: 10px;
+    font-size: 42px; opacity: 0.92;
+    transition: all 1s;
+    pointer-events: none;
+  }
+  .weather-status {
+    margin-top: 8px;
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  /* Compact mode */
+  .weather-card.compact { flex-direction: row; align-items: center; gap: 12px; padding: 14px; }
+  .weather-card.compact .temp { font-size: 36px; }
+  .weather-card.compact .unit { font-size: 18px; }
+  .weather-card.compact .condition { font-size: 12px; margin-bottom: 0; }
+  .weather-card.compact .w-icon { font-size: 28px; right: 14px; top: 14px; transform: none; }
+  .weather-card.compact .details { font-size: 11px; gap: 10px; }
+</style>
+
+<div id="wStage" style="width:100%;height:100%;overflow:hidden;">
+  <div class="weather-card" id="wCard">
+    <div class="w-icon" id="wIcon">⛅</div>
+    <div class="w-location" id="wLoc">--</div>
+    <div class="temp-display">
+      <div class="temp" id="wTemp">--</div>
+      <div class="unit" id="wUnit">°</div>
+    </div>
+    <div class="condition" id="wCond">Loading...</div>
+    <div class="details" id="wDetails">
+      <span id="wHumid">💧 --%</span>
+      <span id="wWind">💨 -- km/h</span>
+      <span id="wFeel" style="display:none">🌡 Feels --°</span>
+    </div>
+    <div class="weather-status" id="wStatus"></div>
+  </div>
+</div>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = '3e07370c-0a3a-42f2-8e0e-ea7a4595caa9';
+        var widgetType = 'weather';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: 'weather', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+  function onState(state) {
+    if (state.temperature !== undefined) $('#wTemp').textContent = state.temperature;
+    if (state.humidity !== undefined) $('#wHumid').textContent = '💧 ' + state.humidity + '%';
+    if (state.wind !== undefined) $('#wWind').textContent = '💨 ' + state.wind + ' mph';
+    if (state.location !== undefined) $('#wLoc').textContent = state.location;
+    
+    if (state.condition) {
+      $('#wCond').textContent = state.condition;
+      
+      var c = state.condition.toLowerCase();
+      var card = $('#wCard');
+      var icon = $('#wIcon');
+      
+      card.className = 'weather-card';
+      if (c.includes('sun') || c.includes('clear')) {
+        card.classList.add('sunny');
+        icon.textContent = '☀️';
+      } else if (c.includes('rain') || c.includes('thunder')) {
+        card.classList.add('rainy');
+        icon.textContent = '🌧️';
+      } else if (c.includes('night')) {
+        card.classList.add('night');
+        icon.textContent = '🌙';
+      } else {
+        card.classList.add('cloudy');
+        icon.textContent = '☁️';
+      }
+    }
+  }
+
+  var initialState = (typeof widget !== 'undefined' && widget.state) || (window.PiWidget && window.PiWidget.state) || null;
+  if (initialState && (initialState.temperature !== undefined || initialState.condition)) {
+    onState(initialState);
+  }
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+
+    <div data-widget="clock" data-instance="62c9fc69-4b5e-4932-b06b-29a950243f98" data-config='{&quot;showSeconds&quot;:true,&quot;use24h&quot;:true,&quot;showDate&quot;:true,&quot;timezone&quot;:&quot;Asia/Kolkata&quot;,&quot;fontFamily&quot;:&quot;Inter, system-ui, sans-serif&quot;,&quot;fontWeight&quot;:&quot;300&quot;,&quot;fontSize&quot;:48,&quot;textColor&quot;:&quot;&quot;,&quot;glowColor&quot;:&quot;&quot;,&quot;separatorBlink&quot;:false}' data-trust="verified" data-fonts="Inter,Outfit,Plus Jakarta Sans,Poppins,Montserrat,Manrope,DM Sans,Space Grotesk,Roboto,Merriweather,Playfair Display,Bebas Neue,Noto Sans,Noto Sans Devanagari,Noto Serif Devanagari,Mukta,Hind,Anek Devanagari" style="position: absolute; left: 1580px; top: 220px; width: 300px; height: 120px; z-index: 13; opacity: 1; overflow: hidden" id="62c9fc69-4b5e-4932-b06b-29a950243f98">
+      <style>
+  .dclock {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dclock-time {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+  .dclock-hm {
+    font-variant-numeric: tabular-nums;
+    color: var(--canvas-text, #e0e0e0);
+  }
+  .dclock-sep {
+    opacity: 0.35;
+    transition: opacity 0.4s ease;
+    margin: 0 1px;
+  }
+  .dclock-sep.blink { animation: sepBlink 1s steps(1) infinite; }
+  @keyframes sepBlink {
+    0%, 49% { opacity: 0.4; }
+    50%, 100% { opacity: 0.08; }
+  }
+
+  .dclock-sec {
+    font-size: 0.4em;
+    opacity: 0.35;
+    margin-left: 4px;
+    font-weight: 300;
+    letter-spacing: 0;
+    vertical-align: super;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dclock-ampm {
+    font-size: 0.2em;
+    opacity: 0.3;
+    margin-left: 6px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    vertical-align: super;
+  }
+
+  .dclock-date {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.3;
+    margin-top: 8px;
+    font-variant-numeric: tabular-nums;
+    color: var(--canvas-text, #e0e0e0);
+  }
+
+  /* Subtle glow line under time */
+  .dclock-glow {
+    width: 60px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--canvas-accent, #6366f1), transparent);
+    opacity: 0.2;
+    margin-top: 10px;
+    border-radius: 1px;
+  }
+</style>
+
+<div class="dclock" id="dclock">
+  <div class="dclock-time" id="dtime">
+    <span class="dclock-hm" id="dhm">00:00</span>
+  </div>
+  <div class="dclock-glow"></div>
+  <div class="dclock-date" id="ddate"></div>
+</div>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = '62c9fc69-4b5e-4932-b06b-29a950243f98';
+        var widgetType = 'clock';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: '', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+  var showSec = cfg.showSeconds !== false;
+  var use24 = cfg.use24h === true;
+  var showDate = cfg.showDate === true;
+  var blink = cfg.separatorBlink !== false;
+  
+  function isValidTimezone(timezone) {
+    if (!timezone || typeof timezone !== "string") return false;
+    try {
+      Intl.DateTimeFormat("en-US", { timeZone: timezone }).format(new Date());
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+  var tz = isValidTimezone(cfg.timezone) ? cfg.timezone : undefined;
+  
+  var fontSize = cfg.fontSize || 48;
+  var fontFamily = cfg.fontFamily || "Inter, system-ui, sans-serif";
+  var weight = String(cfg.fontWeight || '300');
+  
+  var textColor = PiTheme.getColor(cfg, cfg.textColor, "--canvas-text", "#e0e0e0");
+  var glowColor = PiTheme.getColor(cfg, cfg.glowColor, "--canvas-accent", "#6366f1");
+
+  var rootEl = $('#dclock');
+  var hmEl = $('#dhm');
+  var dateEl = $('#ddate');
+
+  if (rootEl) rootEl.style.fontFamily = fontFamily;
+  if (hmEl) {
+    hmEl.style.fontSize = fontSize + 'px';
+    hmEl.style.fontWeight = weight;
+    hmEl.style.color = textColor;
+  }
+  if (dateEl) {
+    dateEl.style.color = textColor;
+    if (!showDate) dateEl.style.display = 'none';
+  }
+
+  var glow = $('.dclock-glow');
+  if (glow) {
+    glow.style.background = 'linear-gradient(90deg, transparent, ' + glowColor + ', transparent)';
+  }
+
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+
+  function tick() {
+    var now = new Date();
+    var h, m, s, ampm = '';
+
+    if (tz) {
+      var parts = {};
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: tz,
+        hour: 'numeric', minute: 'numeric', second: 'numeric',
+        hour12: !use24
+      }).formatToParts(now).forEach(function(p) { parts[p.type] = p.value; });
+      h = parseInt(parts.hour) || 0;
+      m = parseInt(parts.minute) || 0;
+      s = parseInt(parts.second) || 0;
+      ampm = parts.dayPeriod || '';
+      if (use24) h = pad(h);
+    } else {
+      h = now.getHours();
+      m = now.getMinutes();
+      s = now.getSeconds();
+
+      if (!use24) {
+        ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+      }
+      h = pad(h);
+    }
+
+    var sep = '<span class="dclock-sep' + (blink ? ' blink' : '') + '">:</span>';
+    var html = h + sep + pad(m);
+
+    if (showSec) {
+      html += '<span class="dclock-sec">' + pad(s) + '</span>';
+    }
+    if (!use24 && ampm) {
+      html += '<span class="dclock-ampm">' + ampm + '</span>';
+    }
+
+    if (hmEl) hmEl.innerHTML = html;
+
+    if (showDate && dateEl) {
+      var dateOpts = { weekday: 'short', month: 'short', day: 'numeric' };
+      if (tz) dateOpts.timeZone = tz;
+      dateEl.textContent = now.toLocaleDateString('en-US', dateOpts);
+    }
+  }
+
+  var timer = setInterval(tick, 1000);
+  tick();
+
+  function onDestroy() {
+    clearInterval(timer);
+  }
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+
+    <div data-widget="line-basic" data-instance="e79be01e-7da4-479d-b389-d7d573fe972f" data-config='{&quot;orientation&quot;:&quot;horizontal&quot;,&quot;angle&quot;:0,&quot;lineStyle&quot;:&quot;solid&quot;,&quot;lineCap&quot;:&quot;square&quot;,&quot;thickness&quot;:3,&quot;opacity&quot;:1,&quot;background&quot;:{&quot;type&quot;:&quot;gradient&quot;,&quot;color&quot;:&quot;#4B5563&quot;,&quot;color2&quot;:&quot;#94A3B8&quot;,&quot;stops&quot;:[{&quot;color&quot;:&quot;#4B5563&quot;,&quot;position&quot;:0},{&quot;color&quot;:&quot;#94A3B8&quot;,&quot;position&quot;:100}],&quot;gradientType&quot;:&quot;linear&quot;,&quot;angle&quot;:90,&quot;mix&quot;:50,&quot;softness&quot;:100},&quot;__themeMode&quot;:&quot;canvas&quot;}' data-trust="verified" style="position: absolute; left: 0px; top: 146px; width: 1060px; height: 50px; z-index: 14; opacity: 1; overflow: hidden" id="e79be01e-7da4-479d-b389-d7d573fe972f">
+      <style>
+  :host { display: block; width: 100%; height: 100%; }
+  svg { display: block; width: 100%; height: 100%; overflow: visible; }
+</style>
+
+<svg id="lineSvg" viewBox="0 0 100 100" preserveAspectRatio="none">
+  <defs id="lineDefs"></defs>
+  <line id="linePath" x1="8" y1="50" x2="92" y2="50" />
+</svg>
+
+
+
+      
+      <script>
+      (function() {
+        var instanceId = 'e79be01e-7da4-479d-b389-d7d573fe972f';
+        var widgetType = 'line-basic';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+          try {
+            var container = document.getElementById(instanceId);
+            if (!container) return;
+            
+            var config = {};
+            try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
+            var state = {};
+            try { state = JSON.parse(container.getAttribute('data-state') || '{}'); } catch(e) {}
+            
+            var root = container.shadowRoot || container;
+            var $ = function(sel) { return root.querySelector(sel); };
+            var $$ = function(sel) { return root.querySelectorAll(sel); };
+            
+            var widget = {
+              config: config,
+              state: state,
+              _patchTimer: null,
+              _pendingDelta: {},
+              patchState: function(delta) {
+                Object.assign(this._pendingDelta, delta);
+                if (this._patchTimer) return;
+                var self = this;
+                this._patchTimer = setTimeout(function() {
+                  if (window.__piWs && window.__piWs.readyState === 1) {
+                    window.__piWs.send(JSON.stringify({
+                      type: 'patch', widget: widgetType, instance: instanceId, delta: self._pendingDelta
+                    }));
+                  }
+                  self._pendingDelta = {};
+                  self._patchTimer = null;
+                }, 100);
+              },
+              callDaemon: function(payload) {
+                if (window.__piWs && window.__piWs.readyState === 1) {
+                  var cmdMsg = { type: 'cmd', daemon: '', instance: instanceId, data: payload };
+                  window.__piWs.send(JSON.stringify(cmdMsg));
+                }
+              }
+            };
+            
+            // --- WIDGET CODE ---
+            
+
+
+
+
+            // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = [];
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
+            
+            window.PiWidget._registerAPI(instanceId, widgetType, {
+              onData: typeof onData !== 'undefined' ? onData : undefined,
+              onState: typeof onState !== 'undefined' ? onState : undefined,
+              onFrame: typeof onFrame !== 'undefined' ? onFrame : undefined,
+              onDestroy: typeof onDestroy !== 'undefined' ? onDestroy : undefined
+            });
+          } catch(__err) {
+            console.error('[PiWidget] Fatal error in ' + widgetType + ':', __err);
+            var errEl = document.createElement('div');
+            errEl.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);color:#ff6b6b;font-size:12px;padding:8px;z-index:9999;">⚠ Widget Error</div>';
+            if (root) root.appendChild(errEl);
+            window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          }
+        });
+      })();
+      </script>
+    </div>
+  
+  </div>
+  
+  <script>
+    window.onerror = function(msg, url, line, col, error) {
+      fetch('/api/logs', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ level: 'error', source: 'Kiosk', message: msg, data: error ? error.stack : '' }) }).catch(function(){});
+    };
+    var oldErr = console.error;
+    console.error = function() {
+      oldErr.apply(console, arguments);
+      var args = Array.from(arguments).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      fetch('/api/logs', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ level: 'error', source: 'Kiosk', message: args }) }).catch(function(){});
+    };
+    var oldLog = console.log;
+    console.log = function() {
+      oldLog.apply(console, arguments);
+      var args = Array.from(arguments).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      fetch('/api/logs', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ level: 'info', source: 'Kiosk', message: args }) }).catch(function(){});
+    };
+
+    PiWidget.context.serverTimezone = 'UTC';
+    PiWidget.context.canvasId = 'bingo-1780147342871';
+  </script>
+  
+  <script>
+    (function scheduleLoop() {
+      var tz = PiWidget.context.timezone;
+      var currentHHMM = new Date().toLocaleTimeString('en-US', {
+        timeZone: tz, hour12: false, hour: '2-digit', minute: '2-digit'
+      });
+      var today = new Date().toLocaleDateString('en-US', { timeZone: tz, weekday: 'short' }).toLowerCase();
+      
+      document.querySelectorAll('[data-schedule]').forEach(function(el) {
+        var sched = JSON.parse(el.getAttribute('data-schedule') || '{}');
+        var dayOk = !sched.days || sched.days.indexOf(today) !== -1;
+        var timeOk = true;
+        if (sched.from && sched.to) {
+          if (sched.from <= sched.to) {
+            timeOk = currentHHMM >= sched.from && currentHHMM < sched.to;
+          } else {
+            timeOk = currentHHMM >= sched.from || currentHHMM < sched.to;
+          }
+        }
+        el.style.display = (dayOk && timeOk) ? '' : 'none';
+      });
+      
+      setTimeout(scheduleLoop, 30000);
+    })();
+  </script>
+  <script>
+    (function() {
+      document.querySelectorAll('[data-widget]').forEach(function(container) {
+        if (container.dataset.trust === 'community') return;
+        if (!container.attachShadow) return;
+        
+        var shadow = container.attachShadow({ mode: 'open' });
+        
+        var fonts = container.dataset.fonts;
+        if (fonts) {
+          var link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://fonts.googleapis.com/css2?family=' + 
+                      fonts.split(',').map(function(f) { return f.trim().replace(/ /g, '+'); }).join('&family=') +
+                      '&display=swap';
+          shadow.appendChild(link);
+        }
+        
+        var resetStyle = document.createElement('style');
+        resetStyle.textContent = "*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } :host { width: 100%; height: 100%; display: block; overflow: hidden; background: transparent !important; font-family: Inter, system-ui, sans-serif; color: var(--canvas-text); }";
+        shadow.appendChild(resetStyle);
+        
+        while (container.firstChild) {
+          shadow.appendChild(container.firstChild);
+        }
+      });
+    })();
+  </script>
+  <script>
+    (function() {
+      function scaleViewport() {
+        var vp = document.getElementById('kiosk-viewport');
+        var w = window.innerWidth, h = window.innerHeight;
+        var vw = 1920, vh = 1080;
+        var scale = Math.min(w / vw, h / vh);
+        vp.style.transform = 'scale(' + scale + ')';
+        vp.style.transformOrigin = 'top left';
+        vp.style.position = 'absolute';
+        vp.style.left = (w - vw * scale) / 2 + 'px';
+        vp.style.top = (h - vh * scale) / 2 + 'px';
+      }
+      window.addEventListener('resize', scaleViewport);
+      scaleViewport();
+    })();
+  </script>
+  
+  <!-- WebSocket client -->
+  <script>
+    (function() {
+      var wsUrl = (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws/display';
+      var reconnectDelay = 1000;
+      var maxDelay = 30000;
+      
+      function connect() {
+        var ws = new WebSocket(wsUrl);
+        window.__piWs = ws;
+        
+        ws.onopen = function() {
+          reconnectDelay = 1000;
+          ws.send(JSON.stringify({ type: 'hello', role: 'display', canvasId: window.PiWidget.context.canvasId }));
+        };
+        
+        ws.onmessage = function(event) {
+          try {
+            var msg = JSON.parse(event.data);
+            if (msg.type === 'state') {
+              if (window.PiWidget && window.PiWidget._dispatchState) {
+                window.PiWidget._dispatchState(msg.widget, msg.instance, msg.data);
+              }
+              // Broadcast to community iframes
+              var iframes = document.querySelectorAll('iframe');
+              for (var i=0; i<iframes.length; i++) {
+                iframes[i].contentWindow.postMessage({ type: 'pi_state', payload: msg.data }, '*');
+              }
+            } else if (msg.type === 'data') {
+              // Legacy fallback
+              if (window.PiWidget && window.PiWidget._dispatchState) {
+                window.PiWidget._dispatchState(msg.widget, 'global', msg.data);
+              }
+            } else if (msg.type === 'reload') {
+              window.location.reload();
+            }
+          } catch(e) {}
+        };
+        
+        window.addEventListener('message', function(e) {
+          if (!e.data) return;
+          if (e.data.type === 'pi_patch') {
+            if (window.__piWs && window.__piWs.readyState === 1) {
+              window.__piWs.send(JSON.stringify({
+                type: 'patch', widget: e.data.widget, instance: e.data.instance, delta: e.data.delta
+              }));
+            }
+          } else if (e.data.type === 'pi_cmd') {
+            if (window.__piWs && window.__piWs.readyState === 1) {
+              window.__piWs.send(JSON.stringify({
+                type: 'cmd', daemon: e.data.daemon, instance: e.data.instance, data: e.data.data
+              }));
+            }
+          }
+        });
+        
+        ws.onclose = function() {
+          setTimeout(function() {
+            reconnectDelay = Math.min(reconnectDelay * 2, maxDelay);
+            connect();
+          }, reconnectDelay);
+        };
+      }
+      
+      connect();
+    })();
+  </script>
+  <script>
+    if (window.PiWidget && window.PiWidget._startFrameLoop) {
+      window.PiWidget._startFrameLoop(60);
+    }
+  </script>
+</body>
+</html>

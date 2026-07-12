@@ -31,18 +31,32 @@ function serializeFilter(filter: WidgetFilter): string {
 }
 
 function separateFragmentScript(html: string): { htmlPart: string; scriptPart: string } {
-  const scriptRegex = /<script>([\s\S]*?)<\/script>/gi;
-  let lastMatch: RegExpMatchArray | null = null;
-  let match;
+  let scriptContent = '';
+  let htmlPart = html;
   
-  while ((match = scriptRegex.exec(html)) !== null) {
-    lastMatch = match;
+  const scriptStartRegex = /<script(?:\s+[^>]*?)?>/gi;
+  let match;
+  let targetIndex = -1;
+  let targetLength = 0;
+  
+  while ((match = scriptStartRegex.exec(html)) !== null) {
+    if (match[0].toLowerCase().includes('src=')) {
+      continue;
+    }
+    const startIdx = match.index;
+    const innerStart = startIdx + match[0].length;
+    const endIdx = html.indexOf('</script>', innerStart);
+    if (endIdx !== -1) {
+      scriptContent = html.substring(innerStart, endIdx);
+      targetIndex = startIdx;
+      targetLength = (endIdx + 9) - startIdx;
+      break;
+    }
   }
   
-  if (!lastMatch) return { htmlPart: html, scriptPart: '' };
-  
-  const scriptContent = lastMatch[1];
-  const htmlPart = html.slice(0, lastMatch.index!) + html.slice(lastMatch.index! + lastMatch[0].length);
+  if (targetIndex !== -1) {
+    htmlPart = html.substring(0, targetIndex) + html.substring(targetIndex + targetLength);
+  }
   
   return { htmlPart, scriptPart: scriptContent };
 }
@@ -50,13 +64,11 @@ function separateFragmentScript(html: string): { htmlPart: string; scriptPart: s
 function renderInlineWidget(instance: WidgetInstance, manifest: WidgetManifest, fragmentHTML: string, style: string, dataAttrs: string): string {
   const { htmlPart, scriptPart } = separateFragmentScript(fragmentHTML);
   
-  let scriptBlock = '';
-  if (scriptPart) {
-    scriptBlock = `
+  let scriptBlock = `
       <script>
       (function() {
-        var instanceId = '${instance.id}';
-        var widgetType = '${instance.widget_id}';
+        var instanceId = ${JSON.stringify(instance.id)};
+        var widgetType = ${JSON.stringify(instance.widget_id)};
         
         window.addEventListener('DOMContentLoaded', function() {
           try {
@@ -91,17 +103,30 @@ function renderInlineWidget(instance: WidgetInstance, manifest: WidgetManifest, 
                   self._patchTimer = null;
                 }, 100);
               },
-              callDaemon: function(payload) {
+              callDaemon: function(data) {
                 if (window.__piWs && window.__piWs.readyState === 1) {
-                  var cmdMsg = { type: 'cmd', daemon: '${manifest.daemon || ''}', instance: instanceId, data: payload };
+                  var daemonId = ${manifest.daemon ? JSON.stringify(manifest.daemon) : "''"};
+                  var cmdMsg = { type: 'cmd', daemon: daemonId, instance: instanceId, data: data };
                   window.__piWs.send(JSON.stringify(cmdMsg));
                 }
               }
             };
             
             // --- WIDGET CODE ---
-            ${scriptPart}
+            ${scriptPart || ''}
             // --- END WIDGET CODE ---
+            
+            if (window.PiBind) {
+              window.PiBind.apply(container, Object.assign({}, config, state));
+            }
+            
+            if (window._piAddons) {
+              var addons = ${manifest.addons ? JSON.stringify(manifest.addons) : '[]'};
+              for (var i=0; i<addons.length; i++) {
+                var addon = window._piAddons[addons[i]];
+                if (addon && addon.init) addon.init(container);
+              }
+            }
             
             window.PiWidget._registerAPI(instanceId, widgetType, {
               onData: typeof onData !== 'undefined' ? onData : undefined,
@@ -119,7 +144,6 @@ function renderInlineWidget(instance: WidgetInstance, manifest: WidgetManifest, 
         });
       })();
       </script>`;
-  }
 
   return `
     <div ${dataAttrs} style="${style}" id="${instance.id}">
@@ -129,20 +153,92 @@ function renderInlineWidget(instance: WidgetInstance, manifest: WidgetManifest, 
   `;
 }
 
-function renderIframedWidget(instance: WidgetInstance, manifest: WidgetManifest, fragmentHTML: string, style: string, dataAttrs: string): string {
+function renderIframedWidget(instance: WidgetInstance, manifest: WidgetManifest, fragmentHTML: string, style: string, dataAttrs: string, themeString: string, savedState?: any): string {
   const srcdoc = `
-    <html><body style="margin:0;padding:0;overflow:hidden;">
-    <script>var __WIDGET_CONFIG__ = ${JSON.stringify(instance.config)};
-    var __WIDGET_TYPE__ = '${instance.widget_id}';
-    var __INSTANCE_ID__ = '${instance.id}';
-    window.addEventListener('message', function(e) {
-      if (e.data && e.data.type === 'widget_data') {
-        if (window.__communityOnData) window.__communityOnData(e.data.payload);
-      }
-    });
-    </script>
-    ${fragmentHTML}
-    </body></html>
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          :root {
+            ${themeString}
+          }
+          *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+          html { color-scheme: dark; }
+          html, body { width: 100%; height: 100%; overflow: hidden; background: transparent !important; }
+          body { font-family: Inter, system-ui, sans-serif; color: var(--canvas-text); }
+        </style>
+        <script src="/media/libs/pi-theme.js"></script>
+        <script src="/media/libs/pi-bind.js"></script>
+        <script src="/media/libs/pi-widget.js"></script>
+        <script>
+          var __WIDGET_CONFIG__ = ${JSON.stringify(instance.config)};
+          var __WIDGET_TYPE__ = '${instance.widget_id}';
+          var __INSTANCE_ID__ = '${instance.id}';
+          var __WIDGET_STATE__ = ${savedState ? JSON.stringify(savedState) : '{}'};
+          window.instanceId = __INSTANCE_ID__;
+          window.widgetType = __WIDGET_TYPE__;
+          window.widget = {
+            config: __WIDGET_CONFIG__,
+            state: __WIDGET_STATE__,
+            patchState: function(delta) {
+              window.parent.postMessage({ type: 'pi_patch', widget: window.widgetType, instance: window.instanceId, delta: delta }, '*');
+            },
+            callDaemon: function(data) {
+              var daemonId = ${manifest.daemon ? JSON.stringify(manifest.daemon) : "''"};
+              window.parent.postMessage({ type: 'pi_cmd', daemon: daemonId, instance: window.instanceId, data: data }, '*');
+            },
+            register: function(api) {
+              if (window.PiWidget) window.PiWidget._registerAPI(window.instanceId, window.widgetType, api);
+            }
+          };
+          
+          window.addEventListener('DOMContentLoaded', function() {
+            // Also expose to PiWidget for backward compatibility
+            if (window.PiWidget) {
+              window.PiWidget.patchState = window.widget.patchState;
+              window.PiWidget.callDaemon = window.widget.callDaemon;
+            }
+          });
+          
+          window.addEventListener('message', function(e) {
+            if (!e.data || typeof e.data.type !== 'string') return;
+            var knownTypes = ['pi_state', 'pi_data', 'pi_destroy', 'widget_data'];
+            if (knownTypes.indexOf(e.data.type) === -1) return;
+
+            if (e.data.type === 'pi_state') {
+              window.widget.state = e.data.payload;
+              if (window.PiWidget && window.PiWidget._dispatchState) {
+                window.PiWidget._dispatchState(window.widgetType, window.instanceId, e.data.payload);
+              }
+            } else if (e.data.type === 'pi_data') {
+              if (window.PiWidget && window.PiWidget._dispatchData) {
+                window.PiWidget._dispatchData(window.widgetType, window.instanceId, e.data.payload);
+              }
+            } else if (e.data.type === 'pi_destroy') {
+              if (window.PiWidget && window.PiWidget._destroyAll) {
+                window.PiWidget._destroyAll();
+              }
+            } else if (e.data.type === 'widget_data') {
+              // Legacy fallback
+              if (window.__communityOnData) window.__communityOnData(e.data.payload);
+            }
+          });
+          window.onerror = function(msg, src, line, col, err) {
+            window.parent.postMessage({
+              type: 'pi_error',
+              widget: window.widgetType,
+              instance: window.instanceId,
+              error: { message: String(msg), line: line, col: col }
+            }, '*');
+            return true;
+          };
+        </script>
+      </head>
+      <body>
+        <div id="${instance.id}" style="width:100%;height:100%;">${fragmentHTML}</div>
+      </body>
+    </html>
   `.replace(/"/g, '&quot;');
   
   return `
@@ -167,7 +263,7 @@ function getWidgetState(instanceId: string): any | null {
   }
 }
 
-function renderWidgetContainer(instance: WidgetInstance, manifest: WidgetManifest, fragmentHTML: string, savedState?: any): string {
+function renderWidgetContainer(instance: WidgetInstance, manifest: WidgetManifest, fragmentHTML: string, savedState?: any, themeString?: string): string {
   const { layout, config, id, widget_id, schedule } = instance;
   
   // if state isn't passed from memory, attempt to load from disk if persistence is enabled
@@ -204,20 +300,31 @@ function renderWidgetContainer(instance: WidgetInstance, manifest: WidgetManifes
   ].filter(Boolean).join(' ');
   
   if (manifest.trust === 'community') {
-    return renderIframedWidget(instance, manifest, fragmentHTML, style, dataAttrs);
+    return renderIframedWidget(instance, manifest, fragmentHTML, style, dataAttrs, themeString || '', finalSavedState);
   } else {
     return renderInlineWidget(instance, manifest, fragmentHTML, style, dataAttrs);
   }
 }
 
 function getRequiredResources(canvas: CanvasConfig, registry: WidgetRegistryEntry[]): { scripts: string[]; fonts: string[]; } {
-  const scripts = new Set<string>(['/media/libs/pi-widget.js']);
+  var cacheBust = Date.now();
+  const scripts = new Set<string>([
+    `/media/libs/pi-theme.js?v=${cacheBust}`,
+    `/media/libs/pi-widget.js?v=${cacheBust}`,
+    `/media/libs/pi-bind.js?v=${cacheBust}`
+  ]);
   const fonts = new Set<string>();
   
   for (const widget of canvas.widgets) {
     const entry = registry.find(r => r.id === widget.widget_id);
     if (!entry) continue;
     const manifest = entry.manifest;
+    
+    if (manifest.addons) {
+      for (const addon of manifest.addons) {
+        scripts.add('/media/libs/addons/' + addon + '.js');
+      }
+    }
     
     if (manifest.animations?.type?.includes('lottie')) {
       scripts.add('/media/libs/lottie.min.js');
@@ -230,6 +337,14 @@ function getRequiredResources(canvas: CanvasConfig, registry: WidgetRegistryEntr
     for (const font of manifest.resources?.externalFonts || []) {
       fonts.add(font);
     }
+    
+    if (widget.config && typeof widget.config.fontFamily === 'string') {
+      const f = widget.config.fontFamily;
+      const systemFonts = ['sans-serif', 'serif', 'monospace', 'system-ui', 'cursive', 'fantasy', 'inter'];
+      if (!systemFonts.includes(f.toLowerCase()) && f.indexOf(',') === -1) {
+        fonts.add(f);
+      }
+    }
   }
   
   return { scripts: [...scripts], fonts: [...fonts] };
@@ -241,6 +356,18 @@ export function composeHTML(
   savedStates: Record<string, any> = {}
 ): string {
   
+  const theme = (canvas as any).canvas?.theme?.vars || (canvas as any).theme?.vars || {};
+  const defaults: Record<string, string> = {
+    '--canvas-bg': canvas.canvas.background || '#0a0a0a',
+    '--canvas-text': '#e0e0e0',
+    '--canvas-accent': '#6366f1',
+    '--canvas-surface': '#1a1a2e',
+    '--canvas-border': '#2a2a3e',
+    '--canvas-muted': '#888888',
+  };
+  const merged = { ...defaults, ...theme };
+  const themeString = Object.entries(merged).map(([k, v]) => `${k}: ${v};`).join('\n      ');
+
   const sortedWidgets = [...canvas.widgets]
     .filter(w => w.enabled !== false)
     .sort((a, b) => a.layout.zIndex - b.layout.zIndex);
@@ -248,8 +375,8 @@ export function composeHTML(
   const widgetContainers = sortedWidgets.map(instance => {
     const entry = registry.find(r => r.id === instance.widget_id);
     if (!entry) return '';
-    return renderWidgetContainer(instance, entry.manifest, entry.fragmentHTML, savedStates[instance.id]);
-  }).join('\\n');
+    return renderWidgetContainer(instance, entry.manifest, entry.fragmentHTML, savedStates[instance.id], themeString);
+  }).join('\n');
 
   const resources = getRequiredResources(canvas, registry);
 
@@ -257,7 +384,7 @@ export function composeHTML(
     ? `<link href="https://fonts.googleapis.com/css2?family=${resources.fonts.map(f => f.replace(/ /g, '+')).join('&family=')}&display=swap" rel="stylesheet">`
     : '';
 
-  const scriptsHtml = resources.scripts.map(src => `<script src="${src}?v=${Date.now()}"></script>`).join('\\n  ');
+  const scriptsHtml = resources.scripts.map(src => `<script src="${src}?v=${Date.now()}"></script>`).join('\n  ');
 
   const shadowDOMScript = `
     (function() {
@@ -276,6 +403,10 @@ export function composeHTML(
                       '&display=swap';
           shadow.appendChild(link);
         }
+        
+        var resetStyle = document.createElement('style');
+        resetStyle.textContent = "*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } :host { width: 100%; height: 100%; display: block; overflow: hidden; background: transparent !important; font-family: Inter, system-ui, sans-serif; color: var(--canvas-text); }";
+        shadow.appendChild(resetStyle);
         
         while (container.firstChild) {
           shadow.appendChild(container.firstChild);
@@ -322,19 +453,7 @@ export function composeHTML(
   
   <style>
     :root {
-      ${(() => {
-        const theme = (canvas as any).canvas?.theme?.vars || (canvas as any).theme?.vars || {};
-        const defaults: Record<string, string> = {
-          '--canvas-bg': canvas.canvas.background || '#0a0a0a',
-          '--canvas-text': '#e0e0e0',
-          '--canvas-accent': '#6366f1',
-          '--canvas-surface': '#1a1a2e',
-          '--canvas-border': '#2a2a3e',
-          '--canvas-muted': '#888888',
-        };
-        const merged = { ...defaults, ...theme };
-        return Object.entries(merged).map(([k, v]) => `${k}: ${v};`).join('\n      ');
-      })()}
+      ${themeString}
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; overflow: hidden; }
@@ -353,6 +472,22 @@ export function composeHTML(
   </div>
   
   <script>
+    window.onerror = function(msg, url, line, col, error) {
+      fetch('/api/logs', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ level: 'error', source: 'Kiosk', message: msg, data: error ? error.stack : '' }) }).catch(function(){});
+    };
+    var oldErr = console.error;
+    console.error = function() {
+      oldErr.apply(console, arguments);
+      var args = Array.from(arguments).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      fetch('/api/logs', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ level: 'error', source: 'Kiosk', message: args }) }).catch(function(){});
+    };
+    var oldLog = console.log;
+    console.log = function() {
+      oldLog.apply(console, arguments);
+      var args = Array.from(arguments).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      fetch('/api/logs', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ level: 'info', source: 'Kiosk', message: args }) }).catch(function(){});
+    };
+
     PiWidget.context.serverTimezone = 'UTC';
     PiWidget.context.canvasId = '${canvas.id}';
   </script>
@@ -400,13 +535,47 @@ export function composeHTML(
               if (window.PiWidget && window.PiWidget._dispatchState) {
                 window.PiWidget._dispatchState(msg.widget, msg.instance, msg.data);
               }
+              // Broadcast to matching community iframes
+              var containers = document.querySelectorAll('[data-trust="community"]');
+              for (var i=0; i<containers.length; i++) {
+                var c = containers[i];
+                var cWidget = c.getAttribute('data-widget');
+                var cInstance = c.getAttribute('data-instance');
+                if (cWidget === msg.widget && (msg.instance === 'global' || cInstance === msg.instance)) {
+                  var iframe = c.querySelector('iframe');
+                  if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({
+                      type: 'pi_state',
+                      widget: msg.widget,
+                      instance: msg.instance,
+                      payload: msg.data
+                    }, '*');
+                  }
+                }
+              }
             } else if (msg.type === 'data') {
               // Legacy fallback
               if (window.PiWidget && window.PiWidget._dispatchState) {
                 window.PiWidget._dispatchState(msg.widget, 'global', msg.data);
               }
+              // Forward daemon data to matching community iframes
+              var dataContainers = document.querySelectorAll('[data-widget="' + msg.widget + '"][data-trust="community"]');
+              for (var j=0; j<dataContainers.length; j++) {
+                var dIframe = dataContainers[j].querySelector('iframe');
+                if (dIframe && dIframe.contentWindow) {
+                  dIframe.contentWindow.postMessage({ type: 'pi_data', widget: msg.widget, payload: msg.data }, '*');
+                }
+              }
             } else if (msg.type === 'reload') {
-              window.location.reload();
+              // Give community iframes a chance to clean up
+              var reloadIframes = document.querySelectorAll('[data-trust="community"] iframe');
+              for (var k = 0; k < reloadIframes.length; k++) {
+                if (reloadIframes[k].contentWindow) {
+                  reloadIframes[k].contentWindow.postMessage({ type: 'pi_destroy' }, '*');
+                }
+              }
+              // Allow 200ms for cleanup, then reload
+              setTimeout(function() { window.location.reload(); }, 200);
             }
           } catch(e) {}
         };
@@ -419,6 +588,38 @@ export function composeHTML(
         };
       }
       
+      window.addEventListener('message', function(e) {
+        if (!e.data || typeof e.data.type !== 'string') return;
+        var knownTypes = ['pi_patch', 'pi_cmd', 'pi_error'];
+        if (knownTypes.indexOf(e.data.type) === -1) return;
+
+        if (e.data.type === 'pi_patch') {
+          if (window.__piWs && window.__piWs.readyState === 1) {
+            window.__piWs.send(JSON.stringify({
+              type: 'patch', widget: e.data.widget, instance: e.data.instance, delta: e.data.delta
+            }));
+          }
+        } else if (e.data.type === 'pi_cmd') {
+          if (window.__piWs && window.__piWs.readyState === 1) {
+            window.__piWs.send(JSON.stringify({
+              type: 'cmd', daemon: e.data.daemon, instance: e.data.instance, data: e.data.data
+            }));
+          }
+        } else if (e.data.type === 'pi_error') {
+          console.error('[Community Widget Error] ' + e.data.widget + '/' + e.data.instance + ':', e.data.error.message);
+          window.__widgetErrorCount = (window.__widgetErrorCount || 0) + 1;
+          var errContainer = document.querySelector('[data-instance="' + e.data.instance + '"]');
+          if (errContainer && !errContainer.querySelector('.pi-error-badge')) {
+            var badge = document.createElement('div');
+            badge.className = 'pi-error-badge';
+            badge.style.cssText = 'position:absolute;top:4px;right:4px;background:#ff4444;color:white;font-size:10px;padding:2px 6px;border-radius:8px;z-index:9999;pointer-events:none;';
+            badge.textContent = '⚠ Error';
+            errContainer.style.position = 'relative';
+            errContainer.appendChild(badge);
+          }
+        }
+      });
+
       connect();
     })();
   </script>

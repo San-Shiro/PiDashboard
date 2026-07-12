@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #widget-root {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Scaling container */
+    .clock-scaler {
+      position: relative;
+      /* Responsive sizing based on container */
+      height: 100%;
+      max-height: 100%;
+      max-width: 100%;
+      aspect-ratio: 1 / 1;
+    }
+
+    .clock-face {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: relative;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 4px 15px rgba(0,0,0,0.4);
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      transition: background 0.5s ease, border-color 0.5s ease;
+    }
+
+    .clock-face.theme-dark {
+      background: #111;
+      border-color: #333;
+    }
+
+    .clock-face.theme-light {
+      background: #f0f0f0;
+      border-color: #ccc;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.1), 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Clock hands */
+    .hand {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: bottom center;
+      border-radius: 4px;
+      transform: translateX(-50%);
+    }
+
+    .hand-hour {
+      width: 4%;
+      height: 25%;
+      background: #fff;
+      z-index: 3;
+    }
+
+    .hand-minute {
+      width: 2.5%;
+      height: 35%;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 4;
+    }
+
+    .hand-second {
+      width: 1%;
+      height: 40%;
+      background: #ff3b30;
+      z-index: 5;
+    }
+
+    .theme-light .hand-hour { background: #222; }
+    .theme-light .hand-minute { background: #444; }
+
+    /* Center dot */
+    .center-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 6%;
+      height: 6%;
+      border-radius: 50%;
+      background: #ff3b30;
+      transform: translate(-50%, -50%);
+      z-index: 6;
+    }
+  </style>
+</head>
+<body>
+  <div id="widget-root">
+    <div class="clock-scaler">
+      <div id="face" class="clock-face theme-dark">
+        <div class="hand hand-hour" id="hour"></div>
+        <div class="hand hand-minute" id="minute"></div>
+        <div class="hand hand-second" id="second"></div>
+        <div class="center-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let config = {
+      timezone: "",
+      showSeconds: true,
+      useManualTime: false,
+      manualTime: "12:00",
+      theme: "dark"
+    };
+
+    let localLoadTime = performance.now();
+    let manualBaseTime = new Date();
+
+    window.addEventListener("message", (e) => {
+      if (e.data.type === "config_hydrate") {
+        config = { ...config, ...e.data.config };
+        
+        if (config.useManualTime && config.manualTime) {
+          const [h, m] = config.manualTime.split(":");
+          manualBaseTime = new Date();
+          manualBaseTime.setHours(parseInt(h, 10), parseInt(m, 10), 0, 0);
+          localLoadTime = performance.now();
+        }
+
+        applyConfig();
+      }
+    });
+
+    function applyConfig() {
+      const face = document.getElementById("face");
+      const secHand = document.getElementById("second");
+      
+      face.className = `clock-face theme-${config.theme || "dark"}`;
+      secHand.style.display = config.showSeconds ? "block" : "none";
+    }
+
+    function animateClock() {
+      let targetTime;
+
+      if (config.useManualTime && config.manualTime) {
+        // Tick smoothly from the fixed manual base time
+        const elapsed = performance.now() - localLoadTime;
+        targetTime = new Date(manualBaseTime.getTime() + elapsed);
+      } else {
+        targetTime = new Date();
+        // Handle timezone offset if specified
+        if (config.timezone && config.timezone.trim() !== "") {
+          try {
+            const tzDateStr = targetTime.toLocaleString("en-US", { timeZone: config.timezone });
+            const tzDate = new Date(tzDateStr);
+            tzDate.setMilliseconds(targetTime.getMilliseconds());
+            targetTime = tzDate;
+          } catch (err) {
+            // ignore invalid timezone
+          }
+        }
+      }
+
+
+
+      const h = targetTime.getHours() % 12;
+      const m = targetTime.getMinutes();
+      const s = targetTime.getSeconds();
+      const ms = targetTime.getMilliseconds();
+
+      // Calculate degrees
+      // Smooth seconds
+      const secDeg = (s + ms / 1000) * 6;
+      // Minutes move gradually with seconds
+      const minDeg = (m + s / 60) * 6;
+      // Hours move gradually with minutes
+      const hourDeg = (h + m / 60) * 30;
+
+      document.getElementById("second").style.transform = `translateX(-50%) rotate(${secDeg}deg)`;
+      document.getElementById("minute").style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
+      document.getElementById("hour").style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+
+      requestAnimationFrame(animateClock);
+    }
+
+    applyConfig();
+    requestAnimationFrame(animateClock);
+  </script>
+</body>
+</html>

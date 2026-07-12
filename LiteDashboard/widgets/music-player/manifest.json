@@ -1,0 +1,107 @@
+{
+  "id": "music-player",
+  "name": "Music Player",
+  "version": "2.0.0",
+  "author": "PiDashboard",
+  "description": "Elegant music player with device audio output via daemon, playlist management, and album looping",
+  "category": "Media",
+  "icon": "disc",
+  "tier": "push",
+  "estimatedRamMb": 4,
+  "trust": "core",
+  "permissions": {
+    "network": false,
+    "disk": true
+  },
+  "fragment": {
+    "file": "music-player.html",
+    "format": "snippet"
+  },
+  "daemon": "music-player",
+  "configSchema": [
+    {
+      "key": "tracks",
+      "type": "media-list",
+      "label": "Music Tracks",
+      "hint": "Select audio files from your media library",
+      "accepts": "audio/*",
+      "default": ""
+    },
+    {
+      "key": "albumName",
+      "type": "text",
+      "label": "Album Name",
+      "hint": "Display name for this playlist/album",
+      "default": "My Playlist"
+    },
+    {
+      "key": "autoplay",
+      "type": "boolean",
+      "label": "Auto-Play on Load",
+      "default": false
+    },
+    {
+      "key": "loop",
+      "type": "radio",
+      "label": "Loop Mode",
+      "options": [
+        "playlist",
+        "single",
+        "none"
+      ],
+      "default": "playlist"
+    },
+    {
+      "key": "shuffle",
+      "type": "boolean",
+      "label": "Shuffle Tracks",
+      "default": false
+    },
+    {
+      "key": "showTrackList",
+      "type": "boolean",
+      "label": "Show Track List",
+      "default": true
+    },
+    {
+      "key": "showProgress",
+      "type": "boolean",
+      "label": "Show Progress Bar",
+      "default": true
+    },
+    {
+      "key": "showAlbumArt",
+      "type": "boolean",
+      "label": "Show Vinyl Disc",
+      "hint": "Animated spinning disc",
+      "default": true
+    },
+    {
+      "key": "volume",
+      "type": "slider",
+      "label": "Default Volume",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 75
+    },
+    {
+      "key": "accentColor",
+      "type": "color",
+      "label": "Accent Color",
+      "hint": "Leave blank to use canvas theme",
+      "default": ""
+    }
+  ],
+  "stateMode": "global",
+  "persist": false,
+  "defaults": {
+    "width": 380,
+    "height": 320
+  },
+  "dataChannel": {
+    "type": "ipc_file",
+    "ipcFilename": "music-player.json"
+  }
+}

@@ -48,77 +48,67 @@
   }
   .bar-fg {
     height: 100%;
-    width: 0%;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
     border-radius: 2px;
-    transition: width 1s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.5s ease;
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.5s ease;
+    will-change: transform;
   }
-  #cpu-bar {
-    background-color: #00e5ff;
-    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
-  }
-  #ram-bar {
-    background-color: #b388ff;
-    box-shadow: 0 0 10px rgba(179, 136, 255, 0.4);
+  
+  /* Use CSS custom properties for dynamic fallback colors */
+  :host {
+    --low-color: #00e5ff;
+    --mid-color: #ff9100;
+    --high-color: #ff1744;
   }
 </style>
 
-<div class="sysinfo-container">
-  <div class="metric">
+<div class="sysinfo-container" id="sysinfo-wrapper">
+  <div class="metric" data-bind-show="config.showCpu">
     <div class="label-row">
       <span class="label">CPU Usage</span>
-      <span class="value" id="cpu-val">--%</span>
+      <span class="value" data-bind="cpu_percent" data-format="fixed:1" data-suffix="%">--%</span>
     </div>
     <div class="bar-bg">
-      <div class="bar-fg" id="cpu-bar"></div>
+      <div class="bar-fg" data-bar="cpu_percent" data-bar-low="#00e5ff"></div>
     </div>
   </div>
-  
-  <div class="metric">
+
+  <div class="metric" data-bind-show="config.showRam">
     <div class="label-row">
       <span class="label">RAM Usage</span>
-      <span class="value" id="ram-val">--%</span>
+      <span class="value" data-bind="mem_percent" data-format="fixed:1" data-suffix="%">--%</span>
     </div>
     <div class="bar-bg">
-      <div class="bar-fg" id="ram-bar"></div>
+      <div class="bar-fg" data-bar="mem_percent" data-bar-low="#b388ff"></div>
+    </div>
+  </div>
+
+  <div class="metric" data-bind-show="config.showTemp">
+    <div class="label-row">
+      <span class="label">Temperature</span>
+      <span class="value" data-bind="cpu_temp" data-format="fixed:1" data-suffix="°C">--°C</span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fg" data-bar="cpu_temp" data-bar-low="#ff3d00"></div>
+    </div>
+  </div>
+
+  <div class="metric" data-bind-show="config.showDisk">
+    <div class="label-row">
+      <span class="label">Disk Usage</span>
+      <span class="value" data-bind="disk_percent" data-format="fixed:1" data-suffix="%">--%</span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fg" data-bar="disk_percent" data-bar-low="#00e676"></div>
+    </div>
+  </div>
+
+  <div class="metric" data-bind-show="config.showUptime" style="margin-top: 10px;">
+    <div class="label-row">
+      <span class="label">Uptime</span>
+      <span class="value" data-bind="uptime_seconds" data-format="duration" style="font-weight:400;">--</span>
     </div>
   </div>
 </div>
-
-<script>
-  function getColorForUsage(percentage, baseColor) {
-    if (percentage > 85) return '#ff1744'; // Red for high usage
-    if (percentage > 65) return '#ff9100'; // Orange for warning
-    return baseColor;
-  }
-
-  function onState(state) {
-    var cpuBar = $('#cpu-bar');
-    var cpuVal = $('#cpu-val');
-    var ramBar = $('#ram-bar');
-    var ramVal = $('#ram-val');
-    if (cpuVal && state.cpu !== undefined) {
-      var cpu = parseFloat(state.cpu).toFixed(1);
-      cpuVal.textContent = cpu + '%';
-      if (cpuBar) {
-        cpuBar.style.width = cpu + '%';
-        var color = getColorForUsage(cpu, '#00e5ff');
-        cpuBar.style.backgroundColor = color;
-        cpuBar.style.boxShadow = '0 0 10px ' + color + '80';
-      }
-    }
-    if (ramVal && state.ram !== undefined) {
-      var ram = parseFloat(state.ram).toFixed(1);
-      ramVal.textContent = ram + '%';
-      if (ramBar) {
-        ramBar.style.width = ram + '%';
-        var color = getColorForUsage(ram, '#b388ff');
-        ramBar.style.backgroundColor = color;
-        ramBar.style.boxShadow = '0 0 10px ' + color + '80';
-      }
-    }
-  }
-
-  if (widget && widget.state && widget.state.cpu !== undefined) {
-    onState(widget.state);
-  }
-</script>

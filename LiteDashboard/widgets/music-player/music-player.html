@@ -1,0 +1,377 @@
+<style>
+  .mp-wrap {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow: hidden;
+    color: var(--canvas-text, #e0e0e0);
+    --mp-accent: var(--_accent, var(--canvas-accent, #6366f1));
+  }
+
+  /* Header / Now Playing */
+  .mp-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    flex-shrink: 0;
+  }
+  .mp-disc-wrap {
+    width: 56px; height: 56px; flex-shrink: 0;
+    position: relative;
+  }
+  .mp-disc {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #1a1a2e, #2a2a3e, #1a1a2e);
+    display: flex; align-items: center; justify-content: center;
+    animation: mpSpin 3s linear infinite;
+    animation-play-state: paused;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  .mp-disc.playing { animation-play-state: running; }
+  .mp-disc-hole {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--mp-accent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--mp-accent) 40%, transparent);
+  }
+  .mp-disc-ring {
+    position: absolute; inset: 6px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+  @keyframes mpSpin { to { transform: rotate(360deg); } }
+
+  .mp-info { flex: 1; min-width: 0; }
+  .mp-album {
+    font-size: 9px; text-transform: uppercase;
+    letter-spacing: 1.5px; opacity: 0.4;
+    font-weight: 600; margin-bottom: 2px;
+  }
+  .mp-title {
+    font-size: 13px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+  .mp-track-num {
+    font-size: 10px; opacity: 0.4;
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+  }
+
+  /* Progress */
+  .mp-progress { padding: 0 14px 8px; flex-shrink: 0; }
+  .mp-bar-bg {
+    width: 100%; height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+  }
+  .mp-bar-fill {
+    height: 100%; border-radius: 2px;
+    background: var(--mp-accent);
+    transition: width 0.3s linear;
+  }
+  .mp-bar-fill::after {
+    content: '';
+    position: absolute; right: -3px; top: -3px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(0,0,0,0.4);
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .mp-bar-bg:hover .mp-bar-fill::after { opacity: 1; }
+  .mp-times {
+    display: flex; justify-content: space-between;
+    font-size: 9px; opacity: 0.35;
+    font-variant-numeric: tabular-nums;
+    margin-top: 4px;
+  }
+
+  /* Controls */
+  .mp-controls {
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; padding: 4px 14px 10px;
+    flex-shrink: 0;
+  }
+  .mp-btn {
+    background: none; border: none; padding: 6px;
+    color: inherit; cursor: pointer;
+    opacity: 0.5; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .mp-btn:hover { opacity: 1; transform: scale(1.1); }
+  .mp-btn.active { opacity: 1; color: var(--mp-accent); }
+  .mp-btn-play {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--mp-accent);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    border: none; cursor: pointer;
+    box-shadow: 0 2px 12px color-mix(in srgb, var(--mp-accent) 40%, transparent);
+    transition: all 0.15s;
+    font-size: 16px;
+  }
+  .mp-btn-play:hover { transform: scale(1.08); }
+  .mp-btn-play:active { transform: scale(0.95); }
+
+  /* Track list */
+  .mp-list {
+    flex: 1; overflow-y: auto;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .mp-track {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 14px; cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .mp-track:hover { background: rgba(255,255,255,0.03); }
+  .mp-track.active { background: rgba(99,102,241,0.08); }
+  .mp-track-idx {
+    width: 18px; text-align: center;
+    font-size: 10px; opacity: 0.3;
+    font-variant-numeric: tabular-nums;
+  }
+  .mp-track.active .mp-track-idx { color: var(--mp-accent); opacity: 1; }
+  .mp-track-name {
+    flex: 1; font-size: 11px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mp-track.active .mp-track-name { color: var(--mp-accent); font-weight: 600; }
+
+  .mp-eq { display: flex; gap: 1px; align-items: flex-end; height: 12px; }
+  .mp-eq-bar {
+    width: 2px; border-radius: 1px;
+    background: var(--mp-accent);
+    animation: eqBounce 0.6s ease-in-out infinite alternate;
+  }
+  .mp-eq-bar:nth-child(1) { height: 4px; animation-delay: 0s; }
+  .mp-eq-bar:nth-child(2) { height: 8px; animation-delay: 0.15s; }
+  .mp-eq-bar:nth-child(3) { height: 6px; animation-delay: 0.3s; }
+  @keyframes eqBounce { to { height: 12px; } }
+  .mp-eq.paused .mp-eq-bar { animation-play-state: paused; }
+
+  .mp-empty {
+    flex: 1; display: flex;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    opacity: 0.3; gap: 6px; font-size: 12px;
+  }
+  .mp-source {
+    font-size: 8px; text-transform: uppercase;
+    letter-spacing: 1px; opacity: 0.25;
+    text-align: center; padding: 2px 14px 6px;
+  }
+
+  .mp-list::-webkit-scrollbar { width: 3px; }
+  .mp-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1); border-radius: 2px;
+  }
+</style>
+
+<div class="mp-wrap" id="mp-root">
+  <div class="mp-empty" id="mp-empty">
+    <span style="font-size:28px">🎵</span>
+    <span>No tracks added</span>
+    <span style="font-size:10px">Add audio files in widget config</span>
+  </div>
+</div>
+
+<script>
+  var cfg = (typeof widget !== "undefined" && widget.config) ? widget.config : ((typeof PiWidget !== "undefined" && PiWidget.config) || (typeof config !== "undefined" ? config : {}));
+  var root = $('#mp-root');
+  var emptyEl = $('#mp-empty');
+
+  if (!root) return;
+
+  // Parse tracks from config
+  var raw = (cfg.tracks || '').trim();
+  if (raw) {
+    var urls = raw.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+
+    if (urls.length) {
+      if (emptyEl) emptyEl.style.display = 'none';
+
+      var accent = cfg.accentColor || '';
+      if (accent) root.style.setProperty('--_accent', accent);
+
+      var albumName = cfg.albumName || 'My Playlist';
+      var showList = cfg.showTrackList !== false;
+      var showProgress = cfg.showProgress !== false;
+      var showArt = cfg.showAlbumArt !== false;
+
+      function trackName(url) {
+        var n = decodeURIComponent(url.split('/').pop() || 'Unknown');
+        return n.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+      }
+
+      // Build UI
+      var html = '';
+      html += '<div class="mp-header">';
+      if (showArt) {
+        html += '<div class="mp-disc-wrap"><div class="mp-disc" id="mp-disc"><div class="mp-disc-hole"></div></div><div class="mp-disc-ring"></div></div>';
+      }
+      html += '<div class="mp-info">';
+      html += '<div class="mp-album">' + albumName + '</div>';
+      html += '<div class="mp-title" id="mp-title">—</div>';
+      html += '<div class="mp-track-num" id="mp-tracknum">0 / ' + urls.length + '</div>';
+      html += '</div></div>';
+
+      if (showProgress) {
+        html += '<div class="mp-progress">';
+        html += '<div class="mp-bar-bg" id="mp-seek"><div class="mp-bar-fill" id="mp-fill" style="width:0%"></div></div>';
+        html += '<div class="mp-times"><span id="mp-cur">0:00</span><span id="mp-dur">0:00</span></div>';
+        html += '</div>';
+      }
+
+      html += '<div class="mp-controls">';
+      html += '<button class="mp-btn" id="mp-shuffle" title="Shuffle">⤮</button>';
+      html += '<button class="mp-btn" id="mp-prev" title="Previous">⏮</button>';
+      html += '<button class="mp-btn-play" id="mp-play" title="Play/Pause">▶</button>';
+      html += '<button class="mp-btn" id="mp-next" title="Next">⏭</button>';
+      html += '<button class="mp-btn" id="mp-loop" title="Loop">🔁</button>';
+      html += '</div>';
+
+      html += '<div class="mp-source">♪ Device Audio Output</div>';
+
+      if (showList) {
+        html += '<div class="mp-list" id="mp-list">';
+        urls.forEach(function(url, i) {
+          html += '<div class="mp-track" data-idx="' + i + '">';
+          html += '<span class="mp-track-idx">' + (i + 1) + '</span>';
+          html += '<span class="mp-track-name">' + trackName(url) + '</span>';
+          html += '<div class="mp-eq paused" id="mp-eq-' + i + '"><div class="mp-eq-bar"></div><div class="mp-eq-bar"></div><div class="mp-eq-bar"></div></div>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      root.innerHTML = html;
+
+      // DOM refs
+      var disc = $('#mp-disc');
+      var titleEl = $('#mp-title');
+      var numEl = $('#mp-tracknum');
+      var fillEl = $('#mp-fill');
+      var curEl = $('#mp-cur');
+      var durEl = $('#mp-dur');
+      var playBtn = $('#mp-play');
+      var listEl = $('#mp-list');
+
+      var isPlaying = false;
+      var currentIdx = 0;
+      var loopMode = cfg.loop || 'playlist';
+      var loopModes = ['playlist', 'single', 'none'];
+      var loopLabels = ['🔁', '🔂', '➡'];
+      var loopIdx = loopModes.indexOf(loopMode);
+
+      var loopBtn = $('#mp-loop');
+      var shuffleBtn = $('#mp-shuffle');
+      if (loopBtn) {
+        loopBtn.textContent = loopLabels[loopIdx];
+        loopBtn.classList.toggle('active', loopMode !== 'none');
+      }
+      if (shuffleBtn) {
+        shuffleBtn.classList.toggle('active', !!cfg.shuffle);
+      }
+
+      function fmtTime(s) {
+        if (!s || !isFinite(s)) return '0:00';
+        var m = Math.floor(s / 60);
+        var sec = Math.floor(s % 60);
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+      }
+
+      function updateUI(state) {
+        if (!state) return;
+
+        var trackTitle = state.track || trackName(urls[state.index || 0] || '');
+        var idx = state.index || 0;
+        currentIdx = idx;
+        isPlaying = !!state.playing;
+
+        if (titleEl) titleEl.textContent = trackTitle;
+        if (numEl) numEl.textContent = (idx + 1) + ' / ' + (state.total || urls.length);
+        if (playBtn) playBtn.textContent = isPlaying ? '⏸' : '▶';
+
+        if (disc) disc.classList.toggle('playing', isPlaying);
+
+        // Progress
+        if (fillEl && state.duration > 0) {
+          var pct = (state.position / state.duration) * 100;
+          fillEl.style.width = pct + '%';
+        }
+        if (curEl) curEl.textContent = fmtTime(state.position);
+        if (durEl && state.duration) durEl.textContent = fmtTime(state.duration);
+
+        // Track list highlights
+        var tracks = $$('.mp-track');
+        if (tracks) {
+          tracks.forEach(function(t, i) {
+            t.classList.toggle('active', i === idx);
+            var eq = $('#mp-eq-' + i);
+            if (eq) eq.classList.toggle('paused', i !== idx || !isPlaying);
+          });
+        }
+      }
+
+      // Send command to daemon via widget bridge
+      function sendCmd(cmd, data) {
+        var msg = { cmd: cmd };
+        if (data) {
+          for (var k in data) msg[k] = data[k];
+        }
+        if (typeof widget !== 'undefined' && typeof widget.callDaemon === 'function') {
+          widget.callDaemon(msg);
+        }
+      }
+
+      // Button handlers
+      if (playBtn) playBtn.onclick = function() { sendCmd('toggle'); };
+      var nextBtn = $('#mp-next');
+      if (nextBtn) nextBtn.onclick = function() { sendCmd('next'); };
+      var prevBtn = $('#mp-prev');
+      if (prevBtn) prevBtn.onclick = function() { sendCmd('prev'); };
+
+      if (loopBtn) {
+        loopBtn.onclick = function() {
+          loopIdx = (loopIdx + 1) % 3;
+          loopMode = loopModes[loopIdx];
+          loopBtn.textContent = loopLabels[loopIdx];
+          loopBtn.classList.toggle('active', loopMode !== 'none');
+        };
+      }
+
+      if (shuffleBtn) {
+        shuffleBtn.onclick = function() {
+          shuffleBtn.classList.toggle('active');
+        };
+      }
+
+      if (listEl) {
+        listEl.onclick = function(e) {
+          var trackEl = e.target.closest('.mp-track');
+          if (!trackEl) return;
+          sendCmd('play');
+        };
+      }
+
+      var st = typeof widget !== 'undefined' && widget.state ? widget.state : {};
+      if (typeof PiWidget !== 'undefined' && PiWidget.state) st = PiWidget.state;
+
+      updateUI(st);
+      function onState(state) {
+        updateUI(state || {});
+      }
+
+      // Auto-play on load
+      if (cfg.autoplay) {
+        setTimeout(function() { sendCmd('play'); }, 1000);
+      }
+    }
+  }
+</script>

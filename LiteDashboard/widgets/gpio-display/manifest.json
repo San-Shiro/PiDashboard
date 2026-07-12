@@ -1,0 +1,54 @@
+{
+  "id": "gpio-display",
+  "name": "GPIO Pin Monitor",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Live GPIO pin state monitor for the kiosk display",
+  "category": "System",
+  "icon": "cpu",
+  "tier": "push",
+  "estimatedRamMb": 1,
+  "trust": "core",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "fragment": {
+    "file": "gpio-display.html",
+    "format": "snippet"
+  },
+  "daemon": "gpio",
+  "configSchema": [
+    {
+      "key": "showLabels",
+      "type": "boolean",
+      "label": "Show Pin Labels",
+      "default": true
+    },
+    {
+      "key": "columns",
+      "type": "slider",
+      "label": "Columns",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "key": "highlightOutputs",
+      "type": "boolean",
+      "label": "Highlight Active Outputs",
+      "default": true
+    }
+  ],
+  "stateMode": "global",
+  "persist": false,
+  "defaults": {
+    "width": 300,
+    "height": 250
+  },
+  "dataChannel": {
+    "type": "ipc_file",
+    "ipcFilename": "gpio-display.json"
+  }
+}

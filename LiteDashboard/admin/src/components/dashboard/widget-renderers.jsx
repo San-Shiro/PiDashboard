@@ -1,512 +1,198 @@
-// Widget renderers — used on both the kiosk display page AND in the
-// admin layout preview. Each renderer accepts (instance, data) where
-// instance has widget_config and base_config, and data is the latest
-// payload from /api/widget-data/<name>.
+// Universal Widget Renderer using iframe sandbox to render Vanilla HTML fragments
+import { useEffect, useState, useRef } from "react";
 
-const WEATHER_ICONS = {
-  "cloud-sun": "⛅",
-  sun: "☀️",
-  cloud: "☁️",
-  rain: "🌧️",
-  snow: "❄️",
-  storm: "⛈️",
-  fog: "🌫️",
-};
-
-function formatTime(date, format) {
-  const h24 = date.getHours();
-  const h12 = h24 % 12 || 12;
-  const mm = date.getMinutes().toString().padStart(2, "0");
-  const ss = date.getSeconds().toString().padStart(2, "0");
-  const ampm = h24 < 12 ? "AM" : "PM";
-  if (format === "hh:mm A") return `${h12}:${mm} ${ampm}`;
-  if (format === "HH:mm:ss")
-    return `${h24.toString().padStart(2, "0")}:${mm}:${ss}`;
-  return `${h24.toString().padStart(2, "0")}:${mm}`;
+function getWidgetConfig(instance) {
+  return instance?.config || instance?.widget_config || {};
 }
 
-function formatDate(date) {
-  return date.toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-}
+export function WidgetRenderer({ instance, widgetData, now, themeVars }) {
+  const iframeRef = useRef(null);
+  const [html, setHtml] = useState("");
+  const wid = instance.widget_id;
+  const cfg = getWidgetConfig(instance);
 
-// ─── Clock ───────────────────────────────────────────────────────────────────
-export function ClockRenderer({ instance, now }) {
-  const cfg = instance.widget_config || {};
-  const time = now || new Date();
-  return (
-    <div style={{ color: cfg.color || "#fff" }}>
-      <div
-        style={{
-          fontSize: cfg.fontSize || 64,
-          fontWeight: 700,
-          lineHeight: 1,
-          letterSpacing: "-0.02em",
-          fontFamily: "ui-monospace, monospace",
-        }}
-      >
-        {formatTime(time, cfg.format || "HH:mm")}
-      </div>
-      {cfg.showDate && (
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 400,
-            opacity: 0.6,
-            marginTop: 6,
-            letterSpacing: "0.02em",
-          }}
-        >
-          {formatDate(time)}
+  // Fetch HTML fragment when widget type changes
+  useEffect(() => {
+    let active = true;
+    fetch(`/api/widgets/${wid}/fragment`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Load failed");
+        return res.text();
+      })
+      .then((text) => {
+        if (active) setHtml(text);
+      })
+      .catch((err) => {
+        if (active) setHtml(`<div style="color:#ef4444;padding:12px;font-size:12px;font-family:system-ui;">Failed to load widget fragment: ${err.message}</div>`);
+      });
+    return () => {
+      active = false;
+    };
+  }, [wid]);
+
+  // Update iframe contents whenever config, state, or data changes
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || !html) return;
+
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return;
+
+    // Resolve CSS variables from parent theme to pass down to iframe :root
+    const getThemeVars = () => {
+      if (themeVars) {
+        return Object.entries(themeVars).map(([k, v]) => `${k}: ${v};`).join("\n");
+      }
+      const vars = {};
+      const bodyStyles = getComputedStyle(document.body);
+      const docStyles = getComputedStyle(document.documentElement);
+      // Fallback standard canvas colors
+      const defaults = {
+        "--canvas-bg": "#0a0a0a",
+        "--canvas-text": "#e0e0e0",
+        "--canvas-accent": "#6366f1",
+        "--canvas-surface": "#1a1a2e",
+        "--canvas-border": "#2a2a3e",
+        "--canvas-muted": "#888888",
+      };
+      Object.keys(defaults).forEach((key) => {
+        const val = docStyles.getPropertyValue(key).trim() || bodyStyles.getPropertyValue(key).trim() || defaults[key];
+        vars[key] = val;
+      });
+      return Object.entries(vars).map(([k, v]) => `${k}: ${v};`).join("\n");
+    };
+
+    // Serialize widget object
+    const widgetState = widgetData?.[wid] || instance.state || {};
+    const scriptText = `
+      (function() {
+        window.PiWidget = {
+          config: ${JSON.stringify(cfg)},
+          state: ${JSON.stringify(widgetState)},
+          data: ${JSON.stringify(widgetData || {})},
+          context: {
+            timezone: "${Intl.DateTimeFormat().resolvedOptions().timeZone}",
+            locale: "${navigator.language}",
+            is24h: ${!(new Date().toLocaleTimeString().match(/AM|PM/))},
+            deviceType: "pointer",
+            screenWidth: window.innerWidth,
+            screenHeight: window.innerHeight,
+            colorScheme: "dark"
+          },
+          _stateHandlers: [],
+          _registerAPI: function(instanceId, widgetType, api) {
+            if (api && api.onState) {
+              this._stateHandlers.push(api.onState);
+              try { api.onState(this.state); } catch(e) { console.error(e); }
+            }
+            if (api && api.onData) {
+              try { api.onData(this.data); } catch(e) { console.error(e); }
+            }
+          },
+          _dispatchState: function(widgetType, instanceId, data) {
+            this.state = data;
+            for (var i = 0; i < this._stateHandlers.length; i++) {
+              try { this._stateHandlers[i](data); } catch(e) {}
+            }
+          }
+        };
+      })();
+    `;
+
+    const wrappedHtml = html.replace(/<script>([\s\S]*?)<\/script>/gi, (match, p1) => {
+      return `<script>(function(){\n  var container = document.getElementById("${instance.id}");\n  var root = container;\n  var $ = function(sel) { return root.querySelector(sel); };\n  var $$ = function(sel) { return root.querySelectorAll(sel); };\n  var widget = window.widget;\n${p1}\n})();</script>`;
+    });
+
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          :root {
+            ${getThemeVars()}
+          }
+          *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+          html { color-scheme: dark; }
+          html, body { width: 100%; height: 100%; overflow: hidden; background: transparent !important; }
+          body { font-family: Inter, system-ui, sans-serif; color: var(--canvas-text); }
+        </style>
+        <script src="/media/libs/pi-theme.js"></script>
+        <script src="/media/libs/pi-bind.js"></script>
+        <script src="/media/libs/pi-widget.js"></script>
+        <script>${scriptText}</script>
+        <script>
+          // Expose wrapper variables globally in the iframe
+          var containerId = "${instance.id}";
+          window.instanceId = containerId;
+          window.widgetType = "${wid}";
+          
+          window.$ = function(sel) { 
+            return document.querySelector(sel); 
+          };
+          window.$$ = function(sel) { 
+            return document.querySelectorAll(sel); 
+          };
+          window.widget = {
+            config: ${JSON.stringify(cfg)},
+            state: ${JSON.stringify(widgetState)},
+            patchState: function(delta) {
+              console.log("[Preview PatchState]:", delta);
+            }
+          };
+        </script>
+      </head>
+      <body>
+        <div id="${instance.id}" style="width:100%; height:100%;">
+          ${wrappedHtml}
         </div>
-      )}
-    </div>
-  );
-}
+      </body>
+      </html>
+    `);
+    doc.close();
+    
+    // Force transparency programmatically to ensure no browser default backgrounds interfere
+    if (doc.body) {
+      doc.body.style.setProperty('background', 'transparent', 'important');
+      doc.body.style.setProperty('background-color', 'transparent', 'important');
+    }
+    if (doc.documentElement) {
+      doc.documentElement.style.setProperty('background', 'transparent', 'important');
+      doc.documentElement.style.setProperty('background-color', 'transparent', 'important');
+    }
+  }, [html, cfg, widgetData, themeVars]);
 
-// ─── Weather ─────────────────────────────────────────────────────────────────
-export function WeatherRenderer({ instance, data }) {
-  const cfg = instance.widget_config || {};
-  if (!data) {
+  if (!html) {
     return (
-      <div style={{ color: cfg.color || "#fff", fontSize: 13, opacity: 0.5 }}>
-        Fetching weather…
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "rgba(255,255,255,0.3)", fontSize: 10 }}>
+        Loading preview...
       </div>
     );
   }
-  const emoji = WEATHER_ICONS[data.icon] || "🌤️";
-  const unit = cfg.units === "imperial" ? "F" : "C";
-  const temp =
-    cfg.units === "imperial" ? Math.round((data.temp * 9) / 5 + 32) : data.temp;
-  const feels =
-    cfg.units === "imperial"
-      ? Math.round((data.feels_like * 9) / 5 + 32)
-      : data.feels_like;
-  return (
-    <div style={{ color: cfg.color || "#fff" }}>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
-        <span style={{ fontSize: 40 }}>{emoji}</span>
-        <div>
-          <div
-            style={{
-              fontSize: 36,
-              fontWeight: 700,
-              lineHeight: 1,
-              letterSpacing: "-0.02em",
-            }}
-          >
-            {temp}°{unit}
-          </div>
-          {cfg.showFeelsLike && (
-            <div style={{ fontSize: 12, opacity: 0.6, marginTop: 2 }}>
-              Feels {feels}°{unit}
-            </div>
-          )}
-        </div>
-      </div>
-      <div
-        style={{ marginTop: 8, fontSize: 13, opacity: 0.8, fontWeight: 500 }}
-      >
-        {data.condition}
-      </div>
-      <div
-        style={{
-          marginTop: 4,
-          display: "flex",
-          gap: 12,
-          fontSize: 11,
-          opacity: 0.55,
-        }}
-      >
-        {cfg.showHumidity && <span>💧 {data.humidity}%</span>}
-        {data.wind_kph && <span>💨 {data.wind_kph} km/h</span>}
-        {cfg.city && <span>{cfg.city}</span>}
-      </div>
-    </div>
-  );
-}
 
-// ─── Lyrics / Now Playing ────────────────────────────────────────────────────
-export function LyricsRenderer({ instance, data }) {
-  const cfg = instance.widget_config || {};
-  if (!data) {
-    return (
-      <div
-        style={{ color: cfg.lyricsColor || "#fff", fontSize: 13, opacity: 0.4 }}
-      >
-        No track playing
-      </div>
-    );
-  }
-  const progressPct = Math.min(100, Math.round((data.progress || 0) * 100));
-  const lines = cfg.linesToShow ?? 2;
   return (
-    <div
+    <iframe
+      ref={iframeRef}
+      allowTransparency="true"
       style={{
-        color: cfg.lyricsColor || "#fff",
-        display: "flex",
-        gap: 14,
-        alignItems: "stretch",
+        width: "100%",
+        height: "100%",
+        border: "none",
+        background: "transparent",
+        pointerEvents: "none",
       }}
-    >
-      {cfg.showAlbumArt && (
-        <div
-          style={{
-            width: 64,
-            height: 64,
-            flexShrink: 0,
-            backgroundColor: "rgba(255,255,255,0.08)",
-            borderRadius: 6,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 24,
-          }}
-        >
-          🎵
-        </div>
-      )}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginBottom: 6,
-            color: cfg.metaColor || "#A1A1AA",
-          }}
-        >
-          <span
-            style={{
-              fontSize: 11,
-              opacity: 0.7,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              fontWeight: 600,
-            }}
-          >
-            Now Playing
-          </span>
-          <span style={{ fontSize: 11, opacity: 0.4 }}>·</span>
-          <span style={{ fontSize: 11, opacity: 0.85, fontWeight: 500 }}>
-            {data.artist}
-          </span>
-          <span style={{ fontSize: 11, opacity: 0.4 }}>·</span>
-          <span style={{ fontSize: 11, opacity: 0.6 }}>{data.title}</span>
-        </div>
-        <div
-          style={{
-            fontSize: 20,
-            fontWeight: 500,
-            lineHeight: 1.3,
-            letterSpacing: "-0.01em",
-          }}
-        >
-          {data.current_line}
-        </div>
-        {lines >= 2 && data.next_line && (
-          <div
-            style={{
-              fontSize: 15,
-              opacity: 0.4,
-              marginTop: 3,
-              fontWeight: 400,
-            }}
-          >
-            {data.next_line}
-          </div>
-        )}
-        {cfg.showProgressBar && (
-          <div
-            style={{
-              marginTop: 8,
-              height: 2,
-              width: "100%",
-              backgroundColor: "rgba(255,255,255,0.15)",
-              borderRadius: 2,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${progressPct}%`,
-                backgroundColor: "rgba(255,255,255,0.6)",
-                borderRadius: 2,
-                transition: "width 0.5s linear",
-              }}
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── System Info ─────────────────────────────────────────────────────────────
-export function SysinfoRenderer({ instance, data }) {
-  const cfg = instance.widget_config || {};
-  if (!data) {
-    return (
-      <div style={{ color: cfg.color || "#fff", fontSize: 11, opacity: 0.4 }}>
-        Collecting stats…
-      </div>
-    );
-  }
-  const ramPct = Math.round((data.mem_used_mb / data.mem_total_mb) * 100);
-  const r = 18;
-  const circ = 2 * Math.PI * r;
-  const dash = circ * (1 - ramPct / 100);
-  const temp =
-    cfg.tempUnit === "F"
-      ? Math.round(((data.cpu_temp * 9) / 5 + 32) * 10) / 10
-      : data.cpu_temp;
-  return (
-    <div style={{ color: cfg.color || "#fff" }}>
-      <div
-        style={{
-          fontSize: 10,
-          opacity: 0.45,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          fontWeight: 600,
-          marginBottom: 8,
-        }}
-      >
-        System
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        {cfg.showRam && (
-          <div style={{ position: "relative", width: 44, height: 44 }}>
-            <svg width={44} height={44} viewBox="0 0 44 44">
-              <circle
-                cx="22"
-                cy="22"
-                r={r}
-                fill="none"
-                stroke="rgba(255,255,255,0.1)"
-                strokeWidth="3"
-              />
-              <circle
-                cx="22"
-                cy="22"
-                r={r}
-                fill="none"
-                stroke="#EA580C"
-                strokeWidth="3"
-                strokeDasharray={`${circ}`}
-                strokeDashoffset={dash}
-                strokeLinecap="round"
-                transform="rotate(-90 22 22)"
-              />
-            </svg>
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span style={{ fontSize: 9, fontWeight: 700 }}>{ramPct}%</span>
-            </div>
-          </div>
-        )}
-        <div style={{ fontSize: 11, opacity: 0.7, lineHeight: 1.8 }}>
-          {cfg.showCpuTemp && (
-            <div>
-              🌡️ {temp}°{cfg.tempUnit || "C"}
-            </div>
-          )}
-          {cfg.showCpuPercent && <div>⚙️ {data.cpu_percent}% CPU</div>}
-          {cfg.showRam && (
-            <div>
-              💾 {data.mem_used_mb} / {data.mem_total_mb} MB
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Automation ──────────────────────────────────────────────────────────────
-export function AutomationRenderer({ instance, data }) {
-  const cfg = instance.widget_config || {};
-  if (!data) return null;
-  return (
-    <div style={{ color: cfg.color || "#fff" }}>
-      <div
-        style={{
-          fontSize: 10,
-          opacity: 0.45,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          fontWeight: 600,
-          marginBottom: 6,
-        }}
-      >
-        Home
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ fontSize: 18 }}>{data.lights_on ? "💡" : "🌑"}</span>
-        <div>
-          {cfg.showScene && (
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                textTransform: "capitalize",
-              }}
-            >
-              {data.scene} scene
-            </div>
-          )}
-          {cfg.showNextEvent && data.next_event && (
-            <div style={{ fontSize: 11, opacity: 0.5, marginTop: 2 }}>
-              {data.next_event}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Image / Slideshow ───────────────────────────────────────────────────────
-export function ImageRenderer({ instance }) {
-  const cfg = instance.widget_config || {};
-  const src = cfg.imageUrl;
-  if (!src) {
-    return (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          backgroundColor: "rgba(255,255,255,0.06)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "rgba(255,255,255,0.3)",
-          fontSize: 11,
-        }}
-      >
-        No image set
-      </div>
-    );
-  }
-  return (
-    <img
-      src={src}
-      alt=""
-      style={{
-        width: `${cfg.widthPercent || 100}%`,
-        height: cfg.lockAspectRatio ? "auto" : "100%",
-        objectFit: cfg.objectFit || "cover",
-        display: "block",
-      }}
+      title={`Preview of ${wid}`}
     />
   );
 }
 
-// ─── Clock Analog ────────────────────────────────────────────────────────────
-export function ClockAnalogRenderer({ instance, now }) {
-  const cfg = instance.widget_config || {};
-  const time = now || new Date();
-  
-  const s = time.getSeconds();
-  const m = time.getMinutes();
-  const h = time.getHours() % 12;
-  const secDeg = s * 6;
-  const minDeg = (m + s / 60) * 6;
-  const hourDeg = (h + m / 60) * 30;
-
-  const isDark = cfg.theme !== "light";
-  const bg = isDark ? "#111" : "#f0f0f0";
-  const border = isDark ? "#333" : "#ccc";
-  const hourColor = isDark ? "#fff" : "#222";
-  const minColor = isDark ? "rgba(255,255,255,0.8)" : "#444";
-
-  return (
-    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ 
-        position: "relative", height: "100%", maxWidth: "100%", aspectRatio: "1/1",
-        borderRadius: "50%", background: bg, border: `4px solid ${border}`,
-        boxShadow: "inset 0 0 10px rgba(0,0,0,0.5)"
-      }}>
-        <div style={{ position: "absolute", bottom: "50%", left: "50%", width: "4%", height: "25%", background: hourColor, transformOrigin: "bottom center", transform: `translateX(-50%) rotate(${hourDeg}deg)`, borderRadius: 2 }} />
-        <div style={{ position: "absolute", bottom: "50%", left: "50%", width: "2.5%", height: "35%", background: minColor, transformOrigin: "bottom center", transform: `translateX(-50%) rotate(${minDeg}deg)`, borderRadius: 2 }} />
-        {(cfg.showSeconds ?? true) && (
-          <div style={{ position: "absolute", bottom: "50%", left: "50%", width: "1%", height: "40%", background: "#ff3b30", transformOrigin: "bottom center", transform: `translateX(-50%) rotate(${secDeg}deg)`, borderRadius: 2 }} />
-        )}
-        <div style={{ position: "absolute", top: "50%", left: "50%", width: "6%", height: "6%", borderRadius: "50%", background: "#ff3b30", transform: "translate(-50%, -50%)" }} />
-      </div>
-    </div>
-  );
-}
-
-// ─── Clock Digital ───────────────────────────────────────────────────────────
-export function ClockDigitalRenderer({ instance, now }) {
-  const cfg = instance.widget_config || {};
-  const time = now || new Date();
-  
-  const timeOptions = { hour: "numeric", minute: "2-digit", hour12: cfg.format12h ?? true };
-  const formatter = new Intl.DateTimeFormat("en-US", timeOptions);
-  const parts = formatter.formatToParts(time);
-  
-  let hours = "00";
-  let minutes = "00";
-  let ampm = "";
-  for (const part of parts) {
-    if (part.type === "hour") hours = part.value;
-    if (part.type === "minute") minutes = part.value;
-    if (part.type === "dayPeriod") ampm = part.value;
-  }
-  if (!(cfg.format12h ?? true) && hours.length === 1) hours = "0" + hours;
-
-  const dateStr = time.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", color: "rgba(255,255,255,0.9)", fontFamily: "'Inter', sans-serif", textShadow: "0 4px 12px rgba(0,0,0,0.5)" }}>
-      <div style={{ display: "flex", alignItems: "baseline" }}>
-        <div style={{ fontSize: "5rem", fontWeight: 200, letterSpacing: "-2px", lineHeight: 1 }}>{hours}:{minutes}</div>
-        {(cfg.format12h ?? true) && <div style={{ fontSize: "1.5rem", fontWeight: 600, marginLeft: "0.5rem", opacity: 0.7 }}>{ampm}</div>}
-      </div>
-      <div style={{ fontSize: "1.25rem", opacity: 0.8, marginTop: "0.5rem", textTransform: "uppercase", letterSpacing: "2px" }}>{dateStr}</div>
-    </div>
-  );
-}
-
-// ─── Renderer router ─────────────────────────────────────────────────────────
-export function WidgetRenderer({ instance, widgetData, now }) {
-  const wid = instance.widget_id;
-  if (wid === "clock") return <ClockRenderer instance={instance} now={now} />;
-  if (wid === "clock-analog") return <ClockAnalogRenderer instance={instance} now={now} />;
-  if (wid === "clock-digital") return <ClockDigitalRenderer instance={instance} now={now} />;
-  if (wid === "weather")
-    return <WeatherRenderer instance={instance} data={widgetData?.weather} />;
-  if (wid === "lyrics")
-    return <LyricsRenderer instance={instance} data={widgetData?.lyrics} />;
-  if (wid === "sysinfo")
-    return <SysinfoRenderer instance={instance} data={widgetData?.sysinfo} />;
-  if (wid === "automation")
-    return (
-      <AutomationRenderer instance={instance} data={widgetData?.automation} />
-    );
-  if (wid === "image") return <ImageRenderer instance={instance} />;
-  return (
-    <div
-      style={{
-        color: "rgba(255,255,255,0.4)",
-        fontSize: 11,
-        fontFamily: "ui-sans-serif, sans-serif",
-      }}
-    >
-      Unknown widget: {wid}
-    </div>
-  );
-}
+// Dummy legacy exports to prevent compilation crashes in case they are referenced
+export function ClockRenderer() { return null; }
+export function ClockAnalogRenderer() { return null; }
+export function ClockDigitalRenderer() { return null; }
+export function WeatherRenderer() { return null; }
+export function LyricsRenderer() { return null; }
+export function SysinfoRenderer() { return null; }
+export function AutomationRenderer() { return null; }
+export function ImageRenderer() { return null; }

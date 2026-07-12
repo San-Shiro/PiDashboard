@@ -1,0 +1,75 @@
+<style>
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  
+  .shape-container {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<div class="shape-container" id="shape"></div>
+
+<script>
+  var shape = $('#shape');
+
+  var cfg = (typeof widget !== 'undefined' && widget.config) || (window.PiWidget && window.PiWidget.config) || {};
+
+  // Background
+  var bg = PiTheme.getBackground(cfg, cfg.background, "#F59E0B", "#D97706", "transparent");
+  shape.style.background = bg;
+
+  // Clip Path Polygon
+  var type = cfg.shapeType || 'star';
+  var clipPathStr = '';
+  if (type === 'star') {
+    var p = cfg.points || 5;
+    var inner = cfg.innerRadius || 40;
+    var res = '';
+    for (var k = 0; k < p * 2; k++) {
+      var radius = k % 2 === 0 ? 50 : inner / 2;
+      var angle = (k * Math.PI) / p - Math.PI / 2;
+      var x = 50 + Math.cos(angle) * radius;
+      var y = 50 + Math.sin(angle) * radius;
+      res += x.toFixed(1) + '% ' + y.toFixed(1) + '%, ';
+    }
+    clipPathStr = 'polygon(' + res.slice(0, -2) + ')';
+  } else {
+    var p = cfg.points || 5;
+    var res = '';
+    for (var k = 0; k < p; k++) {
+      var angle = (k * 2 * Math.PI) / p - Math.PI / 2;
+      var x = 50 + Math.cos(angle) * 50;
+      var y = 50 + Math.sin(angle) * 50;
+      res += x.toFixed(1) + '% ' + y.toFixed(1) + '%, ';
+    }
+    clipPathStr = 'polygon(' + res.slice(0, -2) + ')';
+  }
+  shape.style.clipPath = clipPathStr;
+  shape.style.webkitClipPath = clipPathStr;
+
+  // Box Sizing based on border position
+  if (cfg.borderPosition === 'outside') {
+    shape.style.boxSizing = 'content-box';
+  } else {
+    shape.style.boxSizing = 'border-box';
+  }
+
+  // Border
+  if (cfg.border && cfg.border.type !== 'none') {
+    var borderW = PiTheme.normalizeBoxValues(cfg.border.width, { top: 2, right: 2, bottom: 2, left: 2 });
+    var borderStyle = cfg.border.type || "solid";
+    var borderColor = PiTheme.getColor(cfg, cfg.border.color, '--canvas-border', '#ffffff');
+    
+    shape.style.borderTop = borderW.top + "px " + borderStyle + " " + borderColor;
+    shape.style.borderRight = borderW.right + "px " + borderStyle + " " + borderColor;
+    shape.style.borderBottom = borderW.bottom + "px " + borderStyle + " " + borderColor;
+    shape.style.borderLeft = borderW.left + "px " + borderStyle + " " + borderColor;
+  } else {
+    shape.style.border = "none";
+  }
+</script>

@@ -1,0 +1,72 @@
+{
+  "id": "text-paragraph",
+  "name": "Text Paragraph",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "description": "Rich paragraph typography with compact rendering cost.",
+  "category": "Typography",
+  "icon": "align-left",
+  "tier": "static",
+  "runtimeTier": "lite",
+  "estimatedRamMb": 1,
+  "trust": "verified",
+  "permissions": {
+    "network": false,
+    "disk": false
+  },
+  "resources": {
+    "externalFonts": [
+      "Inter",
+      "Roboto",
+      "Outfit",
+      "Plus Jakarta Sans",
+      "Poppins",
+      "Montserrat",
+      "Manrope",
+      "DM Sans",
+      "Space Grotesk",
+      "Merriweather",
+      "Playfair Display",
+      "Oswald",
+      "Bebas Neue",
+      "Noto Sans",
+      "Noto Serif",
+      "Noto Sans Devanagari",
+      "Noto Serif Devanagari",
+      "Mukta",
+      "Hind",
+      "Anek Devanagari"
+    ]
+  },
+  "fragment": {
+    "file": "text-paragraph.html",
+    "format": "snippet"
+  },
+  "configSchema": [
+    { "key": "textContent", "type": "textarea", "label": "Paragraph", "rows": 7, "default": "Add paragraph content here." },
+    { "key": "fontFamily", "type": "select", "label": "Font Family", "options": ["system-ui, sans-serif", "Inter, system-ui, sans-serif", "Outfit, system-ui, sans-serif", "\"Plus Jakarta Sans\", system-ui, sans-serif", "Poppins, system-ui, sans-serif", "Montserrat, system-ui, sans-serif", "Manrope, system-ui, sans-serif", "\"DM Sans\", system-ui, sans-serif", "\"Space Grotesk\", system-ui, sans-serif", "\"Segoe UI\", system-ui, sans-serif", "Roboto, Arial, sans-serif", "\"Noto Sans\", system-ui, sans-serif", "\"Noto Sans Devanagari\", system-ui, sans-serif", "\"Noto Serif Devanagari\", Georgia, serif", "Mukta, system-ui, sans-serif", "Hind, system-ui, sans-serif", "\"Anek Devanagari\", system-ui, sans-serif", "Arial, sans-serif", "Georgia, serif", "\"Merriweather\", Georgia, serif", "\"Playfair Display\", Georgia, serif", "\"Noto Serif\", Georgia, serif", "Oswald, system-ui, sans-serif", "\"Bebas Neue\", system-ui, sans-serif"], "default": "system-ui, sans-serif" },
+    { "key": "fontSize", "type": "slider", "label": "Size", "min": 12, "max": 72, "step": 1, "unit": "px", "default": 24 },
+    { "key": "fontWeight", "type": "select", "label": "Weight", "options": ["300", "400", "500", "600", "700"], "default": "400" },
+    { "key": "lineHeight", "type": "slider", "label": "Line Height", "min": 1, "max": 2.2, "step": 0.05, "unit": "", "default": 1.5 },
+    { "key": "letterSpacing", "type": "slider", "label": "Letter Spacing", "min": -1, "max": 8, "step": 0.25, "unit": "px", "default": 0 },
+    { "key": "textWidth", "type": "slider", "label": "Text Width", "min": 180, "max": 1600, "step": 10, "unit": "px", "default": 700 },
+    { "key": "textColor", "type": "color", "label": "Text Color", "default": "#f3f4f6" },
+    { "key": "alignment", "type": "radio", "label": "Align", "options": ["left", "center", "right", "justify"], "default": "left" },
+    { "key": "verticalAlign", "type": "radio", "label": "Vertical", "options": ["flex-start", "center", "flex-end"], "default": "flex-start" },
+    { "key": "transform", "type": "radio", "label": "Transform", "options": ["none", "uppercase", "lowercase", "capitalize"], "default": "none" },
+    { "key": "italic", "type": "boolean", "label": "Italic", "default": false },
+    { "key": "maxLines", "type": "slider", "label": "Max Lines", "min": 0, "max": 20, "step": 1, "unit": "", "default": 0 },
+    { "key": "shadowBlur", "type": "slider", "label": "Shadow Blur", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 0 },
+    { "key": "shadowColor", "type": "color", "label": "Shadow Color", "default": "rgba(0,0,0,0.3)" },
+    { "key": "opacity", "type": "slider", "label": "Opacity", "min": 0.2, "max": 1, "step": 0.05, "unit": "", "default": 1 }
+  ],
+  "stateMode": "instance",
+  "persist": false,
+  "defaults": {
+    "width": 700,
+    "height": 280
+  },
+  "dataChannel": {
+    "type": "none"
+  }
+}
