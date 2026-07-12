@@ -31,13 +31,14 @@ function serializeFilter(filter: WidgetFilter): string {
 }
 
 function separateFragmentScript(html: string): { htmlPart: string; scriptPart: string } {
-  let scriptContent = '';
+  const scripts: string[] = [];
   let htmlPart = html;
   
   const scriptStartRegex = /<script(?:\s+[^>]*?)?>/gi;
   let match;
-  let targetIndex = -1;
-  let targetLength = 0;
+  
+  // We must process from the end to the beginning to avoid index shifting when slicing htmlPart
+  const matches: {start: number, end: number, content: string}[] = [];
   
   while ((match = scriptStartRegex.exec(html)) !== null) {
     if (match[0].toLowerCase().includes('src=')) {
@@ -47,18 +48,23 @@ function separateFragmentScript(html: string): { htmlPart: string; scriptPart: s
     const innerStart = startIdx + match[0].length;
     const endIdx = html.indexOf('</script>', innerStart);
     if (endIdx !== -1) {
-      scriptContent = html.substring(innerStart, endIdx);
-      targetIndex = startIdx;
-      targetLength = (endIdx + 9) - startIdx;
-      break;
+      matches.push({
+        start: startIdx,
+        end: endIdx + 9, // length of </script>
+        content: html.substring(innerStart, endIdx)
+      });
     }
   }
   
-  if (targetIndex !== -1) {
-    htmlPart = html.substring(0, targetIndex) + html.substring(targetIndex + targetLength);
+  // Sort matches descending by start index
+  matches.sort((a, b) => b.start - a.start);
+  
+  for (const m of matches) {
+    scripts.unshift(m.content); // unshift so they execute in original order
+    htmlPart = htmlPart.substring(0, m.start) + htmlPart.substring(m.end);
   }
   
-  return { htmlPart, scriptPart: scriptContent };
+  return { htmlPart, scriptPart: scripts.join('\n;\n') };
 }
 
 function renderInlineWidget(instance: WidgetInstance, manifest: WidgetManifest, fragmentHTML: string, style: string, dataAttrs: string): string {

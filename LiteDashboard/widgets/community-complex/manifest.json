@@ -38,11 +38,5 @@
       "type": "background",
       "label": "Background"
     }
-  ],
-  "stateMode": "instance",
-  "persist": true,
-  "permissions": {
-    "network": true,
-    "persistence": true
-  }
+  ]
 }
