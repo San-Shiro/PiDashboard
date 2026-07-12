@@ -196,7 +196,7 @@ function handleCmd(msg: any) {
 function scheduleBroadcast(key: string, widget: string, instance: string) {
   if (broadcastTimers.has(key)) return;
   
-  const timer = setTimeout(() => {
+  const executeBroadcast = () => {
     broadcastTimers.delete(key);
     
     const data = stateStore.get(key);
@@ -224,9 +224,16 @@ function scheduleBroadcast(key: string, widget: string, instance: string) {
         admins.delete(ws);
       }
     }
-  }, BROADCAST_DEBOUNCE_MS);
+  };
+
+  if (broadcastTimers.size > 50) {
+    // If overwhelmed, skip debounce and broadcast synchronously
+    executeBroadcast();
+    return;
+  }
   
-  broadcastTimers.set(key, timer);
+  const timer = setTimeout(executeBroadcast, BROADCAST_DEBOUNCE_MS);
+  broadcastTimers.set(key, timer as any);
 }
 
 export function pushReload(): void {

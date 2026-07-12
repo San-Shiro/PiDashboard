@@ -10,6 +10,9 @@ export interface LogEntry {
 const MAX_LOGS = 300;
 const logs: LogEntry[] = [];
 
+let pendingBroadcastLogs: LogEntry[] = [];
+let broadcastTimer: ReturnType<typeof setTimeout> | null = null;
+
 // Save original console methods
 const originalConsoleLog = console.log;
 const originalConsoleWarn = console.warn;
@@ -32,8 +35,15 @@ export function addLog(level: 'info' | 'warn' | 'error', source: string, message
     logs.shift();
   }
 
-  // Broadcast
-  broadcastLogs([entry]);
+  // Debounced Broadcast
+  pendingBroadcastLogs.push(entry);
+  if (!broadcastTimer) {
+    broadcastTimer = setTimeout(() => {
+      broadcastLogs(pendingBroadcastLogs);
+      pendingBroadcastLogs = [];
+      broadcastTimer = null;
+    }, 250);
+  }
 }
 
 export function hijackConsole() {
