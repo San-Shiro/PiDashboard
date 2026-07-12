@@ -1,4 +1,5 @@
 {
+  "id": "community-earthquakes",
   "name": "Global Earthquakes Orbit",
   "description": "Live, dynamic world map displaying the latest significant global earthquakes pulled from the USGS.",
   "version": "1.0.0",
@@ -12,7 +13,10 @@
     "defaultH": 4
   },
   "trust": "community",
-  "daemon": "earthquakes.ts",
+  "daemon": "community-earthquakes",
+  "fragment": {
+    "file": "fragment/earthquakes.html"
+  },
   "schema": {
     "type": "object",
     "properties": {
