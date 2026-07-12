@@ -49,32 +49,32 @@
 
 <style>
 /* Scoped pulse animation for markers */
-@keyframes __scope__pulse {
+@keyframes pulse {
   0% { transform: scale(1); opacity: 0.8; }
   100% { transform: scale(3); opacity: 0; }
 }
 
-.__scope__dot {
+.dot {
   position: absolute;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
 
-.__scope__pulse-ring {
+.pulse-ring {
   position: absolute;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  animation: __scope__pulse 2s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: pulse 2s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
   pointer-events: none;
 }
 </style>
 
 <script>
 (function() {
-  const container = document.querySelector('.__scope__ .earthquake-container');
-  const layer = document.querySelector('.__scope__ .markers-layer');
-  const mapPath = document.querySelector('.__scope__ .world-map');
+  const container = document.querySelector('.earthquake-container');
+  const layer = document.querySelector('.markers-layer');
+  const mapPath = document.querySelector('.world-map');
   
   // Setup config styles
   let minMag = 3.0;
@@ -112,7 +112,7 @@
       const size = Math.max(3, (quake.mag - 2) * 2); // Relative dot size
       
       const dot = document.createElement('div');
-      dot.className = '__scope__dot';
+      dot.className = 'dot';
       dot.style.left = `${pos.x}%`;
       dot.style.top = `${pos.y}%`;
       dot.style.width = `${size}px`;
@@ -120,7 +120,7 @@
       dot.style.backgroundColor = dotColor;
       
       const ring = document.createElement('div');
-      ring.className = '__scope__pulse-ring';
+      ring.className = 'pulse-ring';
       ring.style.left = `${pos.x}%`;
       ring.style.top = `${pos.y}%`;
       ring.style.width = `${size}px`;
