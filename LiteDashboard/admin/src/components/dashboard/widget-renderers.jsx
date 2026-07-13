@@ -14,7 +14,7 @@ export function WidgetRenderer({ instance, widgetData, now, themeVars }) {
   // Fetch HTML fragment when widget type changes
   useEffect(() => {
     let active = true;
-    fetch(`/api/widgets/${wid}/fragment`)
+    fetch(`/api/widgets/${wid}/fragment?t=${Date.now()}`)
       .then((res) => {
         if (!res.ok) throw new Error("Load failed");
         return res.text();
@@ -139,6 +139,11 @@ export function WidgetRenderer({ instance, widgetData, now, themeVars }) {
             state: ${JSON.stringify(widgetState)},
             patchState: function(delta) {
               console.log("[Preview PatchState]:", delta);
+            },
+            register: function(api) {
+              if (window.PiWidget && window.PiWidget._registerAPI) {
+                window.PiWidget._registerAPI(window.instanceId, window.widgetType, api);
+              }
             }
           };
         </script>

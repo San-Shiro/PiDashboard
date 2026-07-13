@@ -1,0 +1,472 @@
+<div class="crypto-container" style="background-color: #0f172a;">
+  <div class="crypto-list"></div>
+  <div class="crypto-detail-view" style="display: none;">
+    <div class="crypto-detail-header">
+      <div class="crypto-detail-back" title="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </div>
+      <div class="crypto-detail-title">
+        <span class="crypto-detail-symbol"></span>
+        <span class="crypto-detail-name"></span>
+      </div>
+    </div>
+    <div class="crypto-detail-body">
+      <div class="crypto-detail-price-box">
+        <div class="crypto-detail-price"></div>
+        <div class="crypto-detail-change"></div>
+      </div>
+      <div class="crypto-detail-graph-col">
+        <canvas class="crypto-detail-sparkline"></canvas>
+      </div>
+      <div class="crypto-detail-stats">
+        <div class="crypto-stat-box">
+          <div class="crypto-stat-label">24h Low</div>
+          <div class="crypto-stat-val crypto-stat-min"></div>
+        </div>
+        <div class="crypto-stat-box">
+          <div class="crypto-stat-label">24h High</div>
+          <div class="crypto-stat-val crypto-stat-max"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.crypto-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.crypto-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  flex: 1;
+  overflow: auto;
+}
+.crypto-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 10px 14px;
+  border-radius: 12px;
+  flex: 1;
+  min-height: 0;
+  transition: transform 0.2s, background 0.2s;
+  cursor: pointer;
+}
+.crypto-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.crypto-row:active {
+  transform: scale(0.98);
+}
+.crypto-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 35%;
+}
+.crypto-symbol {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 0.5px;
+}
+.crypto-name {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.crypto-graph-col {
+  width: 30%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+canvas.sparkline {
+  width: 100%;
+  height: 100%;
+  min-height: 30px;
+}
+.crypto-price-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  width: 35%;
+}
+.crypto-price {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+.crypto-change {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.crypto-change.up { color: var(--theme-color, #10b981); }
+.crypto-change.down { color: #ef4444; }
+.crypto-change.up::before { content: "▲"; font-size: 0.6rem; }
+.crypto-change.down::before { content: "▼"; font-size: 0.6rem; }
+
+/* Detail View Styles */
+.crypto-detail-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+.crypto-detail-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.crypto-detail-back {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: color 0.2s, transform 0.2s;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+.crypto-detail-back:hover {
+  color: var(--theme-color, #f8fafc);
+  transform: translateX(-2px);
+}
+.crypto-detail-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.crypto-detail-symbol {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+.crypto-detail-name {
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+.crypto-detail-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 16px;
+  overflow: hidden;
+}
+.crypto-detail-price-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.crypto-detail-price {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.5px;
+}
+.crypto-detail-change {
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.crypto-detail-change.up { color: var(--theme-color, #10b981); }
+.crypto-detail-change.down { color: #ef4444; }
+.crypto-detail-change.up::before { content: "▲"; font-size: 0.9rem; }
+.crypto-detail-change.down::before { content: "▼"; font-size: 0.9rem; }
+
+.crypto-detail-graph-col {
+  flex: 1;
+  min-height: 80px;
+  width: 100%;
+  position: relative;
+}
+.crypto-detail-sparkline {
+  width: 100%;
+  height: 100%;
+}
+
+.crypto-detail-stats {
+  display: flex;
+  gap: 12px;
+}
+.crypto-stat-box {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.crypto-stat-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+.crypto-stat-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+</style>
+
+<script>
+(function() {
+  try {
+    const myInstanceId = window.instanceId;
+    const root = document.getElementById(myInstanceId) || document;
+    const container = root.querySelector('.crypto-container');
+    const list = root.querySelector('.crypto-list');
+    
+    // Detail view elements
+    const detailView = root.querySelector('.crypto-detail-view');
+    const backBtn = root.querySelector('.crypto-detail-back');
+    const dSymbol = root.querySelector('.crypto-detail-symbol');
+    const dName = root.querySelector('.crypto-detail-name');
+    const dPrice = root.querySelector('.crypto-detail-price');
+    const dChange = root.querySelector('.crypto-detail-change');
+    const dMin = root.querySelector('.crypto-stat-min');
+    const dMax = root.querySelector('.crypto-stat-max');
+    const dCanvas = root.querySelector('.crypto-detail-sparkline');
+    
+    let themeColor = '#10b981';
+    let currencySymbol = '$';
+    let detailModeCoinId = null;
+    let cachedData = [];
+    
+    backBtn.addEventListener('click', () => {
+      detailModeCoinId = null;
+      detailView.style.display = 'none';
+      list.style.display = 'flex';
+    });
+    
+    function applyConfig(cfg) {
+      if (cfg.backgroundColor) {
+        container.style.backgroundColor = cfg.backgroundColor;
+      }
+      if (cfg.themeColor) {
+        themeColor = cfg.themeColor;
+      }
+      container.style.setProperty('--theme-color', themeColor);
+      
+      if (cfg.currency) {
+        const c = cfg.currency.toLowerCase();
+        currencySymbol = c === 'eur' ? '€' : c === 'gbp' ? '£' : '$';
+      }
+    }
+    
+    function drawSparkline(canvas, dataPoints, color) {
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      
+      if (rect.width === 0 || rect.height === 0) return;
+      
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!dataPoints || dataPoints.length < 2) return;
+      
+      const min = Math.min(...dataPoints);
+      const max = Math.max(...dataPoints);
+      const range = max - min || 1;
+      
+      const paddingY = 4 * dpr;
+      const w = canvas.width;
+      const h = canvas.height - (paddingY * 2);
+      
+      ctx.beginPath();
+      const stepX = w / (dataPoints.length - 1);
+      
+      for (let i = 0; i < dataPoints.length; i++) {
+        const x = i * stepX;
+        const normalized = (dataPoints[i] - min) / range;
+        const y = paddingY + h - (normalized * h);
+        
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5 * dpr;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      
+      ctx.lineTo(w, canvas.height);
+      ctx.lineTo(0, canvas.height);
+      ctx.closePath();
+      
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, color + '66');
+      grad.addColorStop(1, color + '00');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    function formatPrice(val) {
+      if (val == null) return '--';
+      if (val < 0.01) return currencySymbol + val.toFixed(6);
+      if (val < 1) return currencySymbol + val.toFixed(4);
+      return currencySymbol + val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function showDetail(coin) {
+      detailModeCoinId = coin.id;
+      list.style.display = 'none';
+      detailView.style.display = 'flex';
+      
+      dSymbol.textContent = coin.symbol || '???';
+      dName.textContent = coin.name || 'Unknown';
+      dPrice.textContent = formatPrice(coin.price);
+      
+      const changeClass = coin.change24h >= 0 ? 'up' : 'down';
+      const changeText = coin.change24h != null ? Math.abs(coin.change24h).toFixed(2) + '%' : '--';
+      
+      dChange.className = 'crypto-detail-change ' + changeClass;
+      dChange.textContent = changeText;
+      
+      let minPrice = 0, maxPrice = 0;
+      if (coin.sparkline && coin.sparkline.length > 0) {
+        minPrice = Math.min(...coin.sparkline);
+        maxPrice = Math.max(...coin.sparkline);
+      }
+      dMin.textContent = formatPrice(minPrice);
+      dMax.textContent = formatPrice(maxPrice);
+      
+      setTimeout(() => {
+        try {
+          const graphColor = coin.change24h >= 0 ? themeColor : '#ef4444';
+          drawSparkline(dCanvas, coin.sparkline, graphColor);
+        } catch(e) { console.error("Detail sparkline error:", e); }
+      }, 0);
+    }
+
+    window.widget.register({
+      onState: function(data) {
+        try {
+          const config = (window.widget && window.widget.config) ? window.widget.config : {};
+          applyConfig(config);
+          
+          const safeData = data || {};
+          const myCleanId = myInstanceId ? myInstanceId.trim() : '';
+          let instanceData = null;
+          for (let k in safeData) {
+            if (k.trim() === myCleanId) {
+              instanceData = safeData[k];
+              break;
+            }
+          }
+          instanceData = instanceData || safeData;
+            
+          if (!Array.isArray(instanceData) || instanceData.length === 0) {
+            list.innerHTML = '<div style="color: #64748b; font-size: 0.8rem; text-align: center; margin-top: 20px;">Waiting for crypto data...</div>';
+            return;
+          }
+          
+          cachedData = instanceData;
+          
+          // Render list only if we are not in detail mode (or render it in background)
+          list.innerHTML = '';
+          
+          instanceData.forEach(coin => {
+            const row = document.createElement('div');
+            row.className = 'crypto-row';
+            
+            const changeClass = coin.change24h >= 0 ? 'up' : 'down';
+            const changeText = coin.change24h != null ? Math.abs(coin.change24h).toFixed(2) + '%' : '--';
+            
+            // CRITICAL FIX: We MUST use single quotes here instead of double quotes.
+            row.innerHTML = `
+              <div class='crypto-info'>
+                <span class='crypto-symbol'>${coin.symbol || '???'}</span>
+                <span class='crypto-name'>${coin.name || 'Unknown'}</span>
+              </div>
+              <div class='crypto-graph-col'>
+                <canvas class='sparkline'></canvas>
+              </div>
+              <div class='crypto-price-col'>
+                <span class='crypto-price'>${formatPrice(coin.price)}</span>
+                <span class='crypto-change ${changeClass}'>${changeText}</span>
+              </div>
+            `;
+            
+            // Add click listener
+            row.addEventListener('click', () => {
+              showDetail(coin);
+            });
+            
+            list.appendChild(row);
+            
+            setTimeout(() => {
+              try {
+                // Only draw list sparklines if list is visible to save CPU
+                if (list.style.display !== 'none') {
+                  const canvas = row.querySelector('.sparkline');
+                  const graphColor = coin.change24h >= 0 ? themeColor : '#ef4444';
+                  drawSparkline(canvas, coin.sparkline, graphColor);
+                }
+              } catch (e) {
+                console.error("Sparkline error:", e);
+              }
+            }, 0);
+          });
+          
+          // If a coin is currently selected, update its detail view with the fresh data
+          if (detailModeCoinId) {
+            const activeCoin = instanceData.find(c => c.id === detailModeCoinId);
+            if (activeCoin) {
+              showDetail(activeCoin);
+            }
+          }
+          
+        } catch (err) {
+          list.innerHTML = '<div style="color: red; font-size: 10px;">Error in onState: ' + err.toString() + '</div>';
+        }
+      }
+    });
+  } catch (globalErr) {
+    document.body.innerHTML += '<div style="position:absolute;top:0;left:0;background:red;color:white;z-index:9999;">Global script err: ' + globalErr.toString() + '</div>';
+  }
+})();
+</script>

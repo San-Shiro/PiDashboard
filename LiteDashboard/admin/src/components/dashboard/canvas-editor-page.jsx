@@ -467,6 +467,11 @@ function CanvasEditorShell() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mediaSelectorOpen, setMediaSelectorOpen] = useState(false);
   const [editingInstanceId, setEditingInstanceId] = useState(null);
+
+  useEffect(() => {
+    window.__updateEditingId = setEditingInstanceId;
+    return () => delete window.__updateEditingId;
+  }, []);
   const [now, setNow] = useState(() => new Date());
   const [dirty, setDirty] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);

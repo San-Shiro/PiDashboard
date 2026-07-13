@@ -1,0 +1,48 @@
+{
+  "id": "crypto-desk",
+  "name": "Crypto Desk",
+  "icon": "Bitcoin",
+  "description": "Live cryptocurrency prices and 7-day sparkline graphs powered by CoinGecko.",
+  "version": "1.0.0",
+  "author": "Community",
+  "category": "Finance",
+  "runtimeTier": "lite",
+  "dimensions": {
+    "minW": 4,
+    "minH": 3,
+    "defaultW": 6,
+    "defaultH": 4
+  },
+  "trust": "community",
+  "daemon": "crypto-desk",
+  "stateMode": "instance",
+  "fragment": {
+    "file": "fragment/crypto.html"
+  },
+  "configSchema": [
+    {
+      "key": "coins",
+      "type": "text",
+      "label": "Coin IDs (comma separated)",
+      "default": "bitcoin,ethereum,solana"
+    },
+    {
+      "key": "currency",
+      "type": "text",
+      "label": "Currency",
+      "default": "usd"
+    },
+    {
+      "key": "themeColor",
+      "type": "color",
+      "label": "Graph Color",
+      "default": "#10b981"
+    },
+    {
+      "key": "backgroundColor",
+      "type": "color",
+      "label": "Background Color",
+      "default": "#0f172a"
+    }
+  ]
+}

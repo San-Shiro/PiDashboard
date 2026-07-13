@@ -200,6 +200,18 @@ Widgets expose functions in their `<script>` scope. The SDK auto-detects and cal
 
 > **Note:** `onState` is the only lifecycle hook in v1.0. Future versions may add `onResize`, `onThemeChange`, etc. The `widget.destroy()` registration pattern handles cleanup.
 
+### 4.4 Global `PiWidget` Utilities
+
+The global `PiWidget` object provides helper methods for inter-widget communication and touch gestures:
+
+| Method | Description |
+|---|---|
+| `PiWidget.getInstanceState(widgetId, instanceId)` | Retrieve the current state of any widget instance on the dashboard. Useful for background scripts orchestrating inter-widget communication. |
+| `PiWidget.onSwipe(element, callback)` | Attach a swipe listener to an element. Callback receives `'up'`, `'down'`, `'left'`, or `'right'`. |
+| `PiWidget.onLongPress(element, callback, [duration=800])` | Attach a long-press listener to an element. |
+
+> **Touch Architecture Note:** The kiosk compositor automatically applies `touch-action: pan-y pinch-zoom;` to all widgets. To capture raw gestures (like swiping or dragging a map) without scrolling the page, add `data-touch="none"` to your widget's `:host` or wrapper element.
+
 ---
 
 ## 5. Theming System
