@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, existsSync } from 'fs';
+import { readFileSync, readdirSync, existsSync, mkdirSync, cpSync, rmSync } from 'fs';
 import { join } from 'path';
 import { Router, json, error } from '../router';
 import { stateStore } from '../state/state-store';
@@ -19,6 +19,50 @@ function getActiveWidgetSet(): Set<string> | null {
 }
 
 export function registerWidgetRoutes(router: Router) {
+  // POST /api/widgets/install — extract and install a .wig (zip) package
+  router.post('/api/widgets/install', async (req) => {
+    try {
+      const formData = await req.formData();
+      const file = formData.get('file');
+      if (!file) return error('No file uploaded', 400);
+
+      const arrayBuffer = await (file as File).arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const AdmZip = require('adm-zip');
+      const zip = new AdmZip(buffer);
+
+      let manifestEntry = zip.getEntries().find((e: any) => e.entryName === 'manifest.json' || e.entryName.endsWith('/manifest.json'));
+      if (!manifestEntry) return error('Invalid .wig package: manifest.json not found', 400);
+
+      const manifestStr = zip.readAsText(manifestEntry);
+      const manifest = JSON.parse(manifestStr);
+      if (!manifest.id) return error('Invalid manifest: missing id', 400);
+
+      const widgetFolder = join(WIDGETS_DIR, manifest.id);
+      const rootPrefix = manifestEntry.entryName.includes('/') 
+        ? manifestEntry.entryName.substring(0, manifestEntry.entryName.lastIndexOf('/') + 1)
+        : '';
+
+      const tmpDir = join(process.cwd(), 'state', 'tmp_install_' + Date.now());
+      mkdirSync(tmpDir, { recursive: true });
+      zip.extractAllTo(tmpDir, true);
+
+      const sourceFolder = rootPrefix ? join(tmpDir, rootPrefix) : tmpDir;
+      if (existsSync(widgetFolder)) rmSync(widgetFolder, { recursive: true, force: true });
+      cpSync(sourceFolder, widgetFolder, { recursive: true });
+      rmSync(tmpDir, { recursive: true, force: true });
+
+      // Signal reload to kiosk displays
+      const { pushReload } = require('../ws/display');
+      pushReload();
+
+      return json({ success: true, widgetId: manifest.id });
+    } catch (e: any) {
+      console.error('[API Error] Install widget failed:', e);
+      return error(e.message || 'Install failed', 500);
+    }
+  });
+
   // GET /api/widgets/registry — return all widget manifests
   router.get('/api/widgets/registry', (req) => {
     const widgets: any[] = [];

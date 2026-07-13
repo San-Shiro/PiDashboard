@@ -164,12 +164,66 @@ export default function WidgetsTab({ registry }) {
     saveSelectedRuntimeTier(tier);
   };
 
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef(null);
+
+  const handleInstallClick = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/widgets/install', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        alert('Widget installed successfully! Please reload the page to see it.');
+      } else {
+        const error = await res.json();
+        alert('Installation failed: ' + (error.error || error.message || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Installation failed: ' + err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = null; // reset
+    }
+  };
+
   return (
     <div>
-      <SectionHeader
-        title="Widget Registry"
-        subtitle="Available widgets installed on the system that can be added to canvases."
-      />
+      <div className="flex items-center justify-between mb-4">
+        <SectionHeader
+          title="Widget Registry"
+          subtitle="Available widgets installed on the system that can be added to canvases."
+        />
+        <button
+          onClick={handleInstallClick}
+          disabled={uploading}
+          className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          style={{
+            backgroundColor: "var(--color-accent)",
+            color: "#fff",
+          }}
+        >
+          {uploading ? 'Installing...' : 'Install from .wig'}
+        </button>
+        <input 
+          type="file" 
+          accept=".wig,.zip" 
+          ref={fileInputRef} 
+          style={{ display: 'none' }} 
+          onChange={handleFileChange} 
+        />
+      </div>
 
       <div className="mb-4">
         <Card className="p-4">

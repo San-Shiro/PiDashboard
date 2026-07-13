@@ -37,9 +37,13 @@
           try { api.onState(payload); } catch(e) { console.error('[PiWidget] replay error:', e); }
         }
       }
-      if (api.onData) _dataHandlers.push({ type: widgetType, handler: api.onData });
+      if (api.onData) {
+        _dataHandlers.push({ type: widgetType, instance: instanceId, handler: api.onData });
+      }
+      if (api.onDestroy) {
+        _destroyCallbacks.push({ type: widgetType, instance: instanceId, handler: api.onDestroy });
+      }
       if (api.onFrame) _frameCallbacks.push({ type: widgetType, handler: api.onFrame });
-      if (api.onDestroy) _destroyCallbacks.push({ type: widgetType, instance: instanceId, handler: api.onDestroy });
     },
     
     cmd: function(daemon, payload) {
@@ -53,12 +57,60 @@
       return _lastStates[typeOrInstance] || null;
     },
     
+    getInstanceState: function(widgetType, instanceId) {
+      var wState = _lastStates[widgetType];
+      if (wState && typeof wState === 'object' && instanceId in wState) {
+        return wState[instanceId];
+      }
+      return _lastStates[instanceId] || null;
+    },
+    
+    onSwipe: function(element, callback) {
+      if (!element) return;
+      var touchStartX = 0, touchStartY = 0;
+      var threshold = 50;
+      element.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, {passive: true});
+      element.addEventListener('touchend', function(e) {
+        var touchEndX = e.changedTouches[0].screenX;
+        var touchEndY = e.changedTouches[0].screenY;
+        var dx = touchEndX - touchStartX;
+        var dy = touchEndY - touchStartY;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          if (Math.abs(dx) > threshold) {
+            callback(dx > 0 ? 'right' : 'left');
+          }
+        } else {
+          if (Math.abs(dy) > threshold) {
+            callback(dy > 0 ? 'down' : 'up');
+          }
+        }
+      }, {passive: true});
+    },
+    
+    onLongPress: function(element, callback, duration) {
+      if (!element) return;
+      var timer;
+      duration = duration || 800;
+      function start() { timer = setTimeout(callback, duration); }
+      function cancel() { clearTimeout(timer); }
+      element.addEventListener('touchstart', start, {passive: true});
+      element.addEventListener('touchend', cancel, {passive: true});
+      element.addEventListener('touchmove', cancel, {passive: true});
+      element.addEventListener('mousedown', start, {passive: true});
+      element.addEventListener('mouseup', cancel, {passive: true});
+      element.addEventListener('mousemove', cancel, {passive: true});
+      element.addEventListener('mouseleave', cancel, {passive: true});
+    },
+    
     _dispatchState: function(widgetType, instanceId, data) {
       _lastStates[widgetType] = data;
       if (instanceId !== 'global') {
         _lastStates[instanceId] = data;
       }
-
+      
       // Apply declarative bindings first
       if (window.PiBind) {
         if (instanceId !== 'global') {
@@ -66,17 +118,17 @@
           if (container) {
             var config = {};
             try { config = JSON.parse(container.getAttribute('data-config') || '{}'); } catch(e) {}
-            window.PiBind.apply(container, Object.assign({}, config, data));
+            try { window.PiBind.apply(container, Object.assign({}, config, data)); } catch(e) { console.error('PiBind apply error:', e); }
           }
         } else {
           var containers = document.querySelectorAll('[data-widget="' + widgetType + '"]');
-          for (var j = 0; j < containers.length; j++) {
-            var el = containers[j];
-            var id = el.id;
+          for (var i = 0; i < containers.length; i++) {
+            var el = containers[i];
+            var id = el.getAttribute('data-instance');
             var elData = (data && typeof data === 'object' && id in data) ? data[id] : data;
             var config = {};
             try { config = JSON.parse(el.getAttribute('data-config') || '{}'); } catch(e) {}
-            window.PiBind.apply(el, Object.assign({}, config, elData));
+            try { window.PiBind.apply(el, Object.assign({}, config, elData)); } catch(e) { console.error('PiBind apply error:', e); }
           }
         }
       }

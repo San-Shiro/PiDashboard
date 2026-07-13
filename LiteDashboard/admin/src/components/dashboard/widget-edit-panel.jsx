@@ -604,7 +604,24 @@ export default function WidgetEditPanel({
                       style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px]" style={{ color: "var(--color-text-secondary)" }}>
+                  <div className="mt-3">
+                    <label className="block text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: "var(--color-text-secondary)" }}>Instance ID</label>
+                    <input
+                      type="text"
+                      value={instance.id}
+                      onChange={(e) => {
+                        const newId = e.target.value;
+                        if (newId.trim() && newId !== instance.id) {
+                          onUpdateInstance({ id: newId });
+                          if (window.__updateEditingId) window.__updateEditingId(newId);
+                        }
+                      }}
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all shadow-sm font-mono"
+                      style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}
+                    />
+                    <p className="mt-1.5 text-[10px]" style={{ color: "var(--color-text-secondary)" }}>Unique identifier used for widget-to-widget communication.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] mt-4" style={{ color: "var(--color-text-secondary)" }}>
                     <div className="flex justify-between gap-3"><span>Widget</span><span style={{ color: "var(--color-text-primary)" }} className="font-medium">{manifest.name}</span></div>
                     <div className="flex justify-between gap-3"><span>Version</span><span style={{ color: "var(--color-text-primary)" }} className="font-mono">{manifest.version}</span></div>
                     <div className="flex justify-between gap-3"><span>Author</span><span style={{ color: "var(--color-text-primary)" }}>{manifest.author}</span></div>

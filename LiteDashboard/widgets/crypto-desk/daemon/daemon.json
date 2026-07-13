@@ -1,0 +1,21 @@
+{
+  "runtime": {
+    "command": "bun run daemon.ts",
+    "cwd": "daemon"
+  },
+  "communication": {
+    "mode": "ipc_file",
+    "ipcFilename": "crypto-desk.json"
+  },
+  "health": {
+    "strategy": "file_mtime",
+    "maxStaleSec": 600,
+    "startupGraceSec": 15
+  },
+  "restart": {
+    "policy": "on-failure",
+    "maxRestarts": 5,
+    "backoffBaseSec": 2,
+    "backoffMaxSec": 120
+  }
+}

@@ -226,10 +226,17 @@ function renderIframedWidget(instance: WidgetInstance, manifest: WidgetManifest,
                 window.PiWidget._destroyAll();
               }
             } else if (e.data.type === 'widget_data') {
-              // Legacy fallback
-              if (window.__communityOnData) window.__communityOnData(e.data.payload);
+              if (window.widget.onData) window.widget.onData(e.data.payload);
             }
           });
+          
+          // Hydrate initial state into PiWidget so onState handlers fire immediately
+          document.addEventListener('DOMContentLoaded', function() {
+            if (window.PiWidget && window.PiWidget._dispatchState) {
+              window.PiWidget._dispatchState(window.widgetType, window.instanceId, window.widget.state);
+            }
+          });
+
           window.onerror = function(msg, src, line, col, err) {
             window.parent.postMessage({
               type: 'pi_error',
@@ -411,7 +418,7 @@ export function composeHTML(
         }
         
         var resetStyle = document.createElement('style');
-        resetStyle.textContent = "*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } :host { width: 100%; height: 100%; display: block; overflow: hidden; background: transparent !important; font-family: Inter, system-ui, sans-serif; color: var(--canvas-text); }";
+        resetStyle.textContent = "*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } :host { width: 100%; height: 100%; display: block; overflow: hidden; background: transparent !important; font-family: Inter, system-ui, sans-serif; color: var(--canvas-text); touch-action: pan-y pinch-zoom; } :host([data-touch='none']) { touch-action: none; }";
         shadow.appendChild(resetStyle);
         
         while (container.firstChild) {

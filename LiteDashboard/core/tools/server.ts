@@ -122,7 +122,7 @@ export function generateCanvasHTML(canvasFile?: string) {
   }
   stateStore.hydrate();
 
-  return composeHTML(canvas, registry);
+  return composeHTML(canvas, registry, stateStore.getAll());
 }
 
 // ── Static file server ─────────────────────────────────────────────────────────
@@ -227,8 +227,8 @@ Bun.serve({
       return new Response('WebSocket Upgrade Failed', { status: 400 });
     }
 
-    // Auth gate for /api/* (except auth endpoints)
-    if (url.pathname.startsWith('/api/') && !url.pathname.startsWith('/api/auth/')) {
+    // Auth gate for /api/* (except auth endpoints and logs)
+    if (url.pathname.startsWith('/api/') && !url.pathname.startsWith('/api/auth/') && url.pathname !== '/api/logs') {
       const authResponse = requireAuth(req);
       if (authResponse) return authResponse;
     }
