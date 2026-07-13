@@ -1,0 +1,255 @@
+
+<html>
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="background: #000; padding: 20px;">
+  <div style="width: 400px; height: 250px;">
+    <div class="crypto-container" style="background-color: #0f172a;">
+  <div class="crypto-list"></div>
+</div>
+
+<style>
+.crypto-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.crypto-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+.crypto-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 10px 14px;
+  border-radius: 12px;
+  flex: 1;
+  min-height: 0;
+  transition: transform 0.2s;
+}
+.crypto-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.crypto-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 35%;
+}
+.crypto-symbol {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 0.5px;
+}
+.crypto-name {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.crypto-graph-col {
+  width: 30%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+canvas.sparkline {
+  width: 100%;
+  height: 100%;
+  min-height: 30px;
+}
+.crypto-price-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  width: 35%;
+}
+.crypto-price {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+.crypto-change {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.crypto-change.up { color: #10b981; }
+.crypto-change.down { color: #ef4444; }
+.crypto-change.up::before { content: "▲"; font-size: 0.6rem; }
+.crypto-change.down::before { content: "▼"; font-size: 0.6rem; }
+</style>
+
+<script>
+(function() {
+  const container = document.querySelector('.crypto-container');
+  const list = document.querySelector('.crypto-list');
+  
+  let themeColor = '#10b981';
+  let currencySymbol = '$';
+  
+  function applyConfig(cfg) {
+    if (cfg.backgroundColor) {
+      container.style.backgroundColor = cfg.backgroundColor;
+    }
+    if (cfg.themeColor) {
+      themeColor = cfg.themeColor;
+    }
+    if (cfg.currency) {
+      const c = cfg.currency.toLowerCase();
+      currencySymbol = c === 'eur' ? '€' : c === 'gbp' ? '£' : '$';
+    }
+  }
+  
+  function drawSparkline(canvas, dataPoints, color) {
+    const ctx = canvas.getContext('2d');
+    // High DPI canvas rendering
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    
+    // Avoid drawing if dimensions are collapsed
+    if (rect.width === 0 || rect.height === 0) return;
+    
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!dataPoints || dataPoints.length < 2) return;
+    
+    const min = Math.min(...dataPoints);
+    const max = Math.max(...dataPoints);
+    const range = max - min || 1;
+    
+    const paddingY = 4 * dpr;
+    const w = canvas.width;
+    const h = canvas.height - (paddingY * 2);
+    
+    ctx.beginPath();
+    const stepX = w / (dataPoints.length - 1);
+    
+    // Build line path
+    for (let i = 0; i < dataPoints.length; i++) {
+      const x = i * stepX;
+      const normalized = (dataPoints[i] - min) / range;
+      const y = paddingY + h - (normalized * h);
+      
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    
+    // Line style
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5 * dpr;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    
+    // Gradient fill
+    ctx.lineTo(w, canvas.height);
+    ctx.lineTo(0, canvas.height);
+    ctx.closePath();
+    
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, color + '66'); // ~40% opacity
+    grad.addColorStop(1, color + '00'); // 0% opacity
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+
+  // Format currency dynamically based on magnitude
+  function formatPrice(val) {
+    if (val == null) return '--';
+    if (val < 0.01) return currencySymbol + val.toFixed(6);
+    if (val < 1) return currencySymbol + val.toFixed(4);
+    return currencySymbol + val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  window.widget.register({
+    onState: function(data) {
+      const config = (window.widget && window.widget.config) ? window.widget.config : {};
+      applyConfig(config);
+      
+      const safeData = data || {};
+      const instanceData = safeData[window.instanceId] || safeData;
+      
+      if (!Array.isArray(instanceData) || instanceData.length === 0) {
+        list.innerHTML = '<div style="color: #64748b; font-size: 0.9rem; text-align: center; margin-top: 20px;">Waiting for crypto data...</div>';
+        return;
+      }
+      
+      list.innerHTML = '';
+      
+      instanceData.forEach(coin => {
+        const row = document.createElement('div');
+        row.className = 'crypto-row';
+        
+        const changeClass = coin.change24h >= 0 ? 'up' : 'down';
+        const changeText = coin.change24h != null ? Math.abs(coin.change24h).toFixed(2) + '%' : '--';
+        
+        row.innerHTML = \`
+          <div class="crypto-info">
+            <span class="crypto-symbol">\${coin.symbol || '???'}</span>
+            <span class="crypto-name">\${coin.name || 'Unknown'}</span>
+          </div>
+          <div class="crypto-graph-col">
+            <canvas class="sparkline"></canvas>
+          </div>
+          <div class="crypto-price-col">
+            <span class="crypto-price">\${formatPrice(coin.price)}</span>
+            <span class="crypto-change \${changeClass}">\${changeText}</span>
+          </div>
+        \`;
+        
+        list.appendChild(row);
+        
+        // Wait a tick for DOM layout to complete before drawing canvas
+        setTimeout(() => {
+          const canvas = row.querySelector('.sparkline');
+          const graphColor = coin.change24h >= 0 ? themeColor : '#ef4444'; // Red if down, theme color if up
+          drawSparkline(canvas, coin.sparkline, graphColor);
+        }, 0);
+      });
+    }
+  });
+})();
+</script>
+
+  </div>
+  <script>
+    // Mock the PiWidget SDK
+    window.widget = {
+      config: {
+        coins: "bitcoin,ethereum",
+        currency: "usd",
+        themeColor: "#10b981",
+        backgroundColor: "#0f172a"
+      },
+      register: function(opts) {
+        window.instanceId = 'inst1';
+        opts.onState({"inst1":[{"id":"bitcoin","symbol":"BTC","name":"Bitcoin","price":64109,"change24h":-0.13595,"sparkline":[62615.486952953535,62762.70842480428,63517.88397289706,62835.1273290497,63436.93887280679,64180.63420514519,63093.52474767431,63407.301844394664,63766.30289430432,62932.52174162355,62014.74797212771,62054.78429083154,62252.63748967275,62820.149627589315,62968.05424026797,63255.281135642144,63881.11532044424,64369.17004777795,63799.59845515737,64090.985162830504,64110.967829055204,64311.1039631105,64303.19087890115,63940.97636885769,63971.89666202366,63971.89666202366]},{"id":"ethereum","symbol":"ETH","name":"Ethereum","price":1819.01,"change24h":-0.06044,"sparkline":[1758.986684444454,1779.8127939416997,1784.4717616054245,1763.7176852201294,1785.9479350129877,1804.4557586897022,1769.15896126065,1780.1309158153463,1788.730695858223,1756.079925668831,1734.922322945546,1734.2891912865482,1742.5277253393804,1752.0494832790998,1745.8231033762654,1747.3908073204411,1774.1355066294097,1796.4290994708465,1787.8656374972718,1792.0510038217267,1798.2045145546997,1810.2526848753614,1822.6913504838528,1803.771852380051,1798.1962314706473]}]});
+      }
+    };
+  </script>
+</body>
+</html>

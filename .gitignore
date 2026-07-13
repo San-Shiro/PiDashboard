@@ -9,3 +9,8 @@ state/
 *.lock
 bun.lock
 .env
+*.tar.gz
+*_backup.zip
+coverage/
+.cache/
+.vitest/

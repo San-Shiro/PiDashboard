@@ -339,6 +339,23 @@ export class DaemonManager {
 
     return missing;
   }
+
+  public getStatus(): DaemonStatus[] {
+    const statuses: DaemonStatus[] = [];
+    for (const d of this.daemons.values()) {
+      statuses.push({
+        id: d.id,
+        state: d.state,
+        pid: d.process?.pid || null,
+        uptimeSec: d.startTime ? Math.floor((Date.now() - d.startTime) / 1000) : 0,
+        restartCount: d.restartCount,
+        lastError: d.lastError,
+        healthy: d.state === 'running',
+        missingDependencies: d.missingDependencies,
+      });
+    }
+    return statuses;
+  }
 }
 
 export const daemonManager = new DaemonManager();

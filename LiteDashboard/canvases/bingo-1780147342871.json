@@ -4,28 +4,28 @@
   "canvas_config": {
     "width": 1920,
     "height": 1080,
-    "background": "#0a1628",
+    "background": "#1a0a0a",
     "displayTarget": "primary",
     "pixelRatio": 1,
     "theme": {
-      "id": "ocean",
-      "name": "Ocean",
+      "id": "sunset",
+      "name": "Sunset",
       "vars": {
-        "--canvas-bg": "#0a1628",
-        "--canvas-bg-2": "#102038",
-        "--canvas-bg-3": "#17304d",
-        "--canvas-text": "#b8d4e3",
-        "--canvas-text-2": "#8fc0d4",
-        "--canvas-text-3": "#6ea0b8",
-        "--canvas-accent": "#06b6d4",
-        "--canvas-accent-2": "#0891b2",
-        "--canvas-accent-3": "#67e8f9",
-        "--canvas-surface": "#0f2840",
-        "--canvas-surface-2": "#163654",
-        "--canvas-surface-3": "#20466a",
-        "--canvas-border": "#1a3d5c",
-        "--canvas-border-2": "#2f5d82",
-        "--canvas-muted": "#5b8fa8"
+        "--canvas-bg": "#1a0a0a",
+        "--canvas-bg-2": "#2a1515",
+        "--canvas-bg-3": "#3a1f1f",
+        "--canvas-text": "#ffd7b5",
+        "--canvas-text-2": "#f8c49a",
+        "--canvas-text-3": "#dca37a",
+        "--canvas-accent": "#ff6b35",
+        "--canvas-accent-2": "#f97316",
+        "--canvas-accent-3": "#fb923c",
+        "--canvas-surface": "#2a1515",
+        "--canvas-surface-2": "#341d1d",
+        "--canvas-surface-3": "#442727",
+        "--canvas-border": "#4a2525",
+        "--canvas-border-2": "#663232",
+        "--canvas-muted": "#b08060"
       }
     }
   },
@@ -256,8 +256,8 @@
       "label": "Stat / KPI Card",
       "enabled": true,
       "layout": {
-        "x": 929,
-        "y": 732,
+        "x": 1140,
+        "y": 218,
         "width": 360,
         "height": 140,
         "zIndex": 10,
@@ -337,8 +337,8 @@
       "label": "Live Weather",
       "enabled": true,
       "layout": {
-        "x": 157,
-        "y": 343,
+        "x": 169,
+        "y": 833,
         "width": 380,
         "height": 180,
         "zIndex": 12,
@@ -365,7 +365,7 @@
         "refreshMinutes": 10,
         "textColor": "var(--canvas-text-3)",
         "accentColor": "",
-        "__themeMode": "custom"
+        "__themeMode": "canvas"
       }
     },
     {
@@ -445,8 +445,8 @@
       "label": "Community Complex",
       "enabled": true,
       "layout": {
-        "x": 145,
-        "y": 693,
+        "x": 587,
+        "y": 767,
         "width": 255,
         "height": 258,
         "zIndex": 15,
@@ -457,11 +457,33 @@
         "title": "Network Load",
         "textColor": ""
       }
+    },
+    {
+      "id": "16aff633-6f88-439c-af1f-dfab99404a24",
+      "widget_id": "crypto-desk",
+      "label": "Crypto Desk",
+      "enabled": true,
+      "layout": {
+        "x": 860,
+        "y": 704,
+        "width": 504,
+        "height": 317,
+        "zIndex": 17,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "coins": "bitcoin,ethereum,solana",
+        "currency": "inr",
+        "themeColor": "var(--canvas-accent)",
+        "backgroundColor": "var(--canvas-surface)",
+        "__themeMode": "canvas"
+      }
     }
   ],
-  "widget_count": 12,
+  "widget_count": 13,
   "created_at": "2026-05-30T13:22:22.871Z",
-  "updated_at": "2026-07-12T08:40:31.537Z",
+  "updated_at": "2026-07-13T08:09:57.806Z",
   "is_active": true,
   "id": "bingo-1780147342871"
 }
