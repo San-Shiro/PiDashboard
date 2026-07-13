@@ -24,10 +24,11 @@ import AuthGate from "@/components/dashboard/auth-gate";
 import OverviewTab from "@/components/dashboard/tabs/overview-tab";
 import WidgetsTab from "@/components/dashboard/tabs/widgets-tab";
 import MediaTab from "@/components/dashboard/tabs/media-tab";
-import TemplatesTab from "@/components/dashboard/tabs/templates-tab";
+import CanvasesTab from "@/components/dashboard/tabs/canvases-tab";
 import ThemesTab from "@/components/dashboard/tabs/themes-tab";
 import AboutTab from "@/components/dashboard/tabs/about-tab";
 import SystemControlTab from "@/components/dashboard/tabs/system-control-tab";
+import ResourceTab from "@/components/dashboard/tabs/resource-tab";
 import MarketplaceTab from "@/components/dashboard/tabs/marketplace-tab";
 import GpioTab from "@/components/dashboard/tabs/gpio-tab";
 import CanvasEditorPage from "@/components/dashboard/canvas-editor-page";
@@ -37,13 +38,14 @@ import { Pill, StatusDot, Spinner } from "@/components/dashboard/ui-primitives";
 const DASHBOARD_TABS = [
   { id: "overview", label: "Overview", icon: Activity },
   { id: "widgets", label: "Widgets", icon: Cpu },
-  { id: "canvases", label: "Canvases", icon: Monitor },
+  { id: "canvases", label: "Canvases", icon: LayoutTemplate },
   { id: "media", label: "Media", icon: Image },
 ];
 
 const SETTINGS_TABS = [
   { id: "themes", label: "Themes", icon: Palette },
   { id: "system", label: "System", icon: Settings },
+  { id: "resources", label: "Resources", icon: Server },
   { id: "gpio", label: "GPIO", icon: Cpu },
   { id: "marketplace", label: "Marketplace", icon: ShoppingBag },
   { id: "about", label: "About", icon: Info },
@@ -458,11 +460,12 @@ function AdminShell() {
             />
           )}
           {activeTab === "canvases" && (
-            <TemplatesTab onAfterApply={() => setEditingInstanceId(null)} />
+            <CanvasesTab onAfterApply={() => setEditingInstanceId(null)} />
           )}
           {activeTab === "media" && <MediaTab />}
           {activeTab === "themes" && <ThemesTab />}
           {activeTab === "system" && <SystemControlTab />}
+          {activeTab === "resources" && <ResourceTab />}
           {activeTab === "marketplace" && <MarketplaceTab />}
           {activeTab === "gpio" && <GpioTab />}
           {activeTab === "about" && <AboutTab />}

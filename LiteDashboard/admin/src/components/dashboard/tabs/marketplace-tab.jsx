@@ -1,103 +1,113 @@
-// Widget marketplace — Coming Soon placeholder
+import React, { useState, useRef } from "react";
 import { Card, SectionHeader } from "../ui-primitives";
-import { ShoppingBag, Download, Settings, Star } from "lucide-react";
-
-function FeatureCard({ icon: Icon, title, description }) {
-  return (
-    <Card className="p-5 text-center">
-      <div
-        className="w-10 h-10 mx-auto rounded-lg flex items-center justify-center mb-3"
-        style={{
-          backgroundColor: "var(--color-surface-2)",
-          color: "var(--color-text-secondary)",
-        }}
-      >
-        <Icon size={18} />
-      </div>
-      <h3
-        className="text-sm font-semibold mb-1"
-        style={{ color: "var(--color-text-primary)" }}
-      >
-        {title}
-      </h3>
-      <p
-        className="text-xs leading-relaxed"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        {description}
-      </p>
-    </Card>
-  );
-}
+import { ShoppingBag, Download, UploadCloud, CheckCircle, AlertTriangle } from "lucide-react";
 
 export default function MarketplaceTab() {
+  const [uploading, setUploading] = useState(false);
+  const [status, setStatus] = useState({ type: "", message: "" });
+  const fileInputRef = useRef(null);
+
+  const handleInstallClick = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    setStatus({ type: "", message: "" });
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/widgets/install", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        setStatus({ type: "success", message: "Widget installed successfully! It is now available in the Widget Registry." });
+      } else {
+        const error = await res.json();
+        setStatus({ type: "error", message: "Installation failed: " + (error.error || error.message || "Unknown error") });
+      }
+    } catch (err) {
+      setStatus({ type: "error", message: "Installation failed: " + err.message });
+    } finally {
+      setUploading(false);
+      e.target.value = null; // reset
+    }
+  };
+
   return (
     <div className="space-y-8">
-      {/* Coming Soon Hero */}
-      <div
-        className="rounded-2xl border relative overflow-hidden"
-        style={{
-          backgroundColor: "var(--color-surface)",
-          borderColor: "var(--color-border)",
-        }}
-      >
-        {/* Decorative blobs */}
-        <div
-          className="absolute -top-24 -left-24 w-48 h-48 rounded-full opacity-[0.06] blur-3xl"
-          style={{ backgroundColor: "var(--color-accent)" }}
-        />
-        <div
-          className="absolute -bottom-16 -right-16 w-40 h-40 rounded-full opacity-[0.04] blur-3xl"
-          style={{ backgroundColor: "var(--color-warn)" }}
-        />
+      <SectionHeader
+        title="Widget Marketplace & Installation"
+        subtitle="Install community widgets or manually upload .wig packages to expand your dashboard."
+      />
 
-        <div className="relative z-10 py-16 px-6 flex flex-col items-center text-center">
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 shadow-lg"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--color-accent), var(--color-accent-hover, #818cf8))",
-              color: "#FFFFFF",
-            }}
-          >
-            <ShoppingBag size={30} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Local Installation Box */}
+        <Card className="p-6 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none transition-transform group-hover:scale-110">
+            <UploadCloud size={100} />
           </div>
-
-          <h2
-            className="text-lg font-bold tracking-tight"
-            style={{ color: "var(--color-text-primary)" }}
-          >
-            Widget Marketplace
-          </h2>
-
-          <p
-            className="text-sm mt-2 max-w-md"
-            style={{ color: "var(--color-text-secondary)" }}
-          >
-            Community widgets, one-click install, auto-configured daemons.
-          </p>
-
-          <p
-            className="text-xs mt-3 max-w-sm leading-relaxed"
-            style={{ color: "var(--color-text-muted)" }}
-          >
-            Browse, install, and manage third-party widgets from the community.
-            Coming in a future update.
-          </p>
-
-          <div
-            className="mt-6 inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold"
-            style={{
-              backgroundColor: "var(--color-accent-bg)",
-              color: "var(--color-accent)",
-            }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-            Coming Soon
+          <div className="relative z-10 flex flex-col h-full">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold mb-1" style={{ color: "var(--color-text-primary)" }}>Manual Installation</h3>
+              <p className="text-xs leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+                Upload a `.wig` or `.zip` widget package directly. The system will extract it, validate the manifest, and register any included background daemons automatically.
+              </p>
+            </div>
+            
+            <div className="mt-auto pt-4">
+              {status.message && (
+                <div className={`text-[11px] px-3 py-2 rounded-md mb-3 flex items-center gap-2 ${status.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                  {status.type === 'success' ? <CheckCircle size={14} /> : <AlertTriangle size={14} />}
+                  {status.message}
+                </div>
+              )}
+              <button
+                onClick={handleInstallClick}
+                disabled={uploading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
+                style={{ backgroundColor: "var(--color-accent)", color: "#fff" }}
+              >
+                <UploadCloud size={16} />
+                {uploading ? "Installing..." : "Upload & Install .wig Package"}
+              </button>
+              <input 
+                type="file" 
+                accept=".wig,.zip" 
+                ref={fileInputRef} 
+                style={{ display: "none" }} 
+                onChange={handleFileChange} 
+              />
+            </div>
           </div>
-        </div>
+        </Card>
+
+        {/* Community Catalog Teaser */}
+        <Card className="p-6 relative overflow-hidden" style={{ backgroundColor: "var(--color-surface-2)" }}>
+          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ background: "radial-gradient(circle at top right, var(--color-accent), transparent 60%)" }} />
+          <div className="relative z-10 flex flex-col h-full items-center justify-center text-center py-6">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-sm" style={{ backgroundColor: "var(--color-surface)", color: "var(--color-accent)" }}>
+              <ShoppingBag size={24} />
+            </div>
+            <h3 className="text-sm font-semibold mb-2" style={{ color: "var(--color-text-primary)" }}>Community Catalog</h3>
+            <p className="text-xs mb-4 max-w-[250px]" style={{ color: "var(--color-text-secondary)" }}>
+              A curated online directory of third-party widgets available for one-click installation.
+            </p>
+            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-semibold border" style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-current" />
+              Under Construction
+            </div>
+          </div>
+        </Card>
       </div>
-
+    </div>
+  );
+}
       {/* Feature Preview */}
       <div>
         <SectionHeader

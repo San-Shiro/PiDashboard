@@ -500,7 +500,7 @@ function CanvasEditorShell() {
   } = useQuery({
     queryKey: ["canvas", canvasId],
     queryFn: async () => {
-      const r = await fetch(`/api/templates/${canvasId}`);
+      const r = await fetch(`/api/canvases/${canvasId}`);
       if (!r.ok) throw new Error("Canvas not found");
       return r.json();
     },
@@ -740,7 +740,7 @@ function CanvasEditorShell() {
         widget_count: cleanWidgets.length,
       };
       delete payload.id;
-      const r = await fetch(`/api/templates/${canvasId}`, {
+      const r = await fetch(`/api/canvases/${canvasId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -764,14 +764,14 @@ function CanvasEditorShell() {
       };
       delete payload.id;
 
-      const saveResponse = await fetch(`/api/templates/${canvasId}`, {
+      const saveResponse = await fetch(`/api/canvases/${canvasId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (!saveResponse.ok) throw new Error("save");
 
-      const publishResponse = await fetch(`/api/templates/${canvasId}/publish`, {
+      const publishResponse = await fetch(`/api/canvases/${canvasId}/publish`, {
         method: "POST",
       });
       if (!publishResponse.ok) throw new Error("publish");

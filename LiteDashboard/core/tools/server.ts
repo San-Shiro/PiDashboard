@@ -8,7 +8,7 @@ import { stateStore } from '../server/state/state-store';
 import { startIpcWatcher } from '../server/ipc/tmpfs-watcher';
 import { Router, json, error } from '../server/router';
 import { registerAuthRoutes } from '../server/api/auth';
-import { registerTemplateRoutes } from '../server/api/templates';
+import { registerCanvasesRoutes } from '../server/api/canvases';
 import { registerWidgetRoutes } from '../server/api/widgets';
 import { registerSystemRoutes } from '../server/api/system';
 import { registerMediaRoutes } from '../server/api/media';
@@ -189,7 +189,7 @@ router.get('/media/*', (req, params) => {
 
 // Register API routes
 registerAuthRoutes(router);
-registerTemplateRoutes(router);
+registerCanvasesRoutes(router);
 registerWidgetRoutes(router);
 registerSystemRoutes(router);
 registerMediaRoutes(router);

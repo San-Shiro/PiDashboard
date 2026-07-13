@@ -3,6 +3,8 @@ import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { Router, json, error } from '../router';
 import { pushMaintenance } from '../ws/display';
+import { daemonManager } from '../daemon/daemon-manager';
+import { getLogs } from '../logger';
 
 // In-memory server state
 let maintenanceMode = false;
@@ -97,24 +99,37 @@ export function registerSystemRoutes(router: Router) {
     return json({ success: true });
   });
 
-  // GET /api/system/services — placeholder service list
+  // GET /api/system/services — return real daemons
   router.get('/api/system/services', () => {
+    const daemons = daemonManager.getStatus();
+    const coreServices = [
+      { id: 'pi-dashboard', name: 'PiDashboard Server', state: 'running', uptimeSec: Math.floor(process.uptime()), healthy: true, core: true },
+      { id: 'pi-compositor', name: 'Display Compositor', state: 'running', uptimeSec: Math.floor(process.uptime()), healthy: true, core: true },
+    ];
+    
     return json({
-      services: [
-        { name: 'pi-dashboard', status: 'running', core: true, desc: 'PiDashboard Server' },
-        { name: 'pi-compositor', status: 'running', core: true, desc: 'Display Compositor' },
-        { name: 'pi-sysinfo', status: 'running', core: false, desc: 'System Info Daemon' },
-        { name: 'pi-weather', status: 'running', core: false, desc: 'Weather Daemon' },
-      ],
+      services: [...coreServices, ...daemons.map(d => ({ ...d, name: `Daemon: ${d.id}`, core: false }))],
     });
   });
 
-  // POST /api/system/services/restart — placeholder
+  // GET /api/system/logs — fetch recent logs
+  router.get('/api/system/logs', () => {
+    return json({ logs: getLogs() });
+  });
+
+  // POST /api/system/services/restart
   router.post('/api/system/services/restart', async (req) => {
-    const body = await req.json() as { name?: string };
-    if (!body.name) return error('Service name required', 400);
-    // TODO: integrate with systemctl on real Pi
-    console.log(`[System] Service restart requested: ${body.name}`);
+    const body = await req.json() as { name?: string, id?: string };
+    const targetId = body.id || body.name;
+    if (!targetId) return error('Service ID required', 400);
+    
+    if (targetId.startsWith('pi-')) {
+       return error('Cannot restart core service via this API', 403);
+    }
+    
+    console.log(`[System] Service restart requested: ${targetId}`);
+    daemonManager.stopDaemon(targetId);
+    // It will be reconciled and restarted on the next tick if required
     return json({ success: true });
   });
 
