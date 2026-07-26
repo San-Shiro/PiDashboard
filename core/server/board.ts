@@ -101,12 +101,16 @@ export function getAvailablePins(): string[] {
 
 export function isPinAvailable(pin: number | string): boolean {
   const board = detectBoard();
-  return String(pin) in board.gpio.pins;
+  // hasOwnProperty, not `in`: `in` walks the prototype chain, so 'constructor'
+  // and 'toString' would report as valid pins.
+  return Object.prototype.hasOwnProperty.call(board.gpio.pins, String(pin));
 }
 
 export function getPinCaps(pin: number | string): string[] {
   const board = detectBoard();
-  return board.gpio.pins[String(pin)]?.caps || [];
+  if (!isPinAvailable(pin)) return [];
+  const caps = board.gpio.pins[String(pin)]?.caps;
+  return Array.isArray(caps) ? caps : [];
 }
 
 export function isGpioEnabled(): boolean {

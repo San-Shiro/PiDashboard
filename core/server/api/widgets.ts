@@ -7,6 +7,57 @@ import { registerInstalled } from '../provenance';
 import { validateWidget } from '../../engine/validators/widget-validator';
 
 const SAFE_ID_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
+const SAFE_DAEMON_SEGMENT_RE = /^[a-zA-Z0-9_-]{1,64}$/;
+const SAFE_DEP_RE = /^[A-Za-z0-9._+-]{1,64}$/;
+
+/**
+ * Gate the daemon half of an installed package.
+ *
+ * daemon-manager spawns `runtime.command` with `shell: true`, so an installed
+ * widget's daemon.json is a direct code-execution surface that validateWidget
+ * (which only inspects the manifest and HTML fragment) never looked at.
+ * Returns an error string, or null when acceptable.
+ */
+function inspectDaemonPackage(dir: string): string | null {
+  const daemonJson = join(dir, 'daemon', 'daemon.json');
+  if (!existsSync(daemonJson)) return null;
+
+  let d: any;
+  try { d = JSON.parse(readFileSync(daemonJson, 'utf8')); } catch { return 'daemon/daemon.json is not valid JSON'; }
+
+  const cmd = d?.runtime?.command;
+  if (cmd !== undefined) {
+    if (typeof cmd !== 'string' || !cmd.trim()) return 'daemon runtime.command must be a non-empty string';
+    // The command runs through a shell — refuse operators that would let a
+    // package chain arbitrary commands, and refuse escaping its own directory.
+    if (/[;&|`$(){}<>\n\r]|\|\||&&/.test(cmd)) return 'daemon runtime.command contains shell metacharacters';
+    if (cmd.includes('..')) return 'daemon runtime.command must not traverse directories';
+  }
+
+  const cwd = d?.runtime?.cwd;
+  if (cwd !== undefined && (typeof cwd !== 'string' || cwd.includes('..') || cwd.startsWith('/'))) {
+    return 'daemon runtime.cwd must be a relative path inside the widget';
+  }
+
+  if (d?.communication?.ipcFilename !== undefined) {
+    const f = String(d.communication.ipcFilename).replace(/\.json$/, '');
+    if (!SAFE_DAEMON_SEGMENT_RE.test(f)) return 'daemon communication.ipcFilename is not a safe filename';
+  }
+
+  // Dependency names are passed to a shell lookup at startup.
+  for (const key of ['system', 'python', 'npm']) {
+    const list = d?.dependencies?.[key];
+    if (list === undefined) continue;
+    if (!Array.isArray(list)) return `daemon dependencies.${key} must be an array`;
+    for (const item of list) {
+      if (typeof item !== 'string' || !SAFE_DEP_RE.test(item)) {
+        return `daemon dependencies.${key} contains an unsafe entry`;
+      }
+    }
+  }
+
+  return null;
+}
 
 const WIDGETS_DIR = join(process.cwd(), 'widgets');
 const ACTIVE_WIDGETS_CONFIG = join(process.cwd(), 'config', 'active-widgets.json');
@@ -58,18 +109,26 @@ export function registerWidgetRoutes(router: Router) {
 
       const tmpDir = join(process.cwd(), 'state', 'tmp_install_' + Date.now());
       mkdirSync(tmpDir, { recursive: true });
-      zip.extractAllTo(tmpDir, true);
 
-      const sourceFolder = rootPrefix ? join(tmpDir, rootPrefix) : tmpDir;
-      if (existsSync(widgetFolder)) rmSync(widgetFolder, { recursive: true, force: true });
-      cpSync(sourceFolder, widgetFolder, { recursive: true });
-      rmSync(tmpDir, { recursive: true, force: true });
+      // Extract -> validate in tmp -> only then swap. Validating after
+      // overwriting meant a deliberately-invalid package named e.g. "clock"
+      // permanently destroyed the installed widget of that name.
+      try {
+        zip.extractAllTo(tmpDir, true);
+        const sourceFolder = rootPrefix ? join(tmpDir, rootPrefix) : tmpDir;
 
-      // Validate the installed widget
-      const validation = validateWidget(widgetFolder);
-      if (!validation.valid) {
-        rmSync(widgetFolder, { recursive: true, force: true });
-        return error(`Widget validation failed: ${validation.errors.join(', ')}`, 400);
+        const validation = validateWidget(sourceFolder);
+        if (!validation.valid) {
+          return error(`Widget validation failed: ${validation.errors.join(', ')}`, 400);
+        }
+
+        const daemonIssue = inspectDaemonPackage(sourceFolder);
+        if (daemonIssue) return error(`Widget rejected: ${daemonIssue}`, 400);
+
+        if (existsSync(widgetFolder)) rmSync(widgetFolder, { recursive: true, force: true });
+        cpSync(sourceFolder, widgetFolder, { recursive: true });
+      } finally {
+        rmSync(tmpDir, { recursive: true, force: true });
       }
 
       // Register provenance — installed widgets are capped at community trust

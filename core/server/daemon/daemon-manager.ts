@@ -4,7 +4,7 @@ import { existsSync, readFileSync, statSync, writeFileSync, unlinkSync, mkdirSyn
 import { CanvasConfig } from '../../engine/schema';
 import { addLog } from '../logger';
 import { stateStore } from '../state/state-store';
-import { websocketHandler, pushRefresh } from '../ws/display';
+import { applyTrustedPatch, pushRefresh } from '../ws/display';
 
 export interface DaemonStatus {
   id: string;
@@ -129,7 +129,7 @@ export class DaemonManager {
               
               const stateKey = instanceId === 'global' ? daemonType : `${daemonType}:${instanceId}`;
               stateStore.patch(stateKey, null);
-              websocketHandler.message({} as any, JSON.stringify({ type: 'patch', widget: daemonType, instance: instanceId, delta: null }));
+              applyTrustedPatch(daemonType, instanceId, null);
             } catch (e) {}
             
             pushRefresh(daemonType, instanceId, config);
@@ -177,12 +177,22 @@ export class DaemonManager {
     if (existsSync(daemonJsonPath)) {
       try {
         const loaded = JSON.parse(readFileSync(daemonJsonPath, 'utf8'));
-        daemonManifest = { ...daemonManifest, ...loaded };
-        
+        const defaults = daemonManifest;
+        daemonManifest = { ...defaults, ...loaded };
+
+        // Merge per-field rather than replacing whole blocks: a daemon.json
+        // declaring a PARTIAL health/restart block would otherwise leave
+        // undefined numbers, producing NaN backoff (=> 0ms respawn spin loop)
+        // and comparisons that silently disable the health check.
+        daemonManifest.health = { ...defaults.health, ...(loaded.health || {}) };
+        daemonManifest.restart = { ...defaults.restart, ...(loaded.restart || {}) };
+
         // Ensure communication config uses the instance-specific daemonId
-        if (loaded.communication) {
-          daemonManifest.communication = { ...loaded.communication, ipcFilename: `${daemonId}.json` };
-        }
+        daemonManifest.communication = {
+          ...defaults.communication,
+          ...(loaded.communication || {}),
+          ipcFilename: `${daemonId}.json`,
+        };
         
         cmd = daemonManifest.runtime?.command;
         cwd = daemonManifest.runtime?.cwd ? join(widgetDir, daemonManifest.runtime.cwd) : join(widgetDir, 'daemon');
@@ -381,8 +391,14 @@ export class DaemonManager {
 
     const deps = manifest.dependencies;
 
+    // Dependency names come from an installed widget's daemon.json and are
+    // untrusted. Never interpolate them into a shell string — pass as an
+    // argument ($1) and additionally reject anything that isn't a plain
+    // executable name, so a hostile manifest cannot execute commands here.
+    const SAFE_CMD_RE = /^[A-Za-z0-9._+-]{1,64}$/;
     const checkCommand = (cmd: string): boolean => {
-      const result = spawnSync('sh', ['-c', `command -v ${cmd}`], { stdio: 'ignore' });
+      if (typeof cmd !== 'string' || !SAFE_CMD_RE.test(cmd)) return false;
+      const result = spawnSync('sh', ['-c', 'command -v "$1" >/dev/null 2>&1', 'sh', cmd], { stdio: 'ignore' });
       return result.status === 0;
     };
 

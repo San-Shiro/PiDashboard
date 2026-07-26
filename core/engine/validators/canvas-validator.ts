@@ -54,6 +54,12 @@ export function validateCanvas(raw: any, registryIds: string[]): ValidationResul
   const seenIds = new Set<string>();
 
   raw.widgets = raw.widgets.filter((w: any) => {
+    // A sanitizer must never throw: it is the last line of defence before the
+    // compositor, and an exception here turns every GET / into a permanent 500.
+    if (!w || typeof w !== 'object' || Array.isArray(w)) {
+      errors.push("Widget entry must be an object");
+      return false;
+    }
     if (!w.id || typeof w.id !== 'string') {
       errors.push("Widget missing id");
       return false;
@@ -78,7 +84,8 @@ export function validateCanvas(raw: any, registryIds: string[]): ValidationResul
     w.enabled = w.enabled !== false;
     w.config = w.config || {};
     
-    w.layout = w.layout || {};
+    // A non-object layout (e.g. a string) would throw on property assignment.
+    if (!w.layout || typeof w.layout !== 'object' || Array.isArray(w.layout)) w.layout = {};
     w.layout.x = Math.max(0, clamp(w.layout.x, 0, Infinity));
     w.layout.y = Math.max(0, clamp(w.layout.y, 0, Infinity));
     w.layout.width = clamp(w.layout.width || 320, 50, raw.canvas.width);
@@ -125,12 +132,18 @@ export function validateCanvas(raw: any, registryIds: string[]): ValidationResul
     
     if (w.schedule) {
       const timeRegex = /^\d{2}:\d{2}$/;
-      if (!w.schedule.activeFrom || !timeRegex.test(w.schedule.activeFrom)) delete w.schedule;
+      if (typeof w.schedule !== 'object' || Array.isArray(w.schedule)) delete w.schedule;
+      else if (!w.schedule.activeFrom || !timeRegex.test(w.schedule.activeFrom)) delete w.schedule;
       else if (!w.schedule.activeTo || !timeRegex.test(w.schedule.activeTo)) delete w.schedule;
-      else if (w.schedule.days) {
+      else if (w.schedule.days !== undefined) {
         const validDays = ["mon","tue","wed","thu","fri","sat","sun"];
-        w.schedule.days = w.schedule.days.filter((d: string) => validDays.includes(d));
-        if (w.schedule.days.length === 0) delete w.schedule.days;
+        if (!Array.isArray(w.schedule.days)) {
+          warnings.push(`Invalid schedule.days on '${w.id}' stripped`);
+          delete w.schedule.days;
+        } else {
+          w.schedule.days = w.schedule.days.filter((d: any) => validDays.includes(d));
+          if (w.schedule.days.length === 0) delete w.schedule.days;
+        }
       }
     }
     

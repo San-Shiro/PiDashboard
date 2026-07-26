@@ -114,6 +114,17 @@ export function registerCanvasesRoutes(router: Router) {
 
     body.id = params.id;
     body.updated_at = new Date().toISOString();
+
+    // Reject structurally broken canvases before they reach disk. Writing an
+    // unvalidated body here could make the compositor throw on every GET /,
+    // permanently 500-ing the kiosk with no way back except editing the file.
+    if (!body || typeof body !== 'object' || !Array.isArray(body.widgets)) {
+      return error("Canvas must be an object with a 'widgets' array", 400);
+    }
+    if (body.widgets.some((w: any) => !w || typeof w !== 'object' || Array.isArray(w))) {
+      return error('Each widget entry must be an object', 400);
+    }
+
     writeFileSync(targetFile, JSON.stringify(body, null, 2), 'utf8');
 
     if (body.is_active) {

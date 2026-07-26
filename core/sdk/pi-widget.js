@@ -8,6 +8,7 @@
   var _targetFps = 60;
   var _frameInterval = 1000 / _targetFps;
   var _lastFrameTime = 0;
+  var _loopRunning = false;
 
   // Command acknowledgement correlation (Phase 3.4).
   // callDaemon(name, params) registers a pending command by id; the daemon's
@@ -232,8 +233,14 @@
       _targetFps = fps || 60;
       _frameInterval = 1000 / _targetFps;
 
+      // Guard against a second concurrent loop: the page calls this once at
+      // parse time (with no callbacks yet) and _registerAPI calls it again when
+      // the first onFrame registers, which otherwise left two rAF chains alive.
+      if (_loopRunning) return;
+      _loopRunning = true;
+
       function tick(timestamp) {
-        if (_frameCallbacks.length === 0) return;
+        if (_frameCallbacks.length === 0) { _loopRunning = false; return; }
         if (timestamp - _lastFrameTime >= _frameInterval) {
           _lastFrameTime = timestamp;
           for (var i = 0; i < _frameCallbacks.length; i++) {

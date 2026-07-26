@@ -198,9 +198,20 @@ registerSystemRoutes(router);
 registerMediaRoutes(router);
 registerGpioRoutes(router);
 
-// Logging endpoint for widgets and Kiosk (supports single and batched)
+// Logging endpoint for widgets and Kiosk (supports single and batched).
+// Unauthenticated by design (the kiosk has no session), so it is rate-limited
+// to stop a LAN host from flooding the log buffer and every admin socket.
+const LOG_WINDOW_MS = 10_000;
+const LOG_MAX_REQUESTS = 30;
+let logWindowStart = 0;
+let logWindowCount = 0;
+
 router.post('/api/logs', async (req) => {
   try {
+    const now = Date.now();
+    if (now - logWindowStart > LOG_WINDOW_MS) { logWindowStart = now; logWindowCount = 0; }
+    if (++logWindowCount > LOG_MAX_REQUESTS) return json({ success: false, dropped: true }, 429);
+
     const body = await req.json();
     const entries = Array.isArray(body.batch) ? body.batch : [body];
     for (const entry of entries.slice(0, 50)) {
@@ -226,16 +237,15 @@ Bun.serve({
   async fetch(req, server) {
     const url = new URL(req.url);
 
-    // WebSocket upgrades
-    if (url.pathname === '/ws/display' || url.pathname === '/ws/daemon') {
+    // WebSocket upgrades. Only the display/admin channel exists — /ws/daemon
+    // was removed because it could not be authenticated (daemons are local
+    // processes with no session), which let any LAN host claim a daemon id.
+    // Daemons communicate via state/ipc/*.json instead.
+    if (url.pathname === '/ws/display') {
       const cookieHeader = req.headers.get('cookie') || '';
       const isAdmin = isValidSession(cookieHeader);
       const success = server.upgrade(req, {
-        data: {
-          role: isAdmin ? 'admin' : 'display',
-          id: 'global',
-          isDaemonChannel: url.pathname === '/ws/daemon',
-        }
+        data: { role: isAdmin ? 'admin' : 'display', id: 'global' }
       });
       if (success) return undefined;
       return new Response('WebSocket Upgrade Failed', { status: 400 });

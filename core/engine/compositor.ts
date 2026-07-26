@@ -41,7 +41,10 @@ function separateFragmentScript(html: string): { htmlPart: string; scriptPart: s
   const scripts: string[] = [];
   let htmlPart = html;
   
-  const scriptStartRegex = /<script(?:\s+[^>]*?)?>/gi;
+  // `\b[^>]*` is linear; the previous `(?:\s+[^>]*?)?` backtracked quadratically
+  // on long runs of whitespace inside a <script ...> tag (~2.5s at the 100KB
+  // fragment limit, on every GET /).
+  const scriptStartRegex = /<script\b[^>]*>/gi;
   let match;
   
   // We must process from the end to the beginning to avoid index shifting when slicing htmlPart
@@ -669,14 +672,19 @@ export function composeHTML(
               }
               setTimeout(function() { window.location.reload(); }, 200);
             } else if (msg.type === 'ack') {
-              // Command acknowledgement: route into the owning iframe, or
-              // resolve locally for inline widgets (which share this PiWidget).
-              var ackContainer = msg.instance ? document.querySelector('[data-instance="' + msg.instance + '"]') : null;
-              var ackIframe = ackContainer ? ackContainer.querySelector('iframe') : null;
-              if (ackIframe && ackIframe.contentWindow) {
-                ackIframe.contentWindow.postMessage({ type: 'pi_ack', ack: msg.ack }, '*');
-              } else if (window.PiWidget && window.PiWidget._resolveCommand && msg.ack) {
-                window.PiWidget._resolveCommand(msg.ack.id, msg.ack.ok, msg.ack.error);
+              // Route to the owning instance only. An ack whose instance does
+              // not resolve to a widget container is dropped rather than
+              // resolved page-globally, so a daemon writing an instance-less
+              // state file cannot resolve an unrelated widget's promise.
+              var ackContainer = msg.instance && msg.instance !== 'global'
+                ? document.querySelector('[data-instance="' + msg.instance + '"]') : null;
+              if (ackContainer && msg.ack) {
+                var ackIframe = ackContainer.querySelector('iframe');
+                if (ackIframe && ackIframe.contentWindow) {
+                  ackIframe.contentWindow.postMessage({ type: 'pi_ack', ack: msg.ack }, '*');
+                } else if (window.PiWidget && window.PiWidget._resolveCommand) {
+                  window.PiWidget._resolveCommand(msg.ack.id, msg.ack.ok, msg.ack.error);
+                }
               }
             } else if (msg.type === 'maintenance') {
               window.location.reload();

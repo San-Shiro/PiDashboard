@@ -1,7 +1,7 @@
 import { watch, readFileSync, existsSync, readdirSync } from 'fs';
 import { join, basename } from 'path';
 import { stateStore } from '../state/state-store';
-import { websocketHandler, pushAck } from '../ws/display';
+import { applyTrustedPatch, pushAck } from '../ws/display';
 
 const DEBOUNCE_MS = 50;
 
@@ -19,16 +19,11 @@ export function updateStateCache(type: string, data: any, instance: string = 'gl
       delete cleanData._ack;
     }
 
-    const stateKey = instance === 'global' ? type : `${type}:${instance}`;
-    stateStore.patch(stateKey, cleanData);
-
-    // Broadcast via WS by mocking a patch message to websocketHandler.
-    websocketHandler.message({} as any, JSON.stringify({
-      type: 'patch',
-      widget: type,
-      instance: instance,
-      delta: cleanData
-    }));
+    // Single patch + broadcast through one trusted path. Previously this
+    // patched the store directly with an UNSANITIZED key and then patched
+    // again via a synthetic socket message (which sanitizes), so a daemon file
+    // like `foo.bar__inst.json` wrote two diverging keys.
+    applyTrustedPatch(type, instance, cleanData);
 
     if (ack) pushAck(type, instance, ack);
   } catch (e) {

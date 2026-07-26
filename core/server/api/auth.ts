@@ -9,26 +9,53 @@ const sessions = new Map<string, { created: number }>();
 
 const LOGIN_WINDOW_MS = 60 * 1000;
 const MAX_LOGIN_FAILURES = 10;
-// Failed-login timestamps keyed by client IP. A successful login clears the IP,
-// so an attacker's failures cannot lock out a legitimate admin on a different IP.
+const LOGIN_MAP_MAX = 1000;
+// Failed-login timestamps keyed by client bucket. A successful login clears the
+// bucket, so an attacker's failures cannot lock out an admin on a different IP.
 const loginFailures = new Map<string, number[]>();
+
+/**
+ * Bucket an address for rate limiting. IPv6 collapses to its /64 prefix:
+ * a single host is routinely handed a whole /64, so keying on the full address
+ * would give an attacker ~2^64 independent buckets (i.e. no limit at all).
+ */
+function bucketFor(ip: string): string {
+  if (!ip) return 'unknown';
+  const addr = ip.startsWith('::ffff:') ? ip.slice(7) : ip; // IPv4-mapped IPv6
+  if (!addr.includes(':')) return addr;
+  const groups = addr.split(':');
+  return groups.slice(0, 4).join(':') + '::/64';
+}
+
+function sweep(now: number) {
+  for (const [k, arr] of loginFailures) {
+    if (!arr.some(t => now - t < LOGIN_WINDOW_MS)) loginFailures.delete(k);
+  }
+}
 
 export function isLoginRateLimited(ip: string): boolean {
   const now = Date.now();
-  const arr = (loginFailures.get(ip) || []).filter(t => now - t < LOGIN_WINDOW_MS);
-  if (arr.length) loginFailures.set(ip, arr); else loginFailures.delete(ip);
+  const key = bucketFor(ip);
+  const arr = (loginFailures.get(key) || []).filter(t => now - t < LOGIN_WINDOW_MS);
+  if (arr.length) loginFailures.set(key, arr); else loginFailures.delete(key);
   return arr.length >= MAX_LOGIN_FAILURES;
 }
 
 export function recordLoginResult(ip: string, success: boolean) {
+  const key = bucketFor(ip);
   if (success) {
-    loginFailures.delete(ip);
+    loginFailures.delete(key);
     return;
   }
   const now = Date.now();
-  const arr = (loginFailures.get(ip) || []).filter(t => now - t < LOGIN_WINDOW_MS);
+  // Bound the map so distinct source addresses cannot grow it without limit.
+  if (!loginFailures.has(key) && loginFailures.size >= LOGIN_MAP_MAX) {
+    sweep(now);
+    if (loginFailures.size >= LOGIN_MAP_MAX) return;
+  }
+  const arr = (loginFailures.get(key) || []).filter(t => now - t < LOGIN_WINDOW_MS);
   arr.push(now);
-  loginFailures.set(ip, arr);
+  loginFailures.set(key, arr);
 }
 
 function loadConfig(): any {
