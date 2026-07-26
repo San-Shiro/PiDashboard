@@ -21,6 +21,12 @@ secrets/
 *.passhash
 *.secret
 
+# Python build artifacts. A committed .pyc previously embedded a plaintext
+# password in bytecode, where text-based secret scanning could not see it.
+__pycache__/
+*.pyc
+*.pyo
+
 # Runtime config: contains the admin password hash (Argon2id) and is created
 # per-install by the first-run setup flow. Ship config.example.json instead.
 config.json
