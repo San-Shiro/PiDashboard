@@ -19,8 +19,10 @@ while true; do
 
   if [ -n "$LAT" ] && [ -n "$LON" ]; then
     TEMP_UNIT=""
+    WIND_UNIT="km/h"
     if [ "$UNITS" = "fahrenheit" ]; then
       TEMP_UNIT="&temperature_unit=fahrenheit&wind_speed_unit=mph"
+      WIND_UNIT="mph"
     fi
     
     URL="https://api.open-meteo.com/v1/forecast?latitude=$LAT&longitude=$LON&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m${TEMP_UNIT}"
@@ -42,7 +44,7 @@ while true; do
     elif [ "$WCODE" -ge 1 ]; then COND="Partly Cloudy"; THEME="cloudy"; ICON="⛅";
     fi
     
-    OUT="{ \"location\": \"$NAME\", \"temperature\": $TEMP, \"humidity\": $HUMIDITY, \"feels_like\": $FEELS, \"wind\": $WIND, \"condition\": \"$COND\", \"theme\": \"$THEME\", \"icon\": \"$ICON\" }"
+    OUT="{ \"location\": \"$NAME\", \"temperature\": $TEMP, \"humidity\": $HUMIDITY, \"feels_like\": $FEELS, \"wind\": $WIND, \"wind_unit\": \"$WIND_UNIT\", \"condition\": \"$COND\", \"theme\": \"$THEME\", \"icon\": \"$ICON\" }"
   fi
   
   echo "$OUT" > "$PIDASH_IPC_FILE"
