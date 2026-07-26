@@ -1,0 +1,12 @@
+{
+  "id": "generic-linux",
+  "name": "Generic Linux",
+  "match": [],
+  "gpio": {
+    "backend": "none",
+    "chip": null,
+    "pins": {}
+  },
+  "ramClass": "standard",
+  "features": []
+}

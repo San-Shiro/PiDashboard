@@ -1,0 +1,339 @@
+{
+  "name": "bingo",
+  "description": "",
+  "canvas_config": {
+    "width": 1920,
+    "height": 1080,
+    "background": "#1a0a0a",
+    "displayTarget": "primary",
+    "pixelRatio": 1,
+    "theme": {
+      "id": "sunset",
+      "name": "Sunset",
+      "vars": {
+        "--canvas-bg": "#1a0a0a",
+        "--canvas-bg-2": "#2a1515",
+        "--canvas-bg-3": "#3a1f1f",
+        "--canvas-text": "#ffd7b5",
+        "--canvas-text-2": "#f8c49a",
+        "--canvas-text-3": "#dca37a",
+        "--canvas-accent": "#ff6b35",
+        "--canvas-accent-2": "#f97316",
+        "--canvas-accent-3": "#fb923c",
+        "--canvas-surface": "#2a1515",
+        "--canvas-surface-2": "#341d1d",
+        "--canvas-surface-3": "#442727",
+        "--canvas-border": "#4a2525",
+        "--canvas-border-2": "#663232",
+        "--canvas-muted": "#b08060"
+      }
+    }
+  },
+  "widgets": [
+    {
+      "id": "97c387ee-7cb4-4b0a-b76c-43eae6efa0be",
+      "widget_id": "image-slideshow",
+      "label": "Image Slideshow",
+      "enabled": true,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "zIndex": 1,
+        "opacity": 0,
+        "overflow": "hidden",
+        "borderRadius": 0
+      },
+      "config": {
+        "images": "/media/from_the_decorated_a4_cardboard_202605241426_(1).webp, /media/from_the_decorated_a4_cardboard_202605241426_(2).webp, /media/from_the_decorated_a4_cardboard_202605241426_(3).webp, /media/from_the_decorated_a4_cardboard_202605241426_(4).webp, /media/from_the_decorated_a4_cardboard_202605241426.webp, /media/from_the_decorated_a4_cardboard_202605241427.webp, /media/landscape.webp",
+        "fit": "cover",
+        "renderMode": "pingpong",
+        "showIndicators": false,
+        "transition": "crossfade"
+      }
+    },
+    {
+      "id": "73b3a762-394f-43f6-96d6-e20019ded921",
+      "widget_id": "text-title",
+      "label": "Text Title",
+      "enabled": true,
+      "layout": {
+        "x": 1640,
+        "y": 340,
+        "width": 240,
+        "height": 60,
+        "zIndex": 6,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "textContent": "Your Title",
+        "fontFamily": "Poppins, system-ui, sans-serif",
+        "fontSize": 44,
+        "fontWeight": "800",
+        "lineHeight": 1.1,
+        "letterSpacing": 0,
+        "textWidth": 0,
+        "textColor": "var(--canvas-accent-2)",
+        "alignment": "left",
+        "verticalAlign": "center",
+        "transform": "none",
+        "wrap": true,
+        "italic": false,
+        "strokeWidth": 0,
+        "strokeColor": "#000000",
+        "shadowBlur": 0,
+        "shadowColor": "rgba(0,0,0,0.35)",
+        "opacity": 1,
+        "__themeMode": "canvas"
+      }
+    },
+    {
+      "id": "20e48efd-232f-446e-b8b6-4b4f533a4526",
+      "widget_id": "badge-label",
+      "label": "Badge / Label",
+      "enabled": true,
+      "layout": {
+        "x": 1457,
+        "y": 914,
+        "width": 311,
+        "height": 89,
+        "zIndex": 7,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "textContent": "Featured",
+        "fontFamily": "\"Bebas Neue\", system-ui, sans-serif",
+        "fontSize": 39,
+        "fontWeight": "700",
+        "textColor": "#ffffff",
+        "background": {
+          "type": "classic",
+          "color": "#ffffff",
+          "color2": "",
+          "stops": null,
+          "gradientType": "linear",
+          "angle": 135,
+          "mix": 50,
+          "softness": 100
+        },
+        "paddingX": 36,
+        "paddingY": 6,
+        "radius": 14,
+        "alignment": "left",
+        "uppercase": false,
+        "letterSpacing": 5.5,
+        "shadowBlur": 0,
+        "shadowColor": "rgba(0,0,0,0.25)"
+      }
+    },
+    {
+      "id": "4678baf3-901f-4173-8bc8-832d6c7f31c0",
+      "widget_id": "icon-text-info",
+      "label": "Icon + Text Info",
+      "enabled": true,
+      "layout": {
+        "x": 1600,
+        "y": 420,
+        "width": 280,
+        "height": 120,
+        "zIndex": 8,
+        "opacity": 1,
+        "overflow": "hidden",
+        "borderRadius": 0
+      },
+      "config": {
+        "icon": "✅",
+        "label": "Office",
+        "valueText": "Open 10:00 - 18:00",
+        "subtext": "",
+        "fontFamily": "Poppins, system-ui, sans-serif",
+        "orientation": "row",
+        "alignment": "left",
+        "iconSize": 46,
+        "labelSize": 13,
+        "valueSize": 16,
+        "gap": 4,
+        "iconColor": "#012a5c",
+        "textColor": "#230000",
+        "mutedColor": "#420000",
+        "showSubtext": true,
+        "__themeMode": "canvas"
+      }
+    },
+    {
+      "id": "360ca4aa-c298-474f-af6a-6400bb6cc711",
+      "widget_id": "quote-callout",
+      "label": "Quote / Callout",
+      "enabled": true,
+      "layout": {
+        "x": 1420,
+        "y": 720,
+        "width": 480,
+        "height": 140,
+        "zIndex": 9,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "quoteText": "Small moments of clarity compound into better work.",
+        "author": "PiDashboard",
+        "source": "",
+        "fontFamily": "\"Merriweather\", Georgia, serif",
+        "fontSize": 28,
+        "lineHeight": 1.35,
+        "alignment": "left",
+        "showQuoteMark": true,
+        "accentPosition": "left",
+        "accentColor": "#ffffff",
+        "textColor": "#ffffff",
+        "metaColor": "rgba(255,255,255,0.72)",
+        "sourceMode": "manual",
+        "__themeMode": "canvas",
+        "background": {
+          "type": "gradient",
+          "color": "color-mix(in srgb, var(--canvas-surface, #1a1a2e) 82%, transparent)",
+          "color2": "color-mix(in srgb, var(--canvas-accent, #6366f1) 12%, var(--canvas-surface, #1a1a2e))",
+          "stops": [
+            {
+              "color": "color-mix(in srgb, var(--canvas-surface, #1a1a2e) 88%, transparent)",
+              "position": 0
+            },
+            {
+              "color": "color-mix(in srgb, var(--canvas-accent, #6366f1) 10%, var(--canvas-surface, #1a1a2e))",
+              "position": 62
+            },
+            {
+              "color": "color-mix(in srgb, var(--canvas-accent, #6366f1) 18%, var(--canvas-surface, #1a1a2e))",
+              "position": 100
+            }
+          ],
+          "gradientType": "linear",
+          "angle": 135,
+          "mix": 48,
+          "softness": 100
+        }
+      }
+    },
+    {
+      "id": "05d35b1e-5c84-4766-9041-1d119855b2a8",
+      "widget_id": "stat-kpi-card",
+      "label": "Stat / KPI Card",
+      "enabled": true,
+      "layout": {
+        "x": 1140,
+        "y": 218,
+        "width": 360,
+        "height": 140,
+        "zIndex": 10,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "label": "Revenue",
+        "valueText": "24.8K",
+        "suffix": "",
+        "deltaText": "+12.4% vs last week",
+        "showDelta": true,
+        "trend": "up",
+        "fontFamily": "Inter, system-ui, sans-serif",
+        "valueSize": 56,
+        "labelSize": 13,
+        "padding": 18,
+        "radius": 20,
+        "alignment": "left",
+        "background": {
+          "type": "classic",
+          "color": "#0f172a",
+          "color2": "#1e293b",
+          "gradientType": "linear",
+          "angle": 135,
+          "mix": 48,
+          "softness": 100
+        },
+        "textColor": "#ffffff",
+        "mutedColor": "rgba(255,255,255,0.7)",
+        "accentColor": "#38bdf8"
+      }
+    },
+    {
+      "id": "62c9fc69-4b5e-4932-b06b-29a950243f98",
+      "widget_id": "clock",
+      "label": "Digital Clock",
+      "enabled": true,
+      "layout": {
+        "x": 1580,
+        "y": 220,
+        "width": 300,
+        "height": 120,
+        "zIndex": 13,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "showSeconds": true,
+        "use24h": true,
+        "showDate": true,
+        "timezone": "Asia/Kolkata",
+        "fontFamily": "Inter, system-ui, sans-serif",
+        "fontWeight": "300",
+        "fontSize": 48,
+        "textColor": "var(--canvas-accent)",
+        "glowColor": "",
+        "separatorBlink": false,
+        "__themeMode": "canvas"
+      }
+    },
+    {
+      "id": "933a94ae-4fd9-427b-ba86-cb523ed4ce18",
+      "widget_id": "community-flight-tracker",
+      "label": "Live Flight Tracker",
+      "enabled": true,
+      "layout": {
+        "x": 124,
+        "y": 137,
+        "width": 560,
+        "height": 255,
+        "zIndex": 19,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "radiusKm": 100,
+        "mapTheme": "dark",
+        "zoom": 8
+      }
+    },
+    {
+      "id": "bc524e2f-2fb6-46c1-8511-e38a231af45c",
+      "widget_id": "community-flight-tracker-go",
+      "label": "Live Flight Tracker (Go Daemon)",
+      "enabled": true,
+      "layout": {
+        "x": 123,
+        "y": 454,
+        "width": 558,
+        "height": 277,
+        "zIndex": 20,
+        "opacity": 1,
+        "overflow": "hidden"
+      },
+      "config": {
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "radiusKm": 100,
+        "mapTheme": "dark",
+        "zoom": 8
+      }
+    }
+  ],
+  "widget_count": 9,
+  "created_at": "2026-05-30T13:22:22.871Z",
+  "updated_at": "2026-07-26T11:14:03.319Z",
+  "is_active": true,
+  "id": "bingo-1780147342871"
+}

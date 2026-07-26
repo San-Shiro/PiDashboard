@@ -14,7 +14,7 @@ Prerequisites:
 What it does:
     1. Connects to the Pi via SSH (Paramiko)
     2. Verifies the Pi is running 64-bit OS (required for Bun)
-    3. Creates & uploads a tar.gz archive of the active LiteDashboard app
+    3. Creates & uploads a tar.gz archive of the active PiDashboard app
     4. Uploads the pi-kiosk-setup.sh installer script
     5. Executes the installer (installs packages, configures kiosk)
     6. Pi reboots → dashboard appears on HDMI automatically
@@ -29,15 +29,17 @@ import os
 import io
 
 # ── Configuration (override via command-line args) ───────────────────
-DEFAULT_HOST = "192.168.31.239"
-DEFAULT_USER = "rpsaini"
-DEFAULT_PASS = "***REDACTED***"
+# Credentials are never hardcoded. Supply the password as the 3rd CLI arg or
+# via the PIDASH_DEPLOY_PASS environment variable.
+DEFAULT_HOST = os.environ.get("PIDASH_DEPLOY_HOST", "192.168.31.239")
+DEFAULT_USER = os.environ.get("PIDASH_DEPLOY_USER", "rpsaini")
+DEFAULT_PASS = os.environ.get("PIDASH_DEPLOY_PASS")
 
 # Paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)  # Parent of deploy/
-APP_ROOT = os.path.join(PROJECT_ROOT, "LiteDashboard")
-ARTIFACTS_DIR = os.path.join(PROJECT_ROOT, "archive", "artifacts")
+APP_ROOT = PROJECT_ROOT
+ARTIFACTS_DIR = os.path.join(SCRIPT_DIR, "artifacts")
 SETUP_SCRIPT = os.path.join(SCRIPT_DIR, "pi-kiosk-setup.sh")
 
 
@@ -46,11 +48,17 @@ def parse_args():
     host = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_HOST
     user = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_USER
     pwd  = sys.argv[3] if len(sys.argv) > 3 else DEFAULT_PASS
+    if not pwd:
+        sys.exit(
+            "No deploy password supplied.\n"
+            "  Pass it as the 3rd argument:  python deploy/deploy-pidashboard.py <host> <user> <password>\n"
+            "  or set the environment variable:  PIDASH_DEPLOY_PASS"
+        )
     return host, user, pwd
 
 
 def create_archive(app_root: str) -> str:
-    """Create a tar.gz of LiteDashboard contents, excluding local/runtime files."""
+    """Create a tar.gz of the PiDashboard app, excluding local/runtime/non-deploy files."""
     if not os.path.isdir(app_root):
         raise FileNotFoundError(f"Active app workspace not found: {app_root}")
 
@@ -60,6 +68,7 @@ def create_archive(app_root: str) -> str:
     exclude_dirs = {
         ".git", "node_modules", ".planning", ".agent",
         "__pycache__", ".vscode", "dev", "state", "tmp_widgets",
+        "deploy", "docs",
     }
     exclude_exts = {".pyc", ".log"}
 

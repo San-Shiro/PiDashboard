@@ -1,0 +1,24 @@
+{
+  "activeWidgets": [
+    "image-slideshow",
+    "text-title",
+    "text-paragraph",
+    "clock",
+    "weather",
+    "badge-label",
+    "icon-text-info",
+    "stat-kpi-card",
+    "quote-callout",
+    "ticker-marquee-text",
+    "shape-rectangle",
+    "shape-oval",
+    "shape-polygon",
+    "line-basic",
+    "pen-shape",
+    "community-complex",
+    "community-earthquakes",
+    "crypto-desk",
+    "community-flight-tracker",
+    "community-flight-tracker-go"
+  ]
+}

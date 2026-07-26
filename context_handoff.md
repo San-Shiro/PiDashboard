@@ -2,12 +2,12 @@
 
 ## Current Source Of Truth
 
-`LiteDashboard/` is the active product workspace. The top-level `core/`, `core_legacy_archive/`, and `src-anything/` trees were older implementation/prototype lanes and now live under `archive/` for reference only.
+The app lives directly at the repo root — there is no nested workspace folder. Older lanes (`LiteDashboard/` wrapper, top-level `core/`, `core_legacy_archive/`, `src-anything/`, and the `archive/` reference folder) have all been removed; there is no legacy code path to fall back to.
 
 When making product changes, start in:
 
 ```text
-LiteDashboard/
+PiDashboard/
 ├── admin/      # React 18 + Vite admin panel
 ├── core/       # Bun server, API routes, compositor, SDK, validation
 ├── widgets/    # Widget manifests and HTML fragments
@@ -32,19 +32,16 @@ PiDashboard is a lightweight smart dashboard system aimed at Raspberry Pi Zero 2
 
 ## Repository Layout
 
-- `LiteDashboard/`: Canonical active application.
+- `admin/`, `core/`, `widgets/`, `canvases/`, `config/`, `media/`, `daemons/`, `scripts/`, `tests/`, `community-widgets/`: the active application, all at the repo root.
 - `deploy/`: Packaging and Pi kiosk setup scripts.
-- `docs/`: Planning, design notes, and historical specifications. Some older docs still mention `core/`; treat those paths as historical unless they explicitly reference `LiteDashboard/`.
-- `archive/`: Reference-only historical code, prototypes, handoffs, and artifacts.
+- `docs/`: Planning, design notes, and historical specifications. Some older docs still mention `core/` from before the flattening; treat paths in dated/historical docs as approximate.
 
 ## Current Cleanup Decision
 
-The directory streamlining task intentionally keeps `LiteDashboard/` as a top-level folder rather than moving app contents to the repo root. Existing media is preserved. Archived code is not deleted; it is retained to make earlier implementation ideas recoverable without confusing future active development.
+The app was flattened from a nested `LiteDashboard/` workspace directly onto the repo root — there's now a single app tree with no wrapper folder. Existing media is preserved. The reference-only `archive/` folder (old `core/`, `core_legacy_archive/`, `src-anything/` prototypes), the old `.planning/` GSD state, and accumulated debug/scratch cruft (stray logs, screenshots, one-off fix/test scripts, `dev/`, `scratch/`) have all been deleted outright — none of it was buildable or referenced by the active app.
 
 ## Contribution Rules
 
-- Make active product changes only under `LiteDashboard/`, unless the task is explicitly about repo docs, deployment, or archive organization.
-- Do not delete uploaded media from `LiteDashboard/media/uploads/`.
-- Do not treat `archive/` as buildable or deployable source.
+- Do not delete uploaded media from `media/uploads/`.
 - Keep generated bundles, runtime state, logs, dependency folders, and scratch outputs out of source control.
-- Service and deployment commands should continue to resolve from the deployed app root with `bun run core/tools/server.ts`.
+- Service and deployment commands resolve from the repo root with `bun run core/tools/server.ts`.

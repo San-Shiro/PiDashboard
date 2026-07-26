@@ -1,0 +1,16 @@
+{
+  "id": "volume-osd",
+  "name": "Volume OSD",
+  "description": "On-Screen Display for volume changes",
+  "version": "1.0.0",
+  "author": "PiDashboard",
+  "role": "osd",
+  "osdDuration": 2500,
+  "defaultDimensions": { "w": 300, "h": 60 },
+  "minDimensions": { "w": 200, "h": 40 },
+  "entry": "volume.html",
+  "schema": {
+    "type": "object",
+    "properties": {}
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "daemonType": "community-flight-tracker-go",
+  "runtime": {
+    "command": "bash ./community-flight-tracker-go.sh"
+  }
+}

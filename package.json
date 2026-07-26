@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "test": "bun test",
+    "start": "bun run core/tools/server.ts",
+    "validate-widgets": "bun run core/tools/validate-widgets.ts"
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.0",
+    "puppeteer": "^25.3.0",
+    "ws": "^8.21.0"
+  }
+}

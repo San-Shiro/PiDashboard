@@ -1,0 +1,5 @@
+{
+  "_comment": "Copy to config.json. Do NOT commit config.json — it holds the admin password hash. passwordHash is written by the first-run setup flow (POST /api/auth/setup); leave it absent on a fresh install.",
+  "gpioBindings": [],
+  "boardOverride": null
+}

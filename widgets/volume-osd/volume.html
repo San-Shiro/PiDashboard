@@ -1,0 +1,82 @@
+<style>
+  :host {
+    /* Hide by default, push down slightly */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+  }
+  
+  /* The active class is injected by the SDK when state arrives */
+  :host(.pi-osd-active) {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .osd-card {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 30px;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .osd-icon {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .osd-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .osd-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: #0ea5e9;
+    transition: transform 0.2s ease-out;
+    transform-origin: left;
+    width: 100%;
+  }
+
+  .osd-value {
+    font-size: 14px;
+    font-weight: 600;
+    font-family: sans-serif;
+    min-width: 40px;
+    text-align: right;
+  }
+</style>
+
+<div class="osd-card">
+  <div class="osd-icon">
+    <!-- Change icon based on mute state -->
+    <span data-bind-hide="muted">🔊</span>
+    <span data-bind-show="muted" style="color: #ef4444;">🔇</span>
+  </div>
+  
+  <div class="osd-track">
+    <!-- Use style template to scale the fill bar based on volume percentage -->
+    <div class="osd-fill" data-bind-style="transform:scaleX({{volume}}%)" style="transform:scaleX(0%)"></div>
+  </div>
+  
+  <div class="osd-value">
+    <span data-bind="volume" data-suffix="%">0%</span>
+  </div>
+</div>

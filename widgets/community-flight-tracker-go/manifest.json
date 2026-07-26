@@ -1,0 +1,61 @@
+{
+  "id": "community-flight-tracker-go",
+  "name": "Live Flight Tracker (Go Daemon)",
+  "version": "1.0.0",
+  "description": "Real-time ADS-B flight tracking using a custom Go daemon.",
+  "author": "Community",
+  "tier": "push",
+  "trust": "community",
+  "daemon": "community-flight-tracker-go",
+  "dataChannel": {
+    "type": "ipc_file",
+    "ipcFilename": "community-flight-tracker-go.json"
+  },
+  "entrypoints": {
+    "fragment": "flight.html"
+  },
+  "configSchema": [
+    {
+      "key": "latitude",
+      "type": "number",
+      "label": "Center Latitude",
+      "default": 40.7128,
+      "min": -90,
+      "max": 90
+    },
+    {
+      "key": "longitude",
+      "type": "number",
+      "label": "Center Longitude",
+      "default": -74.0060,
+      "min": -180,
+      "max": 180
+    },
+    {
+      "key": "radiusKm",
+      "type": "number",
+      "label": "Search Radius (km)",
+      "default": 100,
+      "min": 10,
+      "max": 500
+    },
+    {
+      "key": "mapTheme",
+      "type": "select",
+      "label": "Map Theme",
+      "default": "dark",
+      "options": [
+        { "value": "dark", "label": "Dark Mode" },
+        { "value": "light", "label": "Light Mode" }
+      ]
+    },
+    {
+      "key": "zoom",
+      "type": "number",
+      "label": "Initial Zoom",
+      "default": 8,
+      "min": 1,
+      "max": 18
+    }
+  ]
+}

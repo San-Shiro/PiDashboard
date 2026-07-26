@@ -1,0 +1,39 @@
+{
+  "id": "raspberry-pi-zero-2w",
+  "name": "Raspberry Pi Zero 2W",
+  "match": ["Raspberry Pi Zero 2"],
+  "gpio": {
+    "backend": "sysfs",
+    "chip": "gpiochip0",
+    "pins": {
+      "2":  { "caps": ["in", "out", "i2c"] },
+      "3":  { "caps": ["in", "out", "i2c"] },
+      "4":  { "caps": ["in", "out"] },
+      "5":  { "caps": ["in", "out"] },
+      "6":  { "caps": ["in", "out"] },
+      "7":  { "caps": ["in", "out", "spi"] },
+      "8":  { "caps": ["in", "out", "spi"] },
+      "9":  { "caps": ["in", "out", "spi"] },
+      "10": { "caps": ["in", "out", "spi"] },
+      "11": { "caps": ["in", "out", "spi"] },
+      "12": { "caps": ["in", "out", "pwm"] },
+      "13": { "caps": ["in", "out", "pwm"] },
+      "14": { "caps": ["in", "out", "uart"] },
+      "15": { "caps": ["in", "out", "uart"] },
+      "16": { "caps": ["in", "out"] },
+      "17": { "caps": ["in", "out"] },
+      "18": { "caps": ["in", "out", "pwm"] },
+      "19": { "caps": ["in", "out"] },
+      "20": { "caps": ["in", "out"] },
+      "21": { "caps": ["in", "out"] },
+      "22": { "caps": ["in", "out"] },
+      "23": { "caps": ["in", "out"] },
+      "24": { "caps": ["in", "out"] },
+      "25": { "caps": ["in", "out"] },
+      "26": { "caps": ["in", "out"] },
+      "27": { "caps": ["in", "out"] }
+    }
+  },
+  "ramClass": "lite",
+  "features": ["wifi", "bluetooth"]
+}

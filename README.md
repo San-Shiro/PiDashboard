@@ -2,32 +2,29 @@
 
 PiDashboard is a lightweight, customizable smart dashboard platform for low-resource Raspberry Pi kiosk deployments.
 
-## Active Workspace
+## Layout
 
-`LiteDashboard/` is the canonical product workspace.
+The app lives directly at the repo root.
 
 ```text
 PiDashboard/
-├── LiteDashboard/          # Active dashboard app
-│   ├── admin/              # React + Vite admin control panel
-│   ├── core/               # Bun server, API routes, compositor, SDK
-│   ├── widgets/            # Widget manifests and HTML fragments
-│   ├── canvases/           # Active/saved canvas JSON layouts
-│   ├── media/              # Preserved user media/uploads
-│   ├── daemons/            # Background widget data producers
-│   ├── scripts/            # Host/helper scripts
-│   ├── tests/              # Runtime and smoke-test helpers
-│   └── dev/                # Local probes, scratch files, and test harnesses
+├── admin/                  # React + Vite admin control panel
+├── core/                   # Bun server, API routes, compositor, SDK
+├── widgets/                # Widget manifests and HTML fragments
+├── community-widgets/      # Packaged (.wig) community widget bundles
+├── canvases/                # Active/saved canvas JSON layouts
+├── config/                 # Runtime config (active widgets, etc.)
+├── media/                  # Preserved user media/uploads
+├── daemons/                # Background widget data producers
+├── scripts/                # Host/helper scripts
+├── tests/                  # Runtime and smoke-test helpers
 ├── deploy/                 # Deployment scripts for Raspberry Pi
-├── docs/                   # Planning, design, and historical architecture notes
-└── archive/                # Reference-only historical workspaces/prototypes/artifacts
+└── docs/                   # Planning, design, and architecture notes
 ```
-
-Older top-level workspaces such as `core/`, `core_legacy_archive/`, and `src-anything/` have been moved under `archive/` for reference. Do not treat archived folders as active implementation targets.
 
 ## Common Commands
 
-Run these from `LiteDashboard/` unless noted otherwise.
+Run these from the repo root unless noted otherwise.
 
 ```bash
 # Start the Bun dashboard server
@@ -46,7 +43,7 @@ The kiosk display is served at `http://localhost:3000/`, and the admin panel is 
 
 ## Deployment
 
-Deployment helpers live in `deploy/`. The deploy script packages the contents of `LiteDashboard/` as the app root on the Pi, so service commands such as `bun run core/tools/server.ts` resolve from the deployed `PiDashboard` directory.
+Deployment helpers live in `deploy/`. The deploy script packages the repo root as the app root on the Pi (excluding `deploy/`, `docs/`, and local/runtime files), so service commands such as `bun run core/tools/server.ts` resolve from the deployed `PiDashboard` directory.
 
 ```bash
 python deploy/deploy-pidashboard.py
@@ -54,7 +51,5 @@ python deploy/deploy-pidashboard.py
 
 ## Notes For Contributors
 
-- Keep new product work inside `LiteDashboard/`.
-- Preserve existing media in `LiteDashboard/media/uploads/`.
+- Preserve existing media in `media/uploads/`.
 - Keep generated runtime state, logs, dependency folders, and deployment archives out of source control.
-- Use `archive/` only for historical reference. If code needs to be revived from there, copy it deliberately into `LiteDashboard/` and adapt it to the current structure.

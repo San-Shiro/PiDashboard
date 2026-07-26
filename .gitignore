@@ -11,6 +11,19 @@ bun.lock
 .env
 *.tar.gz
 *_backup.zip
+deploy/artifacts/
 coverage/
 .cache/
 .vitest/
+
+# Secrets and runtime credential material — never commit.
+secrets/
+*.passhash
+*.secret
+
+# Runtime config: contains the admin password hash (Argon2id) and is created
+# per-install by the first-run setup flow. Ship config.example.json instead.
+config.json
+
+# Generated at boot by initProvenance(); records per-install widget origins.
+config/widget-provenance.json
